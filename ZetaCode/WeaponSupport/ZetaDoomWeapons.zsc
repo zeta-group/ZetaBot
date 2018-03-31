@@ -1,0 +1,25 @@
+#include "ZetaCode/WeaponSupport/ZetaFist.zsc"
+#include "ZetaCode/WeaponSupport/ZetaChainsaw.zsc"
+#include "ZetaCode/WeaponSupport/ZetaPistol.zsc"
+#include "ZetaCode/WeaponSupport/ZetaShotgun.zsc"
+#include "ZetaCode/WeaponSupport/ZetaSSG.zsc"
+#include "ZetaCode/WeaponSupport/ZetaChaingun.zsc"
+#include "ZetaCode/WeaponSupport/ZetaRL.zsc"
+#include "ZetaCode/WeaponSupport/ZetaPR.zsc"
+#include "ZetaCode/WeaponSupport/ZetaBFG.zsc"
+
+class ZetaDoomWeapons : ZetaWeaponModule
+{
+	override void LoadWeapons(ZetaWeaponModule loader)
+	{
+		loader.AddWeapon("ZetaFist");
+		loader.AddWeapon("ZetaChainsaw");
+		loader.AddWeapon("ZetaPistol");
+		loader.AddWeapon("ZetaShotgun");
+		loader.AddWeapon("ZetaSSG");
+		loader.AddWeapon("ZetaChaingun");
+		loader.AddWeapon("ZetaRL");
+		loader.AddWeapon("ZetaPR");
+		loader.AddWeapon("ZetaBFG");
+	}
+}

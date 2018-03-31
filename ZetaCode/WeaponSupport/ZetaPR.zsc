@@ -1,0 +1,29 @@
+class ZetaPR : ZetaWeapon
+{
+	default
+	{
+		ZetaWeapon.FireInterval 857142;
+		ZetaWeapon.MinAmmo 1;
+		ZetaWeapon.AmmoType "Cell";
+	}
+
+	override bool IsPickupOf(Weapon other)
+	{
+		return other.GetClass() == "PlasmaRifle";
+	}
+	
+	override bool bHasAltFire(Actor shooter)
+	{
+		return false;
+	}
+	
+	override double RateSelf(Actor shooter, Actor target)
+	{
+		return 1200 / sqrt(shooter.Distance3D(target)) * 3;
+	}
+	
+	override void Fire(Actor shooter, Actor target)
+	{
+		shooter.SpawnMissileAngle("PlasmaBall", shooter.angle, tan(shooter.pitch));
+	}
+}

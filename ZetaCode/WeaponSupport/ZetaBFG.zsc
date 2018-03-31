@@ -1,0 +1,29 @@
+class ZetaBFG : ZetaWeapon
+{
+	default
+	{
+		ZetaWeapon.FireInterval 11428571;
+		ZetaWeapon.MinAmmo 40;
+		ZetaWeapon.AmmoType "Cell";
+	}
+
+	override bool IsPickupOf(Weapon other)
+	{
+		return other.GetClass() == "BFG9000";
+	}
+	
+	override bool bHasAltFire(Actor shooter)
+	{
+		return false;
+	}
+	
+	override double RateSelf(Actor shooter, Actor target)
+	{
+		return 15 * Floor((shooter.FindInventory("Cell") != null ? shooter.FindInventory("Cell").Amount : 0) / 40) * target.Health;
+	}
+	
+	override void Fire(Actor shooter, Actor target)
+	{
+		shooter.SpawnMissileAngle("BFGBall", shooter.angle, tan(shooter.pitch));
+	}
+}

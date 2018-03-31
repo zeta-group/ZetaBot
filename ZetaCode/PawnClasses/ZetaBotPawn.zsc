@@ -1,0 +1,217 @@
+class ZetaBotPawn : Actor
+{
+	property DefaultInv: defweap;
+	String defweap;
+	bool bMoved;
+
+	Default
+	{
+		PainChance 100;
+		Speed 1;
+		Obituary "%o wound up smarted out by %NAME%!";
+		Species "ZetaBot";
+		ZetaBotPawn.DefaultInv "";
+		
+		+SOLID
+		+SHOOTABLE
+		+DROPOFF
+		+PICKUP
+		+NOTDMATCH
+		+FRIENDLY
+		+SLIDESONWALLS
+		+CANPASS
+		+CANPUSHWALLS
+		+FLOORCLIP
+		+WINDTHRUST
+		+TELESTOMP
+		+NOBLOCKMONST
+		+FRIENDLY
+		+ISMONSTER
+	}
+
+	static String GetSomeType()
+	{
+		Array<String> types;
+		CVar.FindCVar('zb_btypes').GetString().Split(types, ';');
+		return types[Random(0, CVar.FindCVar('zb_nbtypes').GetInt() - 1)];
+	}
+	
+	enum MovementModifier
+	{
+		MM_None,
+		MM_Run,
+		MM_Crouch,
+	};
+	
+	MovementModifier moveType;
+	bool bShooting; // for visual purposes
+	ZTBotController cont;
+	const speedMod = 6;
+	
+	override String GetObituary(Actor victim, Actor inflictor, Name mod, bool playerattack)
+	{
+		if (mod == 'Telefrag')
+			return "$OB_MONTELEFRAG";
+		
+		string newObituary = Obituary;
+		
+		if ( cont != null )
+		{
+			newObituary.Replace("%ID%", ""..cont.BotID);
+			newObituary.Replace("%NAME%", cont.myName);
+		}
+			
+		else
+		{
+			newObituary.Replace("%ID%", ""..-1);
+			newObituary.Replace("%NAME%", "a ghost ZetaBot");
+		}
+		
+		return newObituary;
+	}
+	
+	void BotThrust(double maxSpeed, double angle)
+	{
+		Thrust(maxSpeed * speedMod - sqrt(vel.x * vel.x + vel.y * vel.y), angle);
+	}
+	
+	override void BeginPlay()
+	{
+		Array<String> dweap;
+		defweap.split(dweap, ",");
+		
+		for ( int i = 0; i < dweap.Size(); i++ )
+			GiveInventoryType(dweap[i]);
+			
+		Array<String> eweap;
+		let extra = CVar.GetCVar("zb_extraweap").GetString();
+			
+		if ( extra != "" )
+		{
+			extra.split(eweap, ",");	// not ";" to support Bash command
+										//line parameter setting
+			
+			for ( int i = 0; i < eweap.Size(); i++ )
+				GiveInventoryType(eweap[i]);
+		}
+	}
+	
+	void MoveForward()
+	{
+		if ( bMoved && FRandom(0, 1) < 0.4 )
+			return;
+			
+		bMoved = true;
+		BotThrust(moveType == MM_Run ? 5 : (moveType == MM_Crouch ? 1.2 : 2.5), angle);
+	}
+	
+	void MoveRight()
+	{
+		if ( bMoved && FRandom(0, 1) < 0.4 )
+			return;
+			
+		bMoved = true;
+		BotThrust(moveType == MM_Run ? 5 : (moveType == MM_Crouch ? 1.2 : 2.5), angle + 90);
+	}
+	
+	void MoveLeft()
+	{
+		if ( bMoved && FRandom(0, 1) < 0.4 )
+			return;
+			
+		bMoved = true;
+		BotThrust(moveType == MM_Run ? 5 : (moveType == MM_Crouch ? 1.2 : 2.5), angle - 90);
+	}
+	
+	void MoveBackward()
+	{
+		if ( bMoved && FRandom(0, 1) < 0.4 )
+			return;
+			
+		bMoved = true;
+		BotThrust(moveType == MM_Run ? -4.5 : (moveType == MM_Crouch ? -1 : -2), angle);
+	}
+	
+	void SetMoveType(uint nmoveType)
+	{
+		moveType = nmoveType;
+		
+		if ( moveType == MM_CROUCH )
+			Height = Default.Height / 2;
+			
+		else
+			Height = Default.Height;
+	}
+	
+	void StepBackward()
+	{
+		if ( bMoved && FRandom(0, 1) < 0.4 )
+			return;
+			
+		bMoved = true;
+		BotThrust(moveType == MM_Run ? -3 : (moveType == MM_Crouch ? -0.8 : -1.35), angle);
+	}
+	
+	void BeginShoot()
+	{
+		bShooting = true;
+	}
+	
+	void EndShoot()
+	{
+		bShooting = false;
+	}
+	
+	void Jump()
+	{
+		if ( pos.z - floorZ > 1 )
+			return;
+			
+		RaiseMobj(8);
+		A_PlaySound("ztmisc/jump", CHAN_BODY);
+	}
+	
+	void A_BotPain()
+	{
+		if ( cont != null )
+			cont.PlayPain();
+	}
+	
+	void A_OnDeath()
+	{
+		if ( cont != null )
+			cont.OnDeath();
+			
+		A_DropWeapons();
+	}
+	
+	void A_DropWeapons()
+	{
+		let iter = ThinkerIterator.Create("Weapon");
+		
+		Weapon w;
+		
+		while ( w = Weapon(iter.Next()) )
+			if ( w != null && w.Owner == self )
+			{
+				Weapon w = Weapon(Spawn(w.GetClass(), Vec3Offset(0, 0, 2)));				
+				
+				if ( w != null )
+				{
+					w.vel = Vec3Offset(FRandom(-2, 2), FRandom(-2, 2), FRandom(0, 2.5), true);
+					
+					Inventory ammo1 = FindInventory(w.AmmoType1);
+					Inventory ammo2 = FindInventory(w.AmmoType2);
+					
+					w.AmmoGive1 = (ammo1 ? ammo1.Amount : 0);
+					w.AmmoGive2 = (ammo2 ? ammo2.Amount : 0);
+				}
+			}
+	}
+	
+	override void Tick()
+	{
+		Super.Tick();
+		bMoved = false;
+	}
+}

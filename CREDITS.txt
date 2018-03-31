@@ -1,0 +1,2 @@
+- freesound for misc sounds;
+- Voices were made in TTS.

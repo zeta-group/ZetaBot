@@ -1,0 +1,115 @@
+// BOT VOICES
+decobot/1/target/1 DV1TARG1
+decobot/1/target/2 DV1TARG2
+decobot/1/target/3 DV1TARG3
+
+decobot/2/target/1 DV2TARG1
+decobot/2/target/2 DV2TARG2
+decobot/2/target/3 DV2TARG3
+
+decobot/3/target/1 DV3TARG1
+decobot/3/target/2 DV3TARG2
+decobot/3/target/3 DV3TARG3
+
+$random decobot/1/target { decobot/1/target/1 decobot/1/target/2 decobot/1/target/3 }
+$random decobot/2/target { decobot/2/target/1 decobot/2/target/2 decobot/2/target/3 }
+$random decobot/3/target { decobot/3/target/1 decobot/3/target/2 decobot/3/target/3 }
+
+decobot/1/elim/1 DV1ELIM1
+decobot/1/elim/2 DV1ELIM2
+decobot/1/elim/3 DV1ELIM3
+
+decobot/2/elim/1 DV2ELIM1
+decobot/2/elim/2 DV2ELIM2
+decobot/2/elim/3 DV2ELIM3
+
+decobot/3/elim/1 DV3ELIM1
+decobot/3/elim/2 DV3ELIM2
+
+$random decobot/1/elim { decobot/1/elim/1 decobot/1/elim/2 decobot/1/elim/3 }
+$random decobot/2/elim { decobot/2/elim/1 decobot/2/elim/2 decobot/2/elim/3 }
+$random decobot/3/elim { decobot/3/elim/1 decobot/3/elim/2 }
+
+decobot/1/hide/1 DV1HIDE1
+decobot/1/hide/2 DV1HIDE2
+
+decobot/2/hide/1 DV2HIDE1
+decobot/2/hide/2 DV2HIDE2
+
+decobot/3/hide/1 DV3HIDE1
+decobot/3/hide/2 DV3HIDE2
+decobot/3/hide/3 DV3HIDE2
+
+$random decobot/1/hide { decobot/1/hide/1 decobot/1/hide/2 }
+$random decobot/2/hide { decobot/2/hide/1 decobot/2/hide/2 }
+$random decobot/3/hide { decobot/3/hide/1 decobot/3/hide/2 decobot/3/hide/3 }
+
+decobot/1/hurt/1 DV1HURT1
+decobot/1/hurt/2 DV1HURT2
+decobot/1/hurt/3 DV1HURT3
+
+decobot/2/hurt/1 DV2HURT1
+decobot/2/hurt/2 DV2HURT2
+decobot/2/hurt/3 DV2HURT3
+
+decobot/3/hurt/1 DV3HURT1
+decobot/3/hurt/2 DV3HURT2
+decobot/3/hurt/3 DV3HURT3
+
+$random decobot/1/hurt { decobot/1/hurt/1 decobot/1/hurt/2 decobot/1/hurt/3 }
+$random decobot/2/hurt { decobot/2/hurt/1 decobot/2/hurt/2 decobot/2/hurt/3 }
+$random decobot/3/hurt { decobot/3/hurt/1 decobot/3/hurt/2 decobot/3/hurt/3 }
+
+decobot/1/idle/1 DV1IDLE1
+decobot/1/idle/2 DV1IDLE2
+decobot/1/idle/3 DV1IDLE3
+decobot/1/idle/4 DV1IDLE4
+decobot/1/idle/5 DV1IDLE5
+decobot/1/idle/6 DV1IDLE6
+
+decobot/2/idle/1 DV2IDLE1
+decobot/2/idle/2 DV2IDLE2
+decobot/2/idle/3 DV2IDLE3
+decobot/2/idle/4 DV2IDLE4
+decobot/2/idle/5 DV2IDLE5
+
+decobot/3/idle/1 DV3IDLE1
+decobot/3/idle/2 DV3IDLE2
+decobot/3/idle/3 DV3IDLE3
+decobot/3/idle/4 DV3IDLE4
+decobot/3/idle/5 DV3IDLE5
+decobot/3/idle/6 DV3IDLE6
+decobot/3/idle/7 DV3IDLE7
+
+$random decobot/1/idle { decobot/1/idle/1 decobot/1/idle/2 decobot/1/idle/3 decobot/1/idle/4 decobot/1/idle/5 decobot/1/idle/6 }
+$random decobot/2/idle { decobot/2/idle/1 decobot/2/idle/2 decobot/2/idle/3 decobot/2/idle/4 decobot/2/idle/5 }
+$random decobot/3/idle { decobot/3/idle/1 decobot/3/idle/2 decobot/3/idle/3 decobot/3/idle/4 decobot/3/idle/5 decobot/3/idle/6 decobot/3/idle/7 }
+
+decobot/1/actv/1 DV1ACTV1
+decobot/1/actv/2 DV1ACTV2
+decobot/1/actv/3 DV1ACTV3
+decobot/1/actv/4 DV1ACTV4
+
+decobot/2/actv/1 DV2ACTV1
+decobot/2/actv/2 DV2ACTV2
+decobot/2/actv/3 DV2ACTV3
+decobot/2/actv/4 DV2ACTV4
+
+decobot/3/actv/1 DV3ACTV1
+decobot/3/actv/2 DV3ACTV2
+decobot/3/actv/3 DV3ACTV2
+
+$random decobot/1/actv { decobot/1/actv/1 decobot/1/actv/2 decobot/1/actv/3 decobot/1/actv/4 }
+$random decobot/2/actv { decobot/2/actv/1 decobot/2/actv/2 decobot/2/actv/3 decobot/2/actv/4 }
+$random decobot/3/actv { decobot/3/actv/1 decobot/3/actv/2 decobot/3/actv/3 }
+
+// MISC
+ztmisc/rico1 ZSRICO1
+ztmisc/rico2 ZSRICO2
+ztmisc/rico3 ZSRICO3
+ztmisc/rico4 ZSRICO4
+$random ztmisc/ricochet { ztmisc/rico1 ztmisc/rico2 ztmisc/rico3 ztmisc/rico4 }
+
+ztmisc/jump ZSJUMP
+ztmisc/die DSPLDETH
+ztmisc/xdie DSPDIEHI

@@ -1,0 +1,77 @@
+class ZetaWeapon : Actor
+{
+	property FireInterval: interval;
+	property MinAmmo: minammo;
+	property AmmoType: ammotype;
+	property AltMinAmmo: altminammo;
+	property AltAmmoType: altammotype;
+	
+	int interval;
+	int minammo;
+	string ammotype;
+	int altminammo;
+	string altammotype;
+	
+	default
+	{
+		ZetaWeapon.FireInterval 10000000;
+		ZetaWeapon.MinAmmo 0;
+		ZetaWeapon.AltMinAmmo 0;
+		ZetaWeapon.AmmoType "Clip";
+		ZetaWeapon.AltAmmoType "Clip";
+	}
+
+	virtual bool IsPickupOf(Weapon other)
+	{
+		return false;
+	}
+	
+	virtual bool bHasAltFire(Actor shooter)
+	{
+		return true;
+	}
+	
+	virtual double RateSelf(Actor shooter, Actor target)
+	{
+		return 0;
+	}
+	
+	virtual double AltRateSelf(Actor shooter, Actor target)
+	{
+		return 0;
+	}
+	
+	virtual bool CanFire(Actor shooter)
+	{
+		Inventory inv = shooter.FindInventory(ammotype);
+		
+		if ( inv == null )
+			return minammo <= 0;
+			
+		else
+			return inv.amount >= minammo;
+	}
+	
+	virtual bool CanAltFire(Actor shooter)
+	{
+		Inventory inv = shooter.FindInventory(altammotype);
+		
+		if ( inv == null )
+			return altminammo <= 0;
+		
+		return inv.amount >= altminammo;
+	}
+	
+	virtual double IntervalSeconds()
+	{
+		return 1. * interval / 10000000;
+	}
+	
+	virtual void Fire(Actor shooter, Actor target) {}
+	virtual void AltFire(Actor shooter, Actor target) {}
+	
+	virtual bool IsMelee()
+	{
+		return false;
+	}
+}

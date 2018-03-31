@@ -1,0 +1,6 @@
+defaultbind kp1 "summonfriend zetabot 0"
+defaultbind kp2 "summon ztpathnode 0"
+defaultbind kp3 "summon ztusenode 0"
+defaultbind kp4 "summon ztjumpnode 0"
+defaultbind kp8 "summon ZTUploadNodes"
+defaultbind kp9 "summon ZTPromptNodes"
