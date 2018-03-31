@@ -19,3 +19,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+----------
+
+The ACC provided is NOT owned by or affiliated to Gustavo Rehermann in any way,
+for it is just a Linux binary compiled and provided for ease of usage of this
+software; nor does the ACS standard library files inside the STDACS folder. These
+have therefore all their rights reserved by the ZDoom team, including the rights
+of prohibiting by law every distribution of the Software that contains these files
+(ACC and its standard library ACS files) if necessary.

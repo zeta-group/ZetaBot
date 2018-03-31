@@ -78,6 +78,12 @@ ADDFOLDER () {
     fi
 }
 
+# Build compilation
+if [ -e "./compile.sh" ]; then
+    . ./compile.sh
+    
+fi
+
 # Build PK3
 . ./config.sh
 out="./${FOLDER}/${NAME}_v${VERSION}.pk3"

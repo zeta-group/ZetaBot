@@ -1,0 +1,6 @@
+#include "zcommon.acs"
+
+script 1994 ENTER
+{
+    GiveInventory("BotName", 1);
+}

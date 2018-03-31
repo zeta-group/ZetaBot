@@ -738,14 +738,21 @@ class ZTBotController : Actor
 						else if ( currNode != null && ( navDest == null || Distance3D(navDest) < 512 ) )
 						{
 							if ( ClosestNode(goingAfter) == currNode )
-								SetBotState(BS_WANDERING);
+                            {
+                                if ( possessed.Distance3D(goingAfter) < 256 )
+                                    SetBotState(BS_ATTACKING);
+                                        
+                                else if ( possessed.Distance3D(goingAfter) > 512 && !possessed.CheckSight(goingAfter) )
+                                    SetBotState(BS_WANDERING);
+                            }
 								
 							else
 							{
-								ActorList path = currNode.findPathTo(ClosestNode(goingAfter), possessed);
+								ActorList path = navDest.findPathTo(ClosestNode(goingAfter), possessed);
 								
 								if ( path != null && path.Length() > 1 )
 								{
+                                    currNode = navDest;
 									navDest = ZTPathNode(path.get(1));
 									
 									DebugLog(LT_INFO, "Next navigation point found at: "..navDest.pos);
@@ -799,6 +806,7 @@ class ZTBotController : Actor
 						goingAfter = commander;
 					}
 				
+                    /*
 					else if ( commander == null )
 					{ // get a commander
 						ActorList friends = VisibleFriends(possessed);
@@ -817,6 +825,7 @@ class ZTBotController : Actor
 							// BotChat("COMM", 0.8);
 						}
 					}
+					*/
 				
 					if ( commander == null )
 					{ // wander around
@@ -991,4 +1000,51 @@ class ZetaBot : Actor
 		DebugLog(LT_INFO, "ZetaBot spawned with success! Class: "..cont.possessed.GetClassName());
 		Destroy();
 	}
+}
+
+class BotName : Inventory
+{
+    int countDown;
+
+    override void BeginPlay()
+    {
+        countDown = 0;
+    }
+    
+    override void Tick()
+    {
+        if ( countDown < 1 )
+        {
+            let iter = ThinkerIterator.Create("ZetaBotPawn");
+            ZetaBotPawn zb = null;
+            ZetaBotPawn closest = null;
+            double cdist = 0;
+            
+            while ( zb = ZetaBotPawn(iter.Next()) )
+            {
+                Vector2 v1 = AngleToVector(Owner.angle);
+                Vector2 v2 = Owner.Vec2To(zb) / Owner.Distance2D(zb);
+                
+                double vdot = (v1.x * v2.x + v1.y * v2.y);
+                
+                if ( vdot > 0.8 && Owner.CheckSight(zb) && zb.cont != null && zb.Health > 0 && ( closest == null || Owner.Distance2D(zb) < cdist ) )
+                {
+                    cdist = Owner.Distance2D(zb);
+                    closest = zb;
+                }
+            }
+            
+            if ( closest != null )
+            {
+                Owner.A_Print("\ci"..closest.cont.myName);
+                countDown = 10;
+            }
+                
+            else
+                countDown = 4;
+        }
+            
+        else
+            countDown--;
+    }
 }
