@@ -624,7 +624,7 @@ class ZTBotController : Actor
 		A_PrintBold("\cg"..myName.." has just died!");
 		
 		let friends = VisibleFriends(possessed);
-		Actor a = null;
+		Object a = null;
 		ZetaBotPawn zb = null;
 		
 		while ( a = friends.iNext() )
