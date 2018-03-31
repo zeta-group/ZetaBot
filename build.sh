@@ -87,7 +87,8 @@ echo -e $FILES | zip -@ $out
 
 # Create launch script
 lout="${FOLDER}/${NAME}"
-printf "${SCPORT} -iwad ${IWAD} -file ./${NAME}v${VERSION}.pk3" > $lout
+echo "#!/bin/bash" >$lout
+printf "\"${SCPORT}\" -iwad \"${IWAD}\" -file \"./${NAME}_v${VERSION}.pk3\"" >> $lout
 
 for cv in $CVAR; do
     printf " +set $(echo $cv | awk -F\= '{print $1}') $(echo $cv | awk -F\= '{print $2}')" >> $lout
