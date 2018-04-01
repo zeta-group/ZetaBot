@@ -22,15 +22,19 @@ launch script. (Windows support coming soon!)
 1. Run your terminal window and `cd` to the folder with the ZetaBot source.
 2. Run the buildscript:
 
-    ./build.sh -f <output folder : build> -s <path to source port : /usr/bin/gzdoom> -i <path to the mod's IWAD>
-    
-It also supports optional CVar settings:
+    ./build.sh [-f <output folder : out>] [-s <path to source port : /usr/bin/gzdoom>] -i <path to the mod's IWAD>
+
+   It also supports optional CVar settings:
 
     [-c <name=value> [-c <name2=value2> ...]]
     
-For example:
+   And additional source port settings as well:
+   
+    [-e <option>[=<value>] [-e <option>[=<value>] ...]]
+    
+   For example:
 
-    ./build.sh -f out -s gzdoom -i /usr/games/doom/doom2.wad -c zb_debug=true
+    ./build.sh -f out -s gzdoom -i /usr/games/doom/doom2.wad -c zb_debug=true -e "-nomonsters" -e "-skill=1" -e "+map=MAP18"
     
 3. Play:
 

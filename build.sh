@@ -114,7 +114,7 @@ for cv in $CVAR; do
 done
     
 for eo in $EXTRA; do
-    printf " -$(echo $eo | awk -F\= '{print $1}') $(echo $eo | awk -F\= '{print $2}')" >> $lout
+    printf " $(echo $eo | awk -F\= '{print $1}') $(echo $eo | awk -F\= '{print $2}')" >> $lout
     
 done
 
