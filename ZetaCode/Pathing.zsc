@@ -283,7 +283,7 @@ class ZTPathNode : Actor
 		let cand = new("ActorList");
 		uint cant = 0;
 	
-		while ( node = ZTPathNode(iter.Next()) )
+		while ( ( node = ZTPathNode(iter.Next()) ) != null )
 			if ( canConnect(node) )
 			{
 				res.push(node);

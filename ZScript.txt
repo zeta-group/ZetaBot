@@ -408,12 +408,12 @@ class ZTBotController : Actor
 	
 	ZTPathNode ClosestNode(Actor other)
 	{
-		ThinkerIterator iter = ThinkerIterator.Create("ZTPathNode", Thinker.STAT_DEFAULT);
+		ThinkerIterator iter = ThinkerIterator.Create("ZTPathNode");
 		ZTPathNode best = null;
 		ZTPathNode cur = null;
 		
 		while ( cur = ZTPathNode(iter.Next()) )
-			if ( best == null || other.Distance2D(cur) < other.Distance2D(best) )
+			if ( best == null || other.Distance3D(cur) < other.Distance3D(best) )
 				best = cur;
 				
 		return best;
@@ -735,7 +735,7 @@ class ZTBotController : Actor
 						if ( possessed.Distance3D(goingAfter) < 1024 && possessed.CheckSight(goingAfter) )
 							SetBotState(AssessBotAttitude(goingAfter));
 					
-						else if ( currNode != null && ( navDest == null || Distance3D(navDest) < 512 ) )
+						else if ( currNode != null && ( navDest == null || Distance3D(navDest) < 512 || navDest == currNode ) )
 						{
 							if ( ClosestNode(goingAfter) == currNode )
                             {
@@ -752,7 +752,6 @@ class ZTBotController : Actor
 								
 								if ( path != null && path.Length() > 1 )
 								{
-                                    currNode = navDest;
 									navDest = ZTPathNode(path.get(1));
 									
 									DebugLog(LT_INFO, "Next navigation point found at: "..navDest.pos);
@@ -834,16 +833,8 @@ class ZTBotController : Actor
 							
 						ZTPathNode ng = null;
 					
-						if ( currNode != null && (ng = currNode.RandomNeighbor()) != currNode )
-						{ // wander to a random 'neighboring' node
-							MoveToward(ng);
-							
-							if ( Distance3D(ng) < Distance3D(currNode) )
-							{
-								pastNode = currNode;
-								currNode = ng;
-							}
-						}
+						if ( currNode != null && (ng = currNode.RandomNeighbor()) != currNode && ng != null )
+							MoveToward(ng); // wander to a random 'neighboring' node
 						
 						else
 						{ // just wander around :P
@@ -924,7 +915,7 @@ class ZTBotController : Actor
 			}
 		}
 		
-		if ( currNode == null || possessed.Distance3D(currNode) > 256 )
+		if ( currNode == null || possessed.Distance3D(currNode) > 192 )
 		{
 			pastNode = currNode;
 			currNode = ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL);
