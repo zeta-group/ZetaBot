@@ -5,6 +5,7 @@ FOLDER="out"
 SCPORT="gzdoom"
 CVAR=""
 IWAD=""
+EXTRA=""
 
 while [[ $# -gt 0 ]]; do
     key="$1"
@@ -31,6 +32,17 @@ while [[ $# -gt 0 ]]; do
         
         else
             CVAR="$CVAR $2"
+            
+        fi
+        shift # past argument
+        shift # past value
+        ;;
+        -e|--extra) # extra source port arguments
+        if [ -z $ ]; then
+            EXTRA="$2"
+        
+        else
+            EXTRA="$EXTRA $2"
             
         fi
         
@@ -98,6 +110,11 @@ printf "\"${SCPORT}\" -iwad \"${IWAD}\" -file \"./${NAME}_v${VERSION}.pk3\"" >> 
 
 for cv in $CVAR; do
     printf " +set $(echo $cv | awk -F\= '{print $1}') $(echo $cv | awk -F\= '{print $2}')" >> $lout
+    
+done
+    
+for eo in $EXTRA; do
+    printf " -$(echo $eo | awk -F\= '{print $1}') $(echo $eo | awk -F\= '{print $2}')" >> $lout
     
 done
 
