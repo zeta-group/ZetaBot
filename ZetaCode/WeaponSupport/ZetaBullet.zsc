@@ -35,14 +35,10 @@ class ZetaBullet : Actor
 		return ZetaBullet(bullet);
 	}
 
-	static Array<ZetaBullet> FireBullets(Actor shooter, String bulletColor, Actor target, double damage, int numBullets, double spreadX, double spreadY)
+	static void FireBullets(Actor shooter, String bulletColor, Actor target, double damage, int numBullets, double spreadX, double spreadY)
 	{
-		Array<ZetaBullet> res;
-	
 		for ( int i = 0; i < numBullets; i++ )
-			res.Push(FireABullet(shooter, bulletColor, target, damage, spreadX, spreadY));
-			
-		return res;
+			FireABullet(shooter, bulletColor, target, damage, spreadX, spreadY);
 	}
 	
 	States
