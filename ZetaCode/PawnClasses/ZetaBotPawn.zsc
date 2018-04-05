@@ -32,7 +32,9 @@ class ZetaBotPawn : Actor
 	static String GetSomeType()
 	{
 		Array<String> types;
-		CVar.FindCVar('zb_btypes').GetString().Split(types, ';');
+		// Workaround for calling function on temporary string value
+		string tmpstr = CVar.FindCVar('zb_btypes').GetString();
+		tmpstr.Split(types, ';');
 		return types[Random(0, CVar.FindCVar('zb_nbtypes').GetInt() - 1)];
 	}
 	

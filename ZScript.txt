@@ -164,7 +164,9 @@ class ZTBotController : Actor
 		loader = ZetaWeaponModule(Spawn("ZetaWeaponModule"));
 		
 		Array<String> wmodules;
-		CVar.GetCVar("zb_wtypes").GetString().Split(wmodules, ";");
+		// Workaround for calling function on temporary string value
+		string tmpstr = CVar.GetCVar("zb_wtypes").GetString();
+		tmpstr.Split(wmodules, ";");
 		
 		for ( int i = 0; i < wmodules.Size(); i++ )
 		{
