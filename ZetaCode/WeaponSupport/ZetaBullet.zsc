@@ -36,7 +36,7 @@ class ZetaBullet : Actor
 	}
 
 	static void FireBullets(Actor shooter, String bulletColor, Actor target, double damage, int numBullets, double spreadX, double spreadY)
-	{
+    {
 		for ( int i = 0; i < numBullets; i++ )
 			FireABullet(shooter, bulletColor, target, damage, spreadX, spreadY);
 	}
@@ -44,13 +44,7 @@ class ZetaBullet : Actor
 	States
 	{
 		Spawn:
-			TNT1 A 1
-			{
-				double pos;
-			
-				for ( pos = 0; pos > -sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z); pos -= 2 )
-					A_SpawnParticle(bulletColor, SPF_FULLBRIGHT | SPF_RELPOS | SPF_RELANG, 15, 1, 0, pos, 0, vel.z * pos, FRandom(-0.01 * pos, 0.01 * pos), FRandom(-0.01 * pos, 0.01 * pos), FRandom(-0.01 * pos, 0.01 * pos));
-			}
+			TNT1 A 1;
 			Loop;
 			
 		Death:
@@ -58,6 +52,8 @@ class ZetaBullet : Actor
 			{
 				if ( FRandom(0, 99.9) < 35 )
 					A_PlaySound("ztmisc/ricochet", CHAN_BODY, FRandom(0.2, 0.7));
+                
+                A_SpawnItemEx("BulletPuff");
 			}
 			Stop;
 			

@@ -15,7 +15,6 @@ class ZetaBotPawn : Actor
 		+SOLID
 		+SHOOTABLE
 		+DROPOFF
-		+PICKUP
 		+NOTDMATCH
 		+FRIENDLY
 		+SLIDESONWALLS
@@ -27,14 +26,14 @@ class ZetaBotPawn : Actor
 		+NOBLOCKMONST
 		+FRIENDLY
 		+ISMONSTER
+		+THRUSPECIES
 	}
 
 	static String GetSomeType()
 	{
 		Array<String> types;
-		// Workaround for calling function on temporary string value
-		string tmpstr = CVar.FindCVar('zb_btypes').GetString();
-		tmpstr.Split(types, ';');
+		let btypes = CVar.FindCVar('zb_btypes').GetString();
+		btypes.Split(types, ';');
 		return types[Random(0, CVar.FindCVar('zb_nbtypes').GetInt() - 1)];
 	}
 	
