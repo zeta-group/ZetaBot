@@ -34,7 +34,7 @@ launch script. (Windows support coming soon!)
     
    For example:
 
-        ./build.sh -f out -s gzdoom -i /usr/games/doom/doom2.wad -c zb_debug=true -e "-nomonsters" -e "-skill=1" -e "+map=MAP18"
+        ./build.sh -f out -s gzdoom -i /usr/games/doom/doom2.wad -c zb_debug=1 -e "-nomonsters" -e "-skill=1" -e "+map=MAP18"
     
 3. Play:
 

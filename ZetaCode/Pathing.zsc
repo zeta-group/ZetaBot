@@ -413,6 +413,9 @@ class ZTPathNode : Actor
 	
 	bool canConnect(ZTPathNode next)
 	{
+        if ( next == null || self == null )
+            return false;
+	
 		if ( nodeType == NT_USE && Distance3D(next) < 72 )
 			return true; // for doors, etc.
 	

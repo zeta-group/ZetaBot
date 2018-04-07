@@ -11,6 +11,19 @@ while [[ $# -gt 0 ]]; do
     key="$1"
 
     case $key in
+        -h|--help)
+        echo
+        echo Syntax:
+        echo
+        echo
+        echo "  ./build.sh \[-f <output folder : out>\] \[-s \<path to source port : gzdoom\>\] -i \<path to the mod's IWAD\> \[-c \<additional cvar\>\=\<value\> \[...\]] \[-e \<source port option\>=\<value\> \[...\]\]"
+        echo
+        echo For example:
+        echo
+        echo "    ./build.sh -f out -s gzdoom -i /usr/games/doom/doom2.wad -c zb_debug=1 -e \"-nomonsters\" -e \"-skill=1\" -e \"+map=MAP18\""
+        echo
+        exit 0
+        ;;
         -f|--folder)
         FOLDER="$2"
         shift # past argument

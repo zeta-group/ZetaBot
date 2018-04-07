@@ -184,7 +184,6 @@ class ZTBotController : Actor
 		super.BeginPlay();
 		
 		botID = NumBots.Get().value++;
-		ACS_NamedExecute("newbot", 0);
 		age = 0;
 		lastShot = -9999;
 	
@@ -330,9 +329,9 @@ class ZTBotController : Actor
                     possessed.MoveBackward();
             }
             
-            leftObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
-            frontObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
-            rightObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
+            leftObs = ObstacleChecker.MakeFor(self, -45, 5 * Speed);
+            frontObs = ObstacleChecker.MakeFor(self, 0, 5 * Speed);
+            rightObs = ObstacleChecker.MakeFor(self, 45, 5 * Speed);
         }
 	}
 	
@@ -689,7 +688,6 @@ class ZTBotController : Actor
                 zb.cont.SetBotState(BS_FLEEING);
                 
         NumBots.Get().value--;
-        ACS_NamedExecute("lessbot", 0);
 	}
 	
 	override void Tick()
@@ -972,7 +970,7 @@ class ZTBotController : Actor
 			}
 		}
 		
-		if ( currNode == null || possessed.Distance3D(currNode) > 192 )
+		if ( currNode == null || possessed.Distance2D(currNode) > 160 )
 		{
 			pastNode = currNode;
 			currNode = ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL);
@@ -1095,30 +1093,5 @@ class BotName : Inventory
             
         else
             countDown--;
-    }
-}
-
-class BotPosition : Inventory
-{
-    override void PostBeginPlay()
-    {
-        super.PostBeginPlay();
-        
-        Vector2
-            a = Owner.Vec2Angle(96, 0),
-            b = Owner.Vec2Angle(96, 60),
-            c = Owner.Vec2Angle(96, 120),
-            d = Owner.Vec2Angle(96, 180),
-            e = Owner.Vec2Angle(96, 240),
-            f = Owner.Vec2Angle(96, 300);
-        
-        ACS_NamedExecute("addPos", a.x, a.y, pos.z);
-        ACS_NamedExecute("addPos", b.x, b.y, pos.z);
-        ACS_NamedExecute("addPos", c.x, c.y, pos.z);
-        ACS_NamedExecute("addPos", d.x, d.y, pos.z);
-        ACS_NamedExecute("addPos", e.x, e.y, pos.z);
-        ACS_NamedExecute("addPos", f.x, f.y, pos.z);
-        
-        Destroy();
     }
 }
