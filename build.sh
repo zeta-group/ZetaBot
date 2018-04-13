@@ -72,12 +72,15 @@ done
 
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-FILES=
+FILES=()
+BUILDDIR="."
 
 ADDFILE () {
+    f="${BUILDDIR}/${1}"
+
     if [ $# -eq 1 ]; then
-        FILES="${FILES}$1\\n"
-        
+        FILES+=($(echo -e "\n$f"))
+
     else
         echo "[WARNING] Invalid call to ADDFILE with ${#} arguments (expected 1)!"
         
@@ -85,15 +88,17 @@ ADDFILE () {
 }
 
 ADDFOLDER () {
+    d="${BUILDDIR}/${1}"
+
     if [ $# -eq 1 ]; then
-        for f in $(find $1); do
-            ADDFILE $f
+        for f in $(find $d -type f); do
+            ADDFILE $(echo $f | cut -c $(expr 1 + ${#BUILDDIR})-)
             
         done
         
     elif [ $# -eq 2 ]; then
-        for f in $(find $1 -name $2); do
-            ADDFILE $f
+        for f in $(find $d -type f -name $2); do
+            ADDFILE $(echo $f | cut -c $(expr 1 + ${#BUILDDIR})-)
             
         done
     
@@ -105,33 +110,43 @@ ADDFOLDER () {
 
 # Build compilation
 if [ -e "./compile.sh" ]; then
-    . ./compile.sh
+    . ./compile.sh >/dev/null
     
 fi
 
 # Build PK3
 . ./config.sh
-out="./${FOLDER}/${NAME}_v${VERSION}.pk3"
+NUMFILES=${#FILES}
+FILES=${FILES[*]}
+
+owd=$(pwd)
+out="${owd}/${FOLDER}/${NAME}_v${VERSION}.pk3"
+
+cd $BUILDDIR
 
 mkdir -p $FOLDER
-echo -e $FILES | zip -@ $out
+
+# Create output file
+echo Adding $NUMFILES files to output \'${out}\'.
+zip $out $FILES >/dev/null
 
 # Create launch script
-lout="${FOLDER}/${NAME}"
-echo "#!/bin/bash" >$lout
-printf "\"${SCPORT}\" -iwad \"${IWAD}\" -file \"./${NAME}_v${VERSION}.pk3\"" >> $lout
+lout="${owd}/${FOLDER}/${NAME}"
+echo "#!/bin/bash" >"$lout"
+printf "\"${SCPORT}\" -iwad \"${IWAD}\" -file \"./${NAME}_v${VERSION}.pk3\"" >>"$lout"
 
 for cv in $CVAR; do
-    printf " +set $(echo $cv | awk -F\= '{print $1}') $(echo $cv | awk -F\= '{print $2}')" >> $lout
+    printf " +set $(echo $cv | awk -F\= '{print $1}') $(echo $cv | awk -F\= '{print $2}')" >> "$lout"
     
 done
     
 for eo in $EXTRA; do
-    printf " $(echo $eo | awk -F\= '{print $1}') $(echo $eo | awk -F\= '{print $2}')" >> $lout
+    printf " $(echo $eo | awk -F\= '{print $1}') $(echo $eo | awk -F\= '{print $2}')" >> "$lout"
     
 done
 
-chmod +x $lout
+cd "$owd"
+chmod +x "$lout"
 
 # Post-build
 if [ -e "./postbuild.sh" ]; then

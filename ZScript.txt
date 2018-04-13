@@ -1,19 +1,21 @@
 version "2.5"
 
-#include "ZetaCode/Standard.zsc"
-#include "ZetaCode/Pathing.zsc"
-#include "ZetaCode/Appearance.zsc"
-#include "ZetaCode/Obstacles.zsc"
+#include "/ZetaCode/Standard.zsc"
+#include "/ZetaCode/Pathing.zsc"
+#include "/ZetaCode/Appearance.zsc"
+#include "/ZetaCode/Obstacles.zsc"
 
 // Weapon Modules
-#include "ZetaCode/WeaponSupport/ZetaWeapon.zsc"
-#include "ZetaCode/WeaponSupport/ZetaWeaponModule.zsc"
-#include "ZetaCode/WeaponSupport/ZetaBullet.zsc"
-#include "ZetaCode/WeaponSupport/ZetaDoomWeapons.zsc"
+#include "/ZetaCode/WeaponSupport/ZetaWeapon.zsc"
+#include "/ZetaCode/WeaponSupport/ZetaBullet.zsc"
+#include "/ZetaCode/WeaponSupport/ZetaWeaponModule.zsc"
+#include "/ZetaCode/WeaponSupport/ZetaDoomWeapons.zsc"
+#include "/ZetaCode/WeaponSupport/ZetaStrifeWeapons.zsc"
 
 // Pawn Modules
-#include "ZetaCode/PawnClasses/ZetaBotPawn.zsc"
-#include "ZetaCode/PawnClasses/ZetaDoom.zsc"
+#include "/ZetaCode/PawnClasses/ZetaBotPawn.zsc"
+#include "/ZetaCode/PawnClasses/ZetaDoom.zsc"
+#include "/ZetaCode/PawnClasses/ZetaStrife.zsc"
 
 class WeaponRating : Thinker
 {
@@ -122,6 +124,7 @@ class ZTBotController : Actor
 	ZetaWeaponModule loader;
 	uint botID;
 	string myName;
+	uint numShoots;
 	
 	static const string botNames[] = {
 		"Jack",
@@ -186,6 +189,7 @@ class ZTBotController : Actor
 		botID = NumBots.Get().value++;
 		age = 0;
 		lastShot = -9999;
+		numShoots = 0;
 	
 		loader = ZetaWeaponModule(Spawn("ZetaWeaponModule"));
 		
@@ -201,7 +205,15 @@ class ZTBotController : Actor
 		
 		navDest = null;
 		bstate = BS_WANDERING;
-		let ptype = ZetaBotPawn.GetSomeType();
+		let ptype = ZetaBotPawn.GetSomeType(self);
+		
+		if ( ptype == "" )
+		{
+            DebugLog(LT_ERROR, "No plausible pawn type found!");
+            Destroy();
+            return;
+		}
+		
 		SetPossessed(ZetaBotPawn(Spawn(ptype, pos)));
 		goingAfter = null;
 		currNode = null;
@@ -548,6 +560,8 @@ class ZTBotController : Actor
 			
 		else
 			bestWeap.Fire(possessed, enemy);
+			
+        numShoots++;
 			
 		lastShot = age;
 			
@@ -1040,6 +1054,10 @@ class ZetaBot : Actor
 		DebugLog(LT_VERBOSE, "Serialized Nodes: "..ZTPathNode.serializeLevel());
 	
 		ZTBotController cont = ZTBotController(Spawn("ZTBotController", pos));
+		
+		if ( cont == null )
+            return;
+		
 		ZetaCape.MakeFor(cont.possessed);
 		cont.possessed.angle = angle;
 		

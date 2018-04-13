@@ -1,12 +1,12 @@
-#include "ZetaCode/WeaponSupport/ZetaFist.zsc"
-#include "ZetaCode/WeaponSupport/ZetaChainsaw.zsc"
-#include "ZetaCode/WeaponSupport/ZetaPistol.zsc"
-#include "ZetaCode/WeaponSupport/ZetaShotgun.zsc"
-#include "ZetaCode/WeaponSupport/ZetaSSG.zsc"
-#include "ZetaCode/WeaponSupport/ZetaChaingun.zsc"
-#include "ZetaCode/WeaponSupport/ZetaRL.zsc"
-#include "ZetaCode/WeaponSupport/ZetaPR.zsc"
-#include "ZetaCode/WeaponSupport/ZetaBFG.zsc"
+#include "/ZetaCode/WeaponSupport/Doom/ZetaFist.zsc"
+#include "/ZetaCode/WeaponSupport/Doom/ZetaChainsaw.zsc"
+#include "/ZetaCode/WeaponSupport/Doom/ZetaPistol.zsc"
+#include "/ZetaCode/WeaponSupport/Doom/ZetaShotgun.zsc"
+#include "/ZetaCode/WeaponSupport/Doom/ZetaSSG.zsc"
+#include "/ZetaCode/WeaponSupport/Doom/ZetaChaingun.zsc"
+#include "/ZetaCode/WeaponSupport/Doom/ZetaRL.zsc"
+#include "/ZetaCode/WeaponSupport/Doom/ZetaPR.zsc"
+#include "/ZetaCode/WeaponSupport/Doom/ZetaBFG.zsc"
 
 class ZetaDoomWeapons : ZetaWeaponModule
 {

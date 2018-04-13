@@ -20,6 +20,11 @@ class ZetaWeapon : Actor
 		ZetaWeapon.AmmoType "Clip";
 		ZetaWeapon.AltAmmoType "Clip";
 	}
+	
+	static double RandomAngle(double range, double pivot = 0)
+	{
+        return FRandom(-range, range) + pivot;
+	}
 
 	virtual bool IsPickupOf(Weapon other)
 	{

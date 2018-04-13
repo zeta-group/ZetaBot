@@ -2,13 +2,13 @@
 
 class ZetaBullet : Actor
 {
-	String bulletColor;
+	String bulletColor, puff;
 	Property BulletColor: bulletColor;
 
 	Default
 	{
 		Damage 0;
-		Speed 80; // TO-DO: a more reasonable speed for a bullet while avoiding FastProjectile
+		Speed 85; // TO-DO: a more reasonable speed for a bullet while avoiding FastProjectile
 		ZetaBullet.BulletColor "Gold";
 		Species "ZetaBot";
 		+THRUSPECIES
@@ -20,7 +20,7 @@ class ZetaBullet : Actor
 		bulletColor = col;
 	}
 
-	static ZetaBullet FireABullet(Actor shooter, String bulletColor, Actor target, double damage, double spreadX, double spreadY)
+	static ZetaBullet FireABullet(Actor shooter, String bulletColor, Actor target, double damage, double spreadX, double spreadY, string puff = "BulletPuff")
 	{
 		let bullet = shooter.SpawnMissile(target, "ZetaBullet", shooter);
 		
@@ -30,12 +30,13 @@ class ZetaBullet : Actor
 			bullet.angle += FRandom(-spreadX, spreadX);
 			bullet.pitch += FRandom(-spreadY, spreadY);
 			ZetaBullet(bullet).SetColor(bulletColor ? bulletColor : "Gold");
+            ZetaBullet(bullet).puff = puff;
 		}
 			
 		return ZetaBullet(bullet);
 	}
 
-	static void FireBullets(Actor shooter, String bulletColor, Actor target, double damage, int numBullets, double spreadX, double spreadY)
+	static void FireBullets(Actor shooter, String bulletColor, Actor target, double damage, int numBullets, double spreadX, double spreadY, string puff = "BulletPuff")
     {
 		for ( int i = 0; i < numBullets; i++ )
 			FireABullet(shooter, bulletColor, target, damage, spreadX, spreadY);
@@ -44,7 +45,14 @@ class ZetaBullet : Actor
 	States
 	{
 		Spawn:
-			TNT1 A 1;
+			TNT1 A 1
+			{
+                for ( double x = -Speed; x <= 0; x += 10 )
+                {
+                    Vector3 offs = Vec3Angle(x, angle, tan(pitch) * x);
+                    A_SpawnParticle(bulletColor, SPF_FULLBRIGHT, 18, 1.5, 180, offs.x, offs.y, offs.z);
+                }
+            }
 			Loop;
 			
 		Death:
@@ -53,7 +61,7 @@ class ZetaBullet : Actor
 				if ( FRandom(0, 99.9) < 35 )
 					A_PlaySound("ztmisc/ricochet", CHAN_BODY, FRandom(0.2, 0.7));
                 
-                A_SpawnItemEx("BulletPuff");
+                A_SpawnItemEx(puff);
 			}
 			Stop;
 			

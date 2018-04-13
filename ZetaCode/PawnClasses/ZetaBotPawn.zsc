@@ -29,12 +29,34 @@ class ZetaBotPawn : Actor
 		+THRUSPECIES
 	}
 
-	static String GetSomeType()
+	static String GetSomeType(Actor anchor = null)
 	{
+        Array<String> rset;
 		Array<String> types;
+		Array<String> parms;
 		let btypes = CVar.FindCVar('zb_btypes').GetString();
 		btypes.Split(types, ';');
-		return types[Random(0, CVar.FindCVar('zb_nbtypes').GetInt() - 1)];
+		
+		for ( uint i = 0; i < types.Size(); i++ )
+        {
+            parms.Clear();
+            types[i].Split(parms, ':');
+		
+            let iter = ThinkerIterator.Create(parms[1]);
+            
+            if ( anchor != null ) anchor.A_Log(parms[1]);
+            
+            if ( iter.Next() )
+                rset.Push(parms[0]);
+        }
+        
+        if ( anchor != null ) anchor.A_Log('Plausible types: '..rset.Size());
+		
+		if ( rset.Size() > 0 )
+            return rset[Random(0, rset.Size() - 1)];
+            
+        else
+            return "";
 	}
 	
 	enum MovementModifier
