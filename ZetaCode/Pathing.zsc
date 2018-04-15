@@ -457,6 +457,7 @@ class ZTPathNode : Actor
 	Default
 	{
         Scale 0.6;
+        Height 32;
 	}
 	
 	States
