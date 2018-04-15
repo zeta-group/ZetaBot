@@ -19,7 +19,10 @@ class ZetaCape : Actor
 	
 	static void makeFor(Actor other)
 	{
-		ZetaCape cape = ZetaCape(other.Spawn("ZetaCape"));
+		ZetaCape cape = ZetaCape(Spawn("ZetaCape", other.pos));
+		
+		if ( cape == null )
+            return;
 		
 		cape.attached = other;
 		cape.lastAngle = other.angle;
@@ -55,8 +58,8 @@ class ZetaCape : Actor
 	States
 	{
 		Spawn:
-			CAPE A 1;
-			Loop;
+			CAPE A -1;
+			Stop;
 	}
 }
 
@@ -64,7 +67,7 @@ class ZTGiveCape : Actor
 {
 	Default
 	{
-		Speed 20;
+		Speed 50;
 		Damage 0;
 		Projectile;
 		+BLOODLESSIMPACT;
@@ -77,8 +80,6 @@ class ZTGiveCape : Actor
 			Loop;
 			
 		Crash:
-			Goto XDeath;
-			
 		XDeath:
 			TNT1 A 0
 			{

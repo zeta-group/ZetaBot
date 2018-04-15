@@ -6,6 +6,9 @@ SCPORT="gzdoom"
 CVAR=""
 IWAD=""
 EXTRA=""
+SPFILES=""
+MAP=""
+LZMA=0
 
 while [[ $# -gt 0 ]]; do
     key="$1"
@@ -24,6 +27,10 @@ while [[ $# -gt 0 ]]; do
         echo
         exit 0
         ;;
+        -l|--lzma)
+        LZMA=1
+        shift # past option
+        ;;
         -f|--folder)
         FOLDER="$2"
         shift # past argument
@@ -39,8 +46,18 @@ while [[ $# -gt 0 ]]; do
         shift # past argument
         shift # past value
         ;;
+        -a|--file|--add)
+        SPFILES="$SPFILES;$2"
+        shift
+        shift
+        ;;
+        -m|--map)
+        MAP=$2
+        shift
+        shift
+        ;;
         -c|--cvar)
-        if [ -z $CVAR ]; then
+        if [ -z "$CVAR" ]; then
             CVAR="$2"
         
         else
@@ -51,7 +68,7 @@ while [[ $# -gt 0 ]]; do
         shift # past value
         ;;
         -e|--extra) # extra source port arguments
-        if [ -z $ ]; then
+        if [ -z "$EXTRA" ]; then
             EXTRA="$2"
         
         else
@@ -73,13 +90,19 @@ done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
 FILES=()
-BUILDDIR="."
+BUILDDIR=""
 
 ADDFILE () {
-    f="${BUILDDIR}/${1}"
-
     if [ $# -eq 1 ]; then
-        FILES+=($(echo -e "\n$f"))
+        if [ ! -z "$BUILDDIR" ]; then
+            f="${BUILDDIR}/${1}"
+        
+        else
+            f="./${1}"
+        
+        fi
+        
+        FILES+=($f)
 
     else
         echo "[WARNING] Invalid call to ADDFILE with ${#} arguments (expected 1)!"
@@ -88,7 +111,13 @@ ADDFILE () {
 }
 
 ADDFOLDER () {
-    d="${BUILDDIR}/${1}"
+    if [ ! -z "$BUILDDIR" ]; then
+        d="${BUILDDIR}/${1}"
+        
+    else
+        d=$1
+    
+    fi
 
     if [ $# -eq 1 ]; then
         for f in $(find $d -type f); do
@@ -114,36 +143,98 @@ if [ -e "./compile.sh" ]; then
     
 fi
 
-# Build PK3
+# Pre-configuration
 . ./config.sh
-NUMFILES=${#FILES}
-FILES=${FILES[*]}
+NUMFILES=${#FILES[@]}
+FARR=("${FILES[@]}")
+FILES=""
+
+for f in "${FARR[@]}"; do
+    if [ -z "$FILES" ]; then
+        FILES=$f
+    
+    else
+        FILES=$(
+            printf "${FILES}"
+            printf '\n'
+            printf $f
+        )
+    
+    fi
+
+done
+
 
 owd=$(pwd)
-out="${owd}/${FOLDER}/${NAME}_v${VERSION}.pk3"
 
-cd $BUILDDIR
+if [ $LZMA -eq 1 ]; then
+    PKEXT=7
+    
+else
+    PKEXT=3
+
+fi
+
+out="${owd}/${FOLDER}/${NAME}_v${VERSION}.pk${PKEXT}"
+
+if [ ! -z "$BUILDDIR" ]; then
+    echo Moving to build directory.
+    cd $BUILDDIR
+
+fi
 
 mkdir -p $FOLDER
 
 # Create output file
 echo Adding $NUMFILES files to output \'${out}\'.
-zip $out $FILES >/dev/null
+rm $out
+
+if [ $LZMA -eq 1 ]; then
+    echo $FILES | tr " " "\n" | tar cf $out --lzma -T - || {
+        echo "Error building PK7 output!"
+        exit 1
+    }
+
+else
+    zip -9 $out ${FILES} >/dev/null || {
+        echo "Error building PK3 output!"
+        exit 1
+    }
+    
+fi
 
 # Create launch script
 lout="${owd}/${FOLDER}/${NAME}"
 echo "#!/bin/bash" >"$lout"
-printf "\"${SCPORT}\" -iwad \"${IWAD}\" -file \"./${NAME}_v${VERSION}.pk3\"" >>"$lout"
+printf "\"${SCPORT}\" -iwad \"${IWAD}\" -file \"./${NAME}_v${VERSION}.pk${PKEXT}\"" >>"$lout"
 
 for cv in $CVAR; do
     printf " +set $(echo $cv | awk -F\= '{print $1}') $(echo $cv | awk -F\= '{print $2}')" >> "$lout"
     
 done
+
+(
+    IFS=';'
     
+    for spf in $SPFILES; do
+        if [ ! $spf == "" ]; then
+            printf ' -file "' >> "$lout"
+            printf $spf >> "$lout"
+            printf '"' >> "$lout"
+            
+        fi
+    done
+)
+
 for eo in $EXTRA; do
     printf " $(echo $eo | awk -F\= '{print $1}') $(echo $eo | awk -F\= '{print $2}')" >> "$lout"
     
 done
+
+if [ ! MAP == "" ]; then
+    printf " +map $MAP" >> "$lout"
+
+fi
 
 cd "$owd"
 chmod +x "$lout"
@@ -154,4 +245,4 @@ if [ -e "./postbuild.sh" ]; then
     
 fi
 
-echo "PK3 built succesfully: $out"
+echo "PK${PKEXT} built succesfully: $out"

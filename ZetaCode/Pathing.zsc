@@ -57,6 +57,7 @@ class ZTPathNode : Actor
 	Vector3 useDirection;
 	bool bPlopped;
 	uint id;
+	bool bGoalNode;
 	
 	override void BeginPlay()
 	{
@@ -98,7 +99,7 @@ class ZTPathNode : Actor
 	
 	string serialize()
 	{
-		return int(pos.x)..","..int(pos.y)..","..int(pos.z)..","..nodeType..","..int(useDirection.x)..","..int(useDirection.y)..","..int(useDirection.z);
+		return int(pos.x)..","..int(pos.y)..","..int(pos.z)..","..nodeType..","..int(useDirection.x)..","..int(useDirection.y)..","..int(useDirection.z)..","..(bGoalNode ? "y" : "n");
 	}
 	
 	static string serializeAll(ActorList allNodes)
@@ -127,7 +128,7 @@ class ZTPathNode : Actor
 		return serializeAll(list);
 	}
 	
-	static void uploadLevel(String cvName = "nodelist")
+	static string uploadLevel(String cvName = "nodelist")
 	{
 		String code = CVar.FindCVar(cvName).GetString();
 			
@@ -141,13 +142,16 @@ class ZTPathNode : Actor
 		
 			while ( true )
 			{
-				if ( split((c = split(code, ";;", i++)), "::", 0) == level.mapName)
+                c = split(code, ";;", i++);
+			
+				if ( split(c, "::", 0) == level.mapName)
 					break;
 					
 				if ( c == "" )
 				{
-					CVar.FindCVar(cvName).SetString(serializeLevel()..";;"..code);
-					return;
+                    code = serializeLevel()..";;"..code;
+					CVar.FindCVar(cvName).SetString(code);
+					return code;
 				}
 			}
 			
@@ -155,6 +159,7 @@ class ZTPathNode : Actor
 		}
 		
 		CVar.FindCVar(cvName).SetString(code);
+		return code;
 	}
 	
 	static String split(string other, string sep, uint index)
@@ -258,6 +263,7 @@ class ZTPathNode : Actor
 			let node = ZTPathNode(Spawn("ZTPathNode", (nx, ny, nz)));
 			node.nodeType = nt;
 			node.bPlopped = true;
+			node.bGoalNode = split(ncode, ",", 6) == "y";
 			
 			node.useDirection = (udx, udy, 0);
 			
@@ -448,7 +454,12 @@ class ZTPathNode : Actor
 		return CheckSight(next);
 	}
 	
-	states
+	Default
+	{
+        Scale 0.6;
+	}
+	
+	States
 	{
 		Spawn:
 			TNT1 A 0;
@@ -464,36 +475,32 @@ class ZTPathNode : Actor
 			Loop;
 			
 		DVisible:
-			CAND A 1;
+			NODE A 1;
 			CAND A 0
 			{
 				if ( CVar.FindCVar("zb_debug").GetInt() < 1 )
 					SetStateLabel("DVisible");
+					
+                else
+                    angle += 10;
 			}
 			Loop;
 	}
 }
 
-class ZTPromptNodes : Actor
+class ZTGoalNode : Actor
 {
-	override void BeginPlay()
+	override void PostBeginPlay()
 	{
-		ZTPathNode n;
-		let iter = ThinkerIterator.Create("ZTPathNode");
+		let node = ZTPathNode(Spawn("ZTPathNode", pos));
+		node.bGoalNode = true;
+		node.useDirection = Vec3Angle(1, angle);
+		node.angle = angle;
 		
-		while ( n = ZTPathNode(iter.Next()) )
-			n.Destroy();
-		
-		PlopResult r = ZTPathNode.plopNodes(CVar.FindCVar("nodelist").GetString());
-		string lst = r.totalNodes.." nodes plopped! "..r.mapsFound.Size().." maps found in nodelist:";
-		
-		for ( uint i = 0; i < r.mapsFound.Size(); i++ )
-			lst = lst.."  >"..r.mapsFound[i];
-	
-		A_Log(lst);
 		Destroy();
 	}
 }
+
 
 class ZTUseNode : Actor
 {
@@ -536,7 +543,38 @@ class ZTUploadNodes : Actor
 {
 	override void BeginPlay()
 	{
-		ZTPathNode.uploadLevel();
+		String code = ZTPathNode.uploadLevel("nodelist");
+		// A_PrintBold("'"..code.."'");
+		
+		Destroy();
+	}
+}
+
+class ZTPromptNodes : Actor
+{
+	override void BeginPlay()
+	{
+		ZTPathNode n;
+		let iter = ThinkerIterator.Create("ZTPathNode");
+		
+		while ( n = ZTPathNode(iter.Next()) )
+			n.Destroy();
+		
+		cvar cv = CVar.FindCVar("nodelist");
+		
+		if ( cv == null )
+		{
+            Destroy();
+            return;
+        }
+		
+		PlopResult r = ZTPathNode.plopNodes(cv.GetString());
+		string lst = r.totalNodes.." nodes plopped! "..r.mapsFound.Size().." maps found in nodelist:";
+		
+		for ( uint i = 0; i < r.mapsFound.Size(); i++ )
+			lst = lst.."  >"..r.mapsFound[i];
+	
+		A_Log(lst);
 		Destroy();
 	}
 }

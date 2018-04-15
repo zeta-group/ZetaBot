@@ -1,21 +1,21 @@
 version "2.5"
 
-#include "/ZetaCode/Standard.zsc"
-#include "/ZetaCode/Pathing.zsc"
-#include "/ZetaCode/Appearance.zsc"
-#include "/ZetaCode/Obstacles.zsc"
+#include "ZetaCode/Standard.zsc"
+#include "ZetaCode/Pathing.zsc"
+#include "ZetaCode/Appearance.zsc"
+#include "ZetaCode/Obstacles.zsc"
 
 // Weapon Modules
-#include "/ZetaCode/WeaponSupport/ZetaWeapon.zsc"
-#include "/ZetaCode/WeaponSupport/ZetaBullet.zsc"
-#include "/ZetaCode/WeaponSupport/ZetaWeaponModule.zsc"
-#include "/ZetaCode/WeaponSupport/ZetaDoomWeapons.zsc"
-#include "/ZetaCode/WeaponSupport/ZetaStrifeWeapons.zsc"
+#include "ZetaCode/WeaponSupport/ZetaWeapon.zsc"
+#include "ZetaCode/WeaponSupport/ZetaBullet.zsc"
+#include "ZetaCode/WeaponSupport/ZetaWeaponModule.zsc"
+#include "ZetaCode/WeaponSupport/ZetaDoomWeapons.zsc"
+#include "ZetaCode/WeaponSupport/ZetaStrifeWeapons.zsc"
 
 // Pawn Modules
-#include "/ZetaCode/PawnClasses/ZetaBotPawn.zsc"
-#include "/ZetaCode/PawnClasses/ZetaDoom.zsc"
-#include "/ZetaCode/PawnClasses/ZetaStrife.zsc"
+#include "ZetaCode/PawnClasses/ZetaBotPawn.zsc"
+#include "ZetaCode/PawnClasses/ZetaDoom.zsc"
+#include "ZetaCode/PawnClasses/ZetaStrife.zsc"
 
 class WeaponRating : Thinker
 {
@@ -101,6 +101,8 @@ class ZTBotController : Actor
 		}
 	}
 
+    bool bReachedGoal;
+    ZTPathNode goalNode;
 	ZetaBotPawn possessed;
 	BotState bstate;
 	ZTPathNode navDest;
@@ -179,8 +181,30 @@ class ZTBotController : Actor
 		"Gregory",
 		"Victoria",
 		"Anita",
-		"Whindersson"
+		"Whindersson",
+		"Melody",
+		"Xonon",
+		"Xihil"
 	};
+	
+	ZTPathNode RandomGoalNode()
+	{
+        if ( bReachedGoal )
+            return null;
+	
+        Array<ZTPathNode> goals;
+        let iter = ThinkerIterator.Create("ZTPathNode");
+        ZTPathNode cur;
+        
+        while ( cur = ZTPathNode(iter.Next()) )
+            if ( cur.bGoalNode )
+                goals.Push(cur);
+                
+        if ( goals.Size() < 1 )
+            return null;
+                
+        return goals[Random(0, goals.Size() - 1)];
+	}
 	
 	override void BeginPlay()
 	{
@@ -226,7 +250,7 @@ class ZTBotController : Actor
 		speedRemaining = 87;
 		pastNode = null;
 		initialized = true;
-		myVoice = Random(0, 3);
+		myVoice = Random(1, 4);
 		logRate = 150;
 		
 		leftObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
@@ -238,7 +262,7 @@ class ZTBotController : Actor
 	
 	void PlayPain()
 	{
-		possessed.A_PlaySound("decobot/"..myVoice.."/hurt");
+		BotChat("PAIN", 0.6);
 	}
 	
 	void aimToward(Actor other, double speed, double threshold = 15)
@@ -324,7 +348,7 @@ class ZTBotController : Actor
 	{
 		possessed.StepBackward();
 	}
-	
+
 	void CheckObstructions()
 	{
         if ( leftObs.st == frontObs.st && frontObs.st == rightObs.st && leftObs.st != ObstacleCheckWaiter.CS_PENDING )
@@ -646,11 +670,11 @@ class ZTBotController : Actor
 	
 	void BotChat(String kind, double importance)
 	{
-		if ( importance > FRandom(0, 0.9999) )
+		if ( importance < FRandom(0, 1) )
 			return;
 	
-		A_PlaySound("decobot/"..myVoice.."/"..kind, CHAN_VOICE, attenuation: 0.7);
-		A_PlaySound("misc/radio", CHAN_UI, 1.0, false, ATTN_NONE);
+		A_PlaySound("zetabot/"..myVoice.."/"..kind, CHAN_VOICE, attenuation: 0.7);
+		A_PlaySound("misc/chat", CHAN_UI, 1.0, false, ATTN_NONE);
 	}
 	
 	double targetPriority(Actor other)
@@ -772,7 +796,7 @@ class ZTBotController : Actor
 				enemy = Actor(targets.poll());
 				DebugLog(LT_INFO, "Attacking a "..enemy.GetClassName());
 				
-				BotChat("TARG", 0.85);
+				BotChat("TARG", 0.5);
 				
 				if ( possessed.Distance3D(enemy) > 1024 )
 				{
@@ -812,7 +836,7 @@ class ZTBotController : Actor
                                 if ( possessed.Distance3D(goingAfter) < 256 )
                                     SetBotState(BS_ATTACKING);
                                         
-                                else if ( possessed.Distance3D(goingAfter) > 512 && !possessed.CheckSight(goingAfter) )
+                                else if ( possessed.Distance3D(goingAfter) > 5192 && !possessed.CheckSight(goingAfter) )
                                     SetBotState(BS_WANDERING);
                             }
 								
@@ -828,7 +852,7 @@ class ZTBotController : Actor
 									MoveToward(navDest, 0.27);
 								}
 									
-								else if ( possessed.Distance3D(goingAfter) < 256 )
+								else if ( possessed.Distance3D(goingAfter) < 256 && possessed.CheckSight(goingAfter) )
 									SetBotState(BS_WANDERING);
 									
 								else
@@ -842,7 +866,7 @@ class ZTBotController : Actor
 						else if ( possessed.Distance3D(goingAfter) < 256 )
 							SetBotState(BS_ATTACKING);
 								
-						else if ( possessed.Distance3D(goingAfter) > 512 && !possessed.CheckSight(goingAfter) )
+						else if ( possessed.Distance3D(goingAfter) > 1500 && !possessed.CheckSight(goingAfter) )
 							SetBotState(BS_WANDERING);
 							
 						else
@@ -864,6 +888,34 @@ class ZTBotController : Actor
 				
 				else if ( bstate == BS_WANDERING )
 				{
+                    if ( currNode == goalNode )
+                        bReachedGoal == true;
+				
+                    else if ( !bReachedGoal )
+                    {
+                        if ( goalNode == null )
+                        {
+                            goingAfter = goalNode = RandomGoalNode();
+                            
+                            if ( goalNode != null )
+                            {
+                                SetBotState(BS_FOLLOWING);
+                                return;
+                            }
+                        }
+                        
+                        else if ( !CheckSight(goalNode) )
+                        {
+                            goingAfter = goalNode;
+                            SetBotState(BS_FOLLOWING);
+                            return;
+                        }
+                        
+                        else
+                            MoveToward(goalNode, 0.6);
+                    }
+                        
+				
 					MoveForward();
 					
 					if ( commander != null && ( possessed.Distance3D(commander) > 1024 && !possessed.CheckSight(commander) ) && ClosestNode(commander) != currNode )
@@ -891,7 +943,7 @@ class ZTBotController : Actor
                                     DebugLog(LT_INFO, myName.." is now following "..ztcom.cont.myName);
 							}
 							
-							// BotChat("COMM", 0.8);
+							BotChat("COMM", 0.8);
 						}
 					}
 				
@@ -952,7 +1004,7 @@ class ZTBotController : Actor
 					if ( FRandom(0, 1) < 0.2 )
 						possessed.Jump();
 				
-					BotChat("ACTV", 0.11);
+					BotChat("ACTV", 0.08);
 						
 					ZetaWeapon w = BestWeapon();
 						
@@ -976,7 +1028,7 @@ class ZTBotController : Actor
 			else
 			{
 				if ( enemy != null )
-					BotChat("ELIM", 0.8);
+					BotChat("ELIM", 0.9);
 			
 				possessed.EndShoot();
 				enemy = null;
@@ -1092,7 +1144,7 @@ class BotName : Inventory
                 
                 double vdot = (v1.x * v2.x + v1.y * v2.y);
                 
-                if ( vdot > 0.8 && Owner.CheckSight(zb) && zb.cont != null && zb.Health > 0 && ( closest == null || Owner.Distance2D(zb) < cdist ) )
+                if ( vdot > Owner.Distance2D(zb) / (zb.Radius * 1.2) && Owner.CheckSight(zb) && zb.cont != null && zb.Health > 0 && ( closest == null || Owner.Distance2D(zb) < cdist ) )
                 {
                     cdist = Owner.Distance2D(zb);
                     closest = zb;
