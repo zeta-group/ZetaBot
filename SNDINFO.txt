@@ -1,4 +1,4 @@
-// BOT VOICES
+// OLD DECOBOT VOICES
 $random zetabot/1/actv { zetabot/1/actv/1 zetabot/1/actv/2 zetabot/1/actv/3 zetabot/1/actv/4 }
 $random zetabot/2/actv { zetabot/2/actv/1 zetabot/2/actv/2 zetabot/2/actv/3 zetabot/2/actv/4 }
 $random zetabot/3/actv { zetabot/3/actv/1 zetabot/3/actv/2 zetabot/3/actv/3 }
@@ -119,11 +119,14 @@ zetabot/4/targ/2 "ZV4TARG2"
 
 zetabot/4/idle/1 "ZV4IDLE1"
 zetabot/4/idle/2 "ZV4IDLE2"
+zetabot/4/idle/3 "ZV4IDLE3"
 
 zetabot/4/hurt/1 "ZV4HURT1"
 zetabot/4/hurt/2 "ZV4HURT2"
+zetabot/4/hurt/3 "ZV4HURT3"
 
 zetabot/4/comm/1 "ZV4COMM1"
+zetabot/4/comm/2 "ZV4COMM2"
 
 // MISC
 $random ztmisc/ricochet { ztmisc/rico1 ztmisc/rico2 ztmisc/rico3 ztmisc/rico4 }

@@ -19,7 +19,7 @@ class ZetaBFG : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-		return 15 * Floor((shooter.FindInventory("Cell") != null ? shooter.FindInventory("Cell").Amount : 0) / 40) * target.Health;
+		return 300 * target.Health / (shooter.Distance2D(target));
 	}
 	
 	override void Fire(Actor shooter, Actor target)

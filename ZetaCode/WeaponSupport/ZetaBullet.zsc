@@ -45,7 +45,8 @@ class ZetaBullet : Actor
 	States
 	{
 		Spawn:
-			TNT1 A 1
+			TNT1 A 1;
+			/*
 			{
                 for ( double x = -Speed; x <= 0; x += 10 )
                 {
@@ -53,6 +54,7 @@ class ZetaBullet : Actor
                     A_SpawnParticle(bulletColor, SPF_FULLBRIGHT, 18, 1.5, 180, offs.x, offs.y, offs.z);
                 }
             }
+			*/
 			Loop;
 			
 		Death:

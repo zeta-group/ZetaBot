@@ -1,7 +1,7 @@
 # ZetaBot
 **The modern ZScript bot made for GZDoom**, made *by ZDoomers for ZDoomers*.
 
-* Over **2600 lines** of code written (verified with `wc`)
+* Exactly **3531 lines** of code written **manually** (verified with `wc`)
 * **Five** possible bot states (Wandering, Following, Attacking, Hunting and Fleeing)
 * **Extensive debugging** (set by CVar `zb_debug`)
 * Has the **attention of official ZDoom developers**
@@ -16,8 +16,13 @@
 
 # How to Play
 
-You need to run the build script in order to zip up the PK3 and get the
-launch script. (Windows support coming soon!)
+### Universal
+
+The easiest way is to go to the Releases section of the repository and
+downloading the PK3 attached to the latest release. Otherwise, you need
+to run the build script in order to zip up the PK3 and get the launch script.
+
+### Linux
 
 1. Run your terminal window and `cd` to the folder with the ZetaBot source.
 2. Run the buildscript:
@@ -36,7 +41,7 @@ launch script. (Windows support coming soon!)
 
         ./build.sh -f out -s gzdoom -i /usr/games/doom/doom2.wad -c zb_debug=1 -e "-nomonsters" -e "-skill=1" -e "+map=MAP18"
     
-3. Play:
+3. Launch:
 
         cd <output folder : build>
         ./ZetaBot
@@ -48,3 +53,15 @@ in the filename.
 You only need to do the steps 1 and 2 once (unless you want to change the
 CVARs set). You can also use the output PK3 as a normal mod, instead of
 using the launchscript :)
+
+    
+### Windows
+    
+For Windows you can just zip up all the files directly in the top folder of the repo,
+along with the following folders:
+
+* ZetaCode
+* sprites
+* sounds
+* acs
+* source

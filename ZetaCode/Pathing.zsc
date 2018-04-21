@@ -5,6 +5,35 @@ class PlopResult : Thinker
 	Array<String> nodeMaps;
 }
 
+class PathBall : DoomImpBall
+{
+    Actor targetNode;
+
+    void A_BallTick()
+    {
+		Vector2 offs = Vec2To(targetNode);
+		offs.x /= Distance2D(targetNode);
+		offs.y /= Distance2D(targetNode);
+		
+		Vector2 vel = AngleToVector(angle);
+
+        if ( Distance3D(targetNode) < 72 || (offs.x * vel.x) + (offs.y * vel.y) < 0 )
+			SetStateLabel("Death");
+    }
+
+	Default
+	{
+		Damage 0;
+	}
+    
+    States
+    {
+        Spawn:
+            BAL1 AB 4 A_BallTick;
+            Loop;
+    }
+}
+
 class ZTPathNode : Actor
 {
 	enum NavigationType
@@ -379,13 +408,13 @@ class ZTPathNode : Actor
 		
 		DebugLog(LT_INFO, "Found a "..res.Length().."-node path between "..self.id.." and "..other.id);
 		
-		if ( CVar.FindCVar("zb_debug").GetInt() == 1 )
+		if ( CVar.FindCVar("zb_debug").GetInt() > 0 )
 			for ( uint i = 0; i < res.Length() - 1; )
 			{
-				let missile = res.Get(i).SpawnMissile(res.Get(++i), "DoomImpBall");
-				
-				if ( missile != null )
-					missile.SetDamage(0);
+				PathBall pb = PathBall(res.Get(i).SpawnMissile(res.Get(++i), "PathBall"));
+
+				if ( pb != null )
+					pb.targetNode = res.Get(++i);
 			}
 		
 		return res;

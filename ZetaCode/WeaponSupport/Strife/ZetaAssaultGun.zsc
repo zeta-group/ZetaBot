@@ -2,7 +2,7 @@ class ZetaAssaultGun : ZetaWeapon
 {
 	default
 	{
-		ZetaWeapon.FireInterval 2571428;
+		ZetaWeapon.FireInterval 857142;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "ClipOfBullets";
 	}
@@ -19,12 +19,12 @@ class ZetaAssaultGun : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-		return 800 - shooter.Distance2D(target) / 2.5;
+		return 600 - shooter.Distance2D(target) / 1.5;
 	}
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-		ZetaBullet.FireABullet(shooter, "Gold", target, 4 * (random[StrifeGun]() % 3 + 1), abs(Random2[StrifeGun]() * (22.5 / 256) * AccuracyFactor()), 0, "StrifePuff");
+		ZetaBullet.FireABullet(shooter, "Gold", target, random[StrifeGun]() % 3 + 1, abs(Random2[StrifeGun]() * (22.5 / 256) * AccuracyFactor()), 0, "StrifePuff");
 		
 		shooter.A_PlaySound("weapons/assaultgun", CHAN_WEAPON);
 	}

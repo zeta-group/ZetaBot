@@ -46,25 +46,47 @@ class ZetaWeapon : Actor
 		return 0;
 	}
 	
-	virtual bool CanFire(Actor shooter)
+	virtual bool CanFireAmmo(Actor shooter)
+	{
+		return true;
+	}
+
+	virtual bool CanFire(Actor shooter, bool bUseAmmo = false)
 	{
 		Inventory inv = shooter.FindInventory(ammotype);
-		
+
 		if ( inv == null )
 			return minammo <= 0;
 			
 		else
+		{
+			if ( bUseAmmo && inv.amount >= minammo )
+			{
+				inv.amount -= minammo;
+				return true;
+			}
+
 			return inv.amount >= minammo;
+		}
 	}
 	
-	virtual bool CanAltFire(Actor shooter)
+	virtual bool CanAltFire(Actor shooter, bool bUseAmmo = false)
 	{
 		Inventory inv = shooter.FindInventory(altammotype);
 		
 		if ( inv == null )
 			return altminammo <= 0;
 		
-		return inv.amount >= altminammo;
+		else
+		{
+			if ( bUseAmmo && inv.amount >= altminammo )
+			{
+				inv.amount -= altminammo;
+				return true;
+			}
+
+			return inv.amount >= altminammo;
+		}
 	}
 	
 	virtual double IntervalSeconds()
