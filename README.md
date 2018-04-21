@@ -1,7 +1,7 @@
 # ZetaBot
 **The modern ZScript bot made for GZDoom**, made *by ZDoomers for ZDoomers*.
 
-* Exactly **3531 lines** of code written **manually** (verified with `wc`)
+* Exactly **3748 lines** of code written **manually** (verified with `wc`)
 * **Five** possible bot states (Wandering, Following, Attacking, Hunting and Fleeing)
 * **Extensive debugging** (set by CVar `zb_debug`)
 * Has the **attention of official ZDoom developers**
