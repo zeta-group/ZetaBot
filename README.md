@@ -7,7 +7,7 @@
 * Has the **attention of official ZDoom developers**
 * Flexible **PK3 mod build script** solution (`build.sh`)
 * Multiple male and female **voices**
-* Pathnode system with **A* pathfinding**
+* Pathnode system with **A\* pathfinding**
 * Supports **any weapons and player classes** _(given there are modules for them, supplied by their respective modders))
 * Constraints akin to **real** players _(max speed, max firing rate, etc etc)_
 * Weapon **rating** system
