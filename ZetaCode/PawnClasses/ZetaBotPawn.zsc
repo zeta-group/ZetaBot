@@ -47,13 +47,13 @@ class ZetaBotPawn : Actor
 		
             let iter = ThinkerIterator.Create(parms[1]);
             
-            // if ( anchor != null ) anchor.A_Log(parms[1]);
+            if ( anchor != null ) anchor.A_Log(parms[0]..': '..parms[1]);
             
             if ( iter.Next() )
                 rset.Push(parms[0]);
         }
         
-        // if ( anchor != null ) anchor.A_Log('Plausible types: '..rset.Size());
+        if ( anchor != null ) anchor.A_Log('Plausible types: '..rset.Size());
 		
 		if ( rset.Size() > 0 )
             return rset[Random(0, rset.Size() - 1)];

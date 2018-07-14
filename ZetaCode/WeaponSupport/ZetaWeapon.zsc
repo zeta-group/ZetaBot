@@ -1,12 +1,14 @@
 class ZetaWeapon : Actor
 {
 	property FireInterval: interval;
+	property AltFireInterval: altinterval;
 	property MinAmmo: minammo;
 	property AmmoType: ammotype;
 	property AltMinAmmo: altminammo;
 	property AltAmmoType: altammotype;
 	
 	int interval;
+	int altinterval;
 	int minammo;
 	string ammotype;
 	int altminammo;
@@ -15,6 +17,7 @@ class ZetaWeapon : Actor
 	default
 	{
 		ZetaWeapon.FireInterval 10000000;
+		ZetaWeapon.AltFireInterval 10000000;
 		ZetaWeapon.MinAmmo 0;
 		ZetaWeapon.AltMinAmmo 0;
 		ZetaWeapon.AmmoType "Clip";
@@ -92,6 +95,11 @@ class ZetaWeapon : Actor
 	virtual double IntervalSeconds()
 	{
 		return 1. * interval / 10000000;
+	}
+	
+	virtual double AltIntervalSeconds()
+	{
+		return 1. * altinterval / 10000000;
 	}
 	
 	virtual void Fire(Actor shooter, Actor target) {}

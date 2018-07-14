@@ -25,7 +25,19 @@ class ZetaWeaponModule : Actor
 			bool isp = zw.IsPickupOf(other);
 		
 			if ( isp )
+            {
+                /*
+                if ( CVar.GetCVar("zb_debug").GetInt() == 2 )
+                {
+                    String c1 = other.GetClassName();
+                    String c2 = zw.GetClassName();
+                    
+                    A_Log("Supported weapon found: "..c1.." -> "..c2);
+                }
+                */
+                
 				return zw;
+            }
 		}
 			
 		return null;

@@ -9,6 +9,7 @@ EXTRA=""
 SPFILES=""
 MAP=""
 LZMA=0
+PLATFORM=$(uname -s | head -c 5)
 
 while [[ $# -gt 0 ]]; do
     key="$1"
@@ -187,16 +188,24 @@ mkdir -p $FOLDER
 
 # Create output file
 echo Adding $NUMFILES files to output \'${out}\'.
-rm $out
+rm $out 2>/dev/null # just to make sure file doesn't exist
+
+if [ $PLATFORM == "CYGWI" ] || [ $PLATFORM == "MINGW" ]; then
+    ZIP="./zip.exe"
+    
+else
+    ZIP=zip
+
+fi
 
 if [ $LZMA -eq 1 ]; then
     echo $FILES | tr " " "\n" | tar cf $out --lzma -T - || {
         echo "Error building PK7 output!"
         exit 1
     }
-
+    
 else
-    zip -9 $out ${FILES} >/dev/null || {
+    $ZIP -9 $out ${FILES} >/dev/null || {
         echo "Error building PK3 output!"
         exit 1
     }
@@ -204,7 +213,7 @@ else
 fi
 
 # Create launch script
-lout="${owd}/${FOLDER}/${NAME}"
+lout="${owd}/${FOLDER}/${NAME}.sh"
 echo "#!/bin/bash" >"$lout"
 printf "\"${SCPORT}\" -iwad \"${IWAD}\" -file \"./${NAME}_v${VERSION}.pk${PKEXT}\"" >>"$lout"
 

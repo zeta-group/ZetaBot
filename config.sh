@@ -1,6 +1,6 @@
-sjh#!/bin/bash
+#!/bin/bash
 NAME=ZetaBot
-VERSION=0.1.8
+VERSION=0.1.9
 
 ADDFOLDER ZetaCode
 ADDFOLDER sprites
