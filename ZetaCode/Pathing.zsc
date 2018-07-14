@@ -485,7 +485,7 @@ class ZTPathNode : Actor
 	
 	Default
 	{
-        Scale 0.6;
+        Scale 0.35;
         Height 32;
 	}
 	
@@ -505,14 +505,14 @@ class ZTPathNode : Actor
 			Loop;
 			
 		DVisible:
-			NODE A 1;
+			NODE A 1 Bright;
 			CAND A 0
 			{
 				if ( CVar.FindCVar("zb_debug").GetInt() < 1 )
 					SetStateLabel("DVisible");
 					
                 else
-                    angle += 10;
+                    angle += 18;
 			}
 			Loop;
 	}
