@@ -1,5 +1,5 @@
 server int zb_debug = 0;
 server string nodeList = "::NONE";
 server string zb_btypes = "ZetaDoom:DoomPlayer;ZetaStrife:StrifePlayer;ZetaSMushes:YellowWyvern";
-server string zb_wtypes = "ZetaDoomWeapons;ZetaStrifeWeapons;ZetaSMWeapons";
+server string zb_wtypes = "ZetaDoomWeapons;ZetaStrifeWeapons;ZetaSentientMushesWeapons";
 server string zb_extraweap = "";

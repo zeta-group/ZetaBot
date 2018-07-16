@@ -26,7 +26,7 @@ class ZetaBullet : Actor
 		
 		if ( bullet != null )
 		{
-			bullet.SetDamage(Floor(damage + 0.5));
+			bullet.Damage = Floor(damage + 0.5);
 			bullet.angle += FRandom(-spreadX, spreadX);
 			bullet.pitch += FRandom(-spreadY, spreadY);
 			ZetaBullet(bullet).SetColor(bulletColor ? bulletColor : "Gold");

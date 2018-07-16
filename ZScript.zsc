@@ -11,13 +11,13 @@ version "2.5"
 #include "ZetaCode/WeaponSupport/ZetaWeaponModule.zsc"
 #include "ZetaCode/WeaponSupport/ZetaDoomWeapons.zsc"
 #include "ZetaCode/WeaponSupport/ZetaStrifeWeapons.zsc"
-// #include "ZetaCode/WeaponSupport/ZetaSMWeapons.zsc"
+#include "ZetaCode/WeaponSupport/ZetaSMWeapons.zsc"
 
 // Pawn Modules
 #include "ZetaCode/PawnClasses/ZetaBotPawn.zsc"
 #include "ZetaCode/PawnClasses/ZetaDoom.zsc"
 #include "ZetaCode/PawnClasses/ZetaStrife.zsc"
-// #include "ZetaCode/PawnClasses/ZetaSMushes.zsc"
+#include "ZetaCode/PawnClasses/ZetaSMushes.zsc"
 
 class DestBall : PlasmaBall
 {
@@ -314,7 +314,7 @@ class ZTBotController : Actor
 	
 	void aimAtAngle(double angle, double speed, double threshold = 15)
 	{
-		possessed.angle += DeltaAngle(angle, possessed.angle) * speed;
+		possessed.angle += DeltaAngle(possessed.angle, angle) * speed;
 		
 		if ( absangle(angle, possessed.angle) <= threshold )
 			possessed.angle = angle;
@@ -640,30 +640,32 @@ class ZTBotController : Actor
 		let iter = ThinkerIterator.create("Weapon");
 		
 		while ( weap = Weapon(iter.Next()) )
-		{
-			ZetaWeapon zweap = loader.CheckType(weap);
-        
-			if ( weap.Owner == possessed && zweap != null)
-			{
-                // A_Log(zweap.GetClassName());
+            if ( weap.Owner == possessed )
+            {
+                ZetaWeapon zweap = loader.CheckType(weap);
+                // A_Log(myName.." > "..weap.GetClassName());
             
-				let assessed1 = zweap.RateSelf(self, enemy);
-				let assessed2 = zweap.AltRateSelf(self, enemy);
-				let alt = zweap.CanAltFire(possessed) && assessed2 > assessed1;
+                if ( zweap != null )
+                {
+                    let assessed1 = zweap.RateSelf(self, enemy);
+                    let assessed2 = zweap.AltRateSelf(self, enemy);
+                    let alt = zweap.CanAltFire(possessed) && assessed2 > assessed1;
+                    
+                    if ( !(alt || zweap.CanFire(possessed))  )
+                        continue;
+                    
+                    let maxAssessed = alt ? assessed1 : assessed2;
                 
-                if ( !(alt || zweap.CanFire(possessed))  )
-                    continue;
+                    // A_Log("("..zweap.GetClassName().." -> "..maxAssessed..")");
                 
-				let maxAssessed = (assessed1 > assessed2) ? assessed1 : assessed2;
-			
-				if ( bestWeap == null || maxAssessed > bestRate )
-				{
-					bestRate = maxAssessed;
-					bestWeap = zweap;
-					bAltFire = alt;
-				}
-			}
-		}
+                    if ( bestWeap == null || maxAssessed > bestRate )
+                    {
+                        bestRate = maxAssessed;
+                        bestWeap = zweap;
+                        bAltFire = alt;
+                    }
+                }
+            }
 		
 		return bestWeap, bAltFire;
 	}
@@ -690,7 +692,7 @@ class ZTBotController : Actor
                 if ( !(alt || zweap.CanFire(possessed))  )
                     continue;
                 
-				let maxAssessed = (assessed1 > assessed2) ? assessed1 : assessed2;
+				let maxAssessed = alt ? assessed1 : assessed2;
 			
 				if ( ( age - lastShot > zweap.AltIntervalSeconds() || !alt ) && ( age - lastShot > zweap.IntervalSeconds() || alt ) && ( bestWeap == null || maxAssessed > bestRate ) )
 				{
@@ -712,6 +714,7 @@ class ZTBotController : Actor
             {
                 if ( age - lastShot > lastWeap.AltIntervalSeconds() )
                 {
+                    // A_Log(lastWeap.GetClassName());
                     lastWeap.AltFire(possessed, enemy);
                     lastShot = age;
                 }
@@ -723,6 +726,7 @@ class ZTBotController : Actor
             {
                 if ( age - lastShot > lastWeap.IntervalSeconds() )
                 {
+                    // A_Log(lastWeap.GetClassName());
                     lastWeap.Fire(possessed, enemy);
                     lastShot = age;
                 }
@@ -748,6 +752,8 @@ class ZTBotController : Actor
         else
             return false;
 
+        // A_Log(bestWeap.GetClassName());
+            
         numShoots++;
 			
 		lastShot = age;
@@ -977,7 +983,7 @@ class ZTBotController : Actor
                     
                     BotChat("TARG", 0.5);
                     
-                    if ( possessed.Distance3D(enemy) > 1024 )
+                    if ( possessed.Distance3D(enemy) > 1024 && ClosestNode(enemy) != currNode )
                     {
                         goingAfter = enemy;
                         SetBotState(BS_HUNTING);
@@ -1174,7 +1180,7 @@ class ZTBotController : Actor
 		{
 			if ( enemy != null && enemy.Health > 0 )
 			{
-				if ( !possessed.CheckSight(enemy) || possessed.Distance3D(enemy) > 1500 )
+				if ( possessed.Distance3D(enemy) > 1500 && ClosestNode(enemy) != currNode )
 				{
 					possessed.EndShoot();
                     goingAfter = enemy;
