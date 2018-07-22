@@ -83,7 +83,7 @@ class ZTPathNode : Actor
 	}
 
 	NavigationType nodeType;
-	Vector3 useDirection;
+	double useDirection;
 	bool bPlopped;
 	uint id;
 	bool bGoalNode;
@@ -103,9 +103,6 @@ class ZTPathNode : Actor
 	override void PostBeginPlay()
 	{
 		super.PostBeginPlay();
-	
-		useDirection = Vec3Angle(1, angle);
-		nodeType = 0;
 		
 		/*
 		if ( !bPlopped )
@@ -128,7 +125,7 @@ class ZTPathNode : Actor
 	
 	string serialize()
 	{
-		return int(pos.x)..","..int(pos.y)..","..int(pos.z)..","..nodeType..","..int(useDirection.x)..","..int(useDirection.y)..","..int(useDirection.z)..","..(bGoalNode ? "y" : "n");
+		return int(pos.x)..","..int(pos.y)..","..int(pos.z)..","..nodeType..","..int(useDirection)..","..(bGoalNode ? "y" : "n");
 	}
 	
 	static string serializeAll(ActorList allNodes)
@@ -286,15 +283,14 @@ class ZTPathNode : Actor
 			double ny = SInt(split(ncode, ",", 1));
 			double nz = SInt(split(ncode, ",", 2));
 			NavigationType nt = SInt(split(ncode, ",", 3));
-			double udx = SInt(split(ncode, ",", 4));
-			double udy = SInt(split(ncode, ",", 5));
+			double ud = SInt(split(ncode, ",", 4));
 			
 			let node = ZTPathNode(Spawn("ZTPathNode", (nx, ny, nz)));
 			node.nodeType = nt;
 			node.bPlopped = true;
-			node.bGoalNode = split(ncode, ",", 6) == "y";
+			node.bGoalNode = split(ncode, ",", 5) == "y";
 			
-			node.useDirection = (udx, udy, 0);
+			node.useDirection = ud;
 			
 			total++;
 		}
@@ -335,7 +331,7 @@ class ZTPathNode : Actor
 		return res;
 	}
 	
-	ZTPathNode randomNeighbor()
+	ZTPathNode RandomNeighbor()
 	{
 		ActorList nb = neighbors();
 		
@@ -524,7 +520,8 @@ class ZTGoalNode : Actor
 	{
 		let node = ZTPathNode(Spawn("ZTPathNode", pos));
 		node.bGoalNode = true;
-		node.useDirection = Vec3Angle(1, angle);
+		node.nodeType = ZTPathNode.NT_USE;
+		node.useDirection = angle;
 		node.angle = angle;
 		
 		Destroy();
@@ -538,7 +535,7 @@ class ZTUseNode : Actor
 	{
 		let node = ZTPathNode(Spawn("ZTPathNode", pos));
 		node.nodeType = ZTPathNode.NT_USE;
-		node.useDirection = Vec3Angle(1, angle);
+		node.useDirection = angle;
 		node.angle = angle;
 		
 		Destroy();

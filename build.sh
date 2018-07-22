@@ -190,7 +190,7 @@ mkdir -p $FOLDER
 echo Adding $NUMFILES files to output \'${out}\'.
 rm $out 2>/dev/null # just to make sure file doesn't exist
 
-if [ $PLATFORM == "CYGWI" ] || [ $PLATFORM == "MINGW" ]; then
+if [ $PLATFORM == "MINGW" ]; then
     ZIP="./zip.exe"
     
 else
@@ -205,7 +205,7 @@ if [ $LZMA -eq 1 ]; then
     }
     
 else
-    $ZIP -9 $out ${FILES} >/dev/null || {
+    $ZIP -9 $out ${FILES} || {
         echo "Error building PK3 output!"
         exit 1
     }
