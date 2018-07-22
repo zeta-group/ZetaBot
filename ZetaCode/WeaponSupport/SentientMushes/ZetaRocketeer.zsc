@@ -35,12 +35,25 @@ class ZetaRocketeer : ZetaWeapon
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-		shooter.SpawnMissileAngle("RRGrenade", shooter.angle, tan(shooter.pitch));
+        let ggs = "RRGrenade";
+        Class<Actor> gg = ggs;
+        
+        if ( gg )
+            shooter.SpawnMissileAngle(gg, shooter.angle, tan(shooter.pitch));
 	}
     
     override void AltFire(Actor shooter, Actor target)
     {
-		shooter.SpawnMissileAngle("RRClusterBomb", shooter.angle, tan(shooter.pitch));
-		shooter.SpawnMissileAngle("RocketFog", shooter.angle, tan(shooter.pitch));
+        let cbs = "RRClusterBomb";
+        let rfs = "RocketFog";
+        
+        Class<Actor> cb = cbs;
+        Class<Actor> rf = rfs;
+    
+        if ( cb && rf )
+        {
+            shooter.SpawnMissileAngle(cb, shooter.angle, tan(shooter.pitch));
+            shooter.SpawnMissileAngle(rf, shooter.angle, tan(shooter.pitch));
+        }
     }
 }

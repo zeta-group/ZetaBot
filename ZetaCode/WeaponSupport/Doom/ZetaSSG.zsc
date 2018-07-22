@@ -19,7 +19,7 @@ class ZetaSSG : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-		return 750 * target.Radius / shooter.Distance3D(target);
+		return 2000 / sqrt(shooter.Distance2D(target) * 1.5);
 	}
 	
 	override void Fire(Actor shooter, Actor target)

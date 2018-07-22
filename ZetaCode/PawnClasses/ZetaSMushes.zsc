@@ -94,7 +94,13 @@ class ZetaSMushes : ZetaBotPawn
 			Stop;
 			
 		XDeath:
-			TNT1 A 0 A_SpawnItemEx("GibFX", 0, 0, 32);
+			TNT1 A 0 {
+				string gibClassName = "GibFX";
+				class<Actor> gibClass = gibClassName;
+				
+				if ( gibClass )
+					A_SpawnItemEx(gibClass, 0, 0, 32);
+			}
 			BDPL A 0 A_NoBlocking;
 			BDPL A 0 A_NoBlocking;
 			BDPL A 0 A_OnDeath;

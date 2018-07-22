@@ -509,7 +509,7 @@ class ZTPathNode : Actor
 			CAND A 0
 			{
 				if ( CVar.FindCVar("zb_debug").GetInt() < 1 )
-					SetStateLabel("DVisible");
+					SetStateLabel("DLoop");
 					
                 else
                     angle += 18;

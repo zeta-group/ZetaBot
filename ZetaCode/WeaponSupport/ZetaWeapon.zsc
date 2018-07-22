@@ -46,7 +46,7 @@ class ZetaWeapon : Actor
 	
 	virtual double AltRateSelf(Actor shooter, Actor target)
 	{
-		return 0;
+		return -1;
 	}
 	
 	virtual bool CanFireAmmo(Actor shooter)
@@ -75,6 +75,9 @@ class ZetaWeapon : Actor
 	
 	virtual bool CanAltFire(Actor shooter, bool bUseAmmo = false)
 	{
+        if ( !bHasAltFire(shooter) )
+            return false;
+    
 		Inventory inv = shooter.FindInventory(altammotype);
 		
 		if ( inv == null )

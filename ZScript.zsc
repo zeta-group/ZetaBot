@@ -653,8 +653,11 @@ class ZTBotController : Actor
                     
                     if ( !(alt || zweap.CanFire(possessed))  )
                         continue;
+                        
+                    if ( CVar.FindCVar("zb_debug").GetInt() > 2 )
+                        DebugLog(LT_VERBOSE, myName.." considering a "..zweap.GetClassName()..": alt="..alt.." rating="..(alt ? assessed2 : assessed1).."dm");
                     
-                    let maxAssessed = alt ? assessed1 : assessed2;
+                    let maxAssessed = alt ? assessed2 : assessed1;
                 
                     // A_Log("("..zweap.GetClassName().." -> "..maxAssessed..")");
                 
@@ -692,7 +695,7 @@ class ZTBotController : Actor
                 if ( !(alt || zweap.CanFire(possessed))  )
                     continue;
                 
-				let maxAssessed = alt ? assessed1 : assessed2;
+				let maxAssessed = alt ? assessed2 : assessed1;
 			
 				if ( ( age - lastShot > zweap.AltIntervalSeconds() || !alt ) && ( age - lastShot > zweap.IntervalSeconds() || alt ) && ( bestWeap == null || maxAssessed > bestRate ) )
 				{
@@ -714,9 +717,10 @@ class ZTBotController : Actor
             {
                 if ( age - lastShot > lastWeap.AltIntervalSeconds() )
                 {
-                    // A_Log(lastWeap.GetClassName());
+                    DebugLog(LT_VERBOSE, myName.." fired a "..lastWeap.GetClassName().."!");
                     lastWeap.AltFire(possessed, enemy);
                     lastShot = age;
+                    DebugLog(LT_VERBOSE, myName.." can shoot again after "..lastWeap.IntervalSeconds().." seconds, or alt-fire after "..lastWeap.AltIntervalSeconds().." seconds!");
                 }
                     
                 return age - lastShot > lastWeap.AltIntervalSeconds();
@@ -726,9 +730,10 @@ class ZTBotController : Actor
             {
                 if ( age - lastShot > lastWeap.IntervalSeconds() )
                 {
-                    // A_Log(lastWeap.GetClassName());
+                    DebugLog(LT_VERBOSE, myName.." alt-fired a "..lastWeap.GetClassName().."!");
                     lastWeap.Fire(possessed, enemy);
                     lastShot = age;
+                    DebugLog(LT_VERBOSE, myName.." can shoot again after "..lastWeap.IntervalSeconds().." seconds, or alt-fire after "..lastWeap.AltIntervalSeconds().." seconds!");
                 }
                     
                 return age - lastShot > lastWeap.IntervalSeconds();
@@ -752,7 +757,8 @@ class ZTBotController : Actor
         else
             return false;
 
-        // A_Log(bestWeap.GetClassName());
+        DebugLog(LT_VERBOSE, myName.." "..(bAltFire ? "alt-" : "").."fired a "..bestWeap.GetClassName().."!");
+        DebugLog(LT_VERBOSE, myName.." can shoot again after "..bestWeap.IntervalSeconds().." seconds, or alt-fire after "..bestWeap.AltIntervalSeconds().." seconds!");
             
         numShoots++;
 			
@@ -880,7 +886,22 @@ class ZTBotController : Actor
 		if ( navDest != null )
 			navDestS = navDest.serialize();
 	
-		DebugLog(LT_VERBOSE, "["..myName.."'s STATS] Health: "..possessed.health.." | Current State: "..BStateNames[bstate].." | Enemy Type: "..enemyType.." | Going After Type: "..goingAfterType.." | Current Pathnode: "..currNodeS.." | Destination Pathnode: "..navDestS.." | Age: "..age.."s");
+        string lastWeapS = "none.";
+        
+        if ( lastWeap != null )
+            lastWeapS = lastWeap.GetClassName();
+    
+        if ( enemy == null )
+            DebugLog(LT_VERBOSE, "["..myName.."'s STATS] Health: "..possessed.health.." | Current State: "..BStateNames[bstate].." | Enemy Type: "..enemyType.." | Going After Type: "..goingAfterType.." | Current Pathnode: "..currNodeS.." | Destination Pathnode: "..navDestS.." | Age: "..age.."s | Best Weapon: none. | Last Weapon: "..lastWeapS);
+            
+        else
+        {
+            ZetaWeapon wp;
+            double rt;
+        
+            [ wp, rt ] = BestWeaponAllTic();
+            DebugLog(LT_VERBOSE, "["..myName.."'s STATS] Health: "..possessed.health.." | Current State: "..BStateNames[bstate].." | Enemy Type: "..enemyType.." | Going After Type: "..goingAfterType.." | Current Pathnode: "..currNodeS.." | Destination Pathnode: "..navDestS.." | Age: "..age.."s | Best Weapon: "..wp.GetClassName().." ("..rt.." dopamine molecules) | Last Weapon: "..lastWeapS);
+        }
 	}
 	
 	// bot death listener

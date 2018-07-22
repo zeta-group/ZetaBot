@@ -27,7 +27,13 @@ class ZetaRockox : ZetaWeapon
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-		shooter.SpawnMissileAngle("RockoxRocket", shooter.angle, tan(shooter.pitch));
-        shooter.A_PlaySound("rockox/fire", CHAN_WEAPON);
+        String rrs = "RockoxRocket";
+        Class<Actor> rr = rrs;
+    
+        if ( rr )
+        {
+            shooter.SpawnMissileAngle(rr, shooter.angle, tan(shooter.pitch));
+            shooter.A_PlaySound("rockox/fire", CHAN_WEAPON);
+        }
 	}
 }
