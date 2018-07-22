@@ -36,7 +36,7 @@ class ZetaCrossbow1 : ZetaWeapon
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-		shooter.SpawnMissileAngle("ElectricBolt", ZetaWeapon.RandomAngle(5.625 / pow(2, floor(shooter.accuracy / 2)), shooter.angle), tan(ZetaWeapon.RandomAngle(5.625 / pow(2, floor(shooter.accuracy / 2)), shooter.pitch)));
+		shooter.SpawnMissileAngle("ElectricBolt", ZetaWeapon.RandomAngle(5.625 / pow(2, floor(shooter.accuracy / 2)), shooter.angle), tan(ZetaWeapon.RandomAngle(5.625 / pow(2, floor(shooter.accuracy / 2)))) + (target.pos.z - shooter.pos.z) * 30 / target.Distance2D(shooter));
 		shooter.A_PlaySound("weapons/xbowshoot", CHAN_WEAPON);
 	}
 }

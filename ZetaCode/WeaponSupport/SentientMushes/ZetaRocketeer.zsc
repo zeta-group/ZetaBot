@@ -39,7 +39,7 @@ class ZetaRocketeer : ZetaWeapon
         Class<Actor> gg = ggs;
         
         if ( gg )
-            shooter.SpawnMissileAngle(gg, shooter.angle, tan(shooter.pitch));
+            shooter.SpawnMissileAngle(gg, shooter.angle, (target.pos.z - shooter.pos.z) * 25 / target.Distance2D(shooter));
 	}
     
     override void AltFire(Actor shooter, Actor target)
@@ -52,8 +52,8 @@ class ZetaRocketeer : ZetaWeapon
     
         if ( cb && rf )
         {
-            shooter.SpawnMissileAngle(cb, shooter.angle, tan(shooter.pitch));
-            shooter.SpawnMissileAngle(rf, shooter.angle, tan(shooter.pitch));
+            shooter.SpawnMissileAngle(cb, shooter.angle, (target.pos.z - shooter.pos.z) * 19 / target.Distance2D(shooter));
+            shooter.SpawnMissileAngle(rf, shooter.angle, shooter.pitch);
         }
     }
 }

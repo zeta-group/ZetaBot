@@ -24,6 +24,8 @@ class PathBall : DoomImpBall
 	Default
 	{
 		Damage 0;
+        
+        +PAINLESS;
 	}
     
     States

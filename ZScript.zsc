@@ -515,15 +515,12 @@ class ZTBotController : Actor
 	{
 		if ( CVar.FindCVar("zb_debug").GetInt() > 0 && debugCount < 1 )
 		{
-			debugCount += 10;
+			debugCount = 20;
 			DestBall db = DestBall(possessed.SpawnMissile(Other, "DestBall"));
 
 			if ( db != null )
 				db.targetNode = Other;
 		}
-
-		else
-			debugCount--;
 	}
 	
 	void SmartMove()
@@ -598,11 +595,14 @@ class ZTBotController : Actor
 	
 	void SetCurrentNode(ZTPathNode pn)
 	{
-        bool use = pn.nodeType == ZTPathNode.NT_USE;
-    
-		if ( pn != currNode )
-            DebugLog(LT_VERBOSE, myName.." is now at the node: \ck"..pn.serialize()..(use ? " | It's an USE node!" : ""));
-            
+        if ( pn != null )
+        {   
+            bool use = pn.nodeType == ZTPathNode.NT_USE;
+        
+            if ( pn != currNode )
+                DebugLog(LT_VERBOSE, myName.." is now at the node: \ck"..pn.serialize()..(use ? " | It's an USE node!" : ""));
+        }   
+         
 		currNode = pn;
 	}
 	
@@ -624,17 +624,14 @@ class ZTBotController : Actor
 		return best;
 	}
     
-    bool LineOfSight(Actor other, Actor from = null, bool CountActors = false)
+    bool LineOfSight(Actor other, Actor from = null)
     {
         if ( from == null )
             from = possessed;
         
-        FLineTraceData data;
-        int flags = (CountActors ? 0 : TRF_THRUACTORS);
-        
-        from.LineTrace(from.AngleTo(other), from.Distance2D(other), from.pitch, flags: flags, data: data);
-        
-        return data.HitType == TRACE_HitNone;
+        // For a while, used to be a LineTrace, for multiple reasons.
+        // That didn't work, though :(
+        return from.CheckSight(other);
     }
 	
 	ZTPathNode ClosestVisibleNode(Actor other)
@@ -895,7 +892,7 @@ class ZTBotController : Actor
 	
 	void BotChat(String kind, double importance)
 	{
-		if ( importance < FRandom(0, 9.9999) )
+		if ( importance < FRandom(0, 2.25) )
 			return;
 	
 		A_PlaySound("zetabot/"..myVoice.."/"..kind, CHAN_VOICE, attenuation: 0.7);
@@ -942,16 +939,17 @@ class ZTBotController : Actor
             lastWeapS = lastWeap.GetClassName();
     
         if ( enemy == null )
-            DebugLog(LT_VERBOSE, "["..myName.."'s STATS] Health: "..possessed.health.." | Current State: "..BStateNames[bstate].." | Enemy Type: "..enemyType.." | Going After Type: "..goingAfterType.." | Current Pathnode: "..currNodeS..(useNode ? " (use)" : "").." | Destination Pathnode: "..navDestS.." | Age: "..age.."s | Best Weapon: none. | Last Weapon: "..lastWeapS);
+            DebugLog(LT_VERBOSE, "["..myName.."'s STATS] Health: "..possessed.health.." | Current State: "..BStateNames[bstate].." | Enemy Type: None | Going After Type: "..goingAfterType.." | Current Pathnode: "..currNodeS..(useNode ? " (use)" : "").." | Destination Pathnode: "..navDestS.." | Age: "..age.."s | Best Weapon: none. | Last Weapon: "..lastWeapS);
             
         else
         {
             ZetaWeapon wp;
             double rt;
             bool _;
+            string enemyH = " | Enemy Health: "..enemy.Health;
         
             [ wp, _, rt ] = BestWeaponAllTic();
-            DebugLog(LT_VERBOSE, "["..myName.."'s STATS] Health: "..possessed.health.." | Current State: "..BStateNames[bstate].." | Enemy Type: "..enemyType.." | Going After Type: "..goingAfterType.." | Current Pathnode: "..currNodeS..(useNode ? " (use)" : "").." | Destination Pathnode: "..navDestS.." | Age: "..age.."s | Best Weapon: "..wp.GetClassName().." ("..rt.." dopamine molecules"..(_ ? ", alt" : "")..") | Last Weapon: "..lastWeapS);
+            DebugLog(LT_VERBOSE, "["..myName.."'s STATS] Health: "..possessed.health.." | Current State: "..BStateNames[bstate].." | Enemy Type: "..enemyType..enemyH.." | Going After Type: "..goingAfterType.." | Current Pathnode: "..currNodeS..(useNode ? " (use)" : "").." | Destination Pathnode: "..navDestS.." | Age: "..age.."s | Best Weapon: "..wp.GetClassName().." ("..rt.." dopamine molecules"..(_ ? ", alt" : "")..") | Last Weapon: "..lastWeapS);
         }
 	}
 	
@@ -1034,6 +1032,7 @@ class ZTBotController : Actor
 			return;
 			
 		age += 1. / 35;
+        debugCount -= 1;
 			
 		if ( age - lastShot > 0.7 && possessed.bShooting )
 			possessed.EndShoot();
@@ -1085,7 +1084,8 @@ class ZTBotController : Actor
                     PriorityQueue targets = new("PriorityQueue");
                 
                     for ( uint i = 0; i < mon.length(); i++ )
-                        targets.add(mon.get(i), TargetPriority(mon.get(i)));
+                        if ( mon.get(i).Health > 0 )
+                            targets.add(mon.get(i), TargetPriority(mon.get(i)));
                 
                     if ( bstate != BS_ATTACKING || enemy == null )
                         enemy = Actor(targets.poll());
@@ -1113,7 +1113,10 @@ class ZTBotController : Actor
                     }
                         
                     else
+                    {
+                        MakeDestBall(enemy);
                         SetBotState(BS_ATTACKING);
+                    }
                         
                     return;
                 }
@@ -1347,6 +1350,8 @@ class ZTBotController : Actor
 					possessed.EndShoot();
                     lastEnemyPos = enemy.pos;
 					SetBotState(BS_HUNTING);
+                    
+                    return;
 				}
 				
                 /* - our bots can't be cowards
@@ -1357,37 +1362,33 @@ class ZTBotController : Actor
 				}
                 */
 				
-				else
-				{
-					if ( FRandom(0, 1) < 0.2 )
-						possessed.Jump();
-				
-					BotChat("ACTV", 0.08);
-						
-					ZetaWeapon w = BestWeapon();
-					// MakeDestBall(enemy);
+                if ( FRandom(0, 1) < 0.2 )
+                    possessed.Jump();
+            
+                BotChat("ACTV", 0.08);
+                    
+                ZetaWeapon w = BestWeapon();
 
-					if ( BestWeaponAllTic() == null )
-					{
-						SetBotState(BS_FLEEING);
-						return;
-					}
+                if ( BestWeaponAllTic() == null )
+                {
+                    SetBotState(BS_FLEEING);
+                    return;
+                }
 
-					if ( possessed.Distance3D(enemy) > 256 + enemy.radius || ( w != null && w.IsMelee() ) )
-						MoveToward(enemy, 0.282);
-						
-					else if ( possessed.Distance3D(enemy) < 128 + enemy.radius )
-						StepBackFrom(enemy);
-						
-					RandomStrafe();
-					AimToward(enemy, 0.27, 30);
-					
-					if ( fireBestWeapon() )
-						possessed.BeginShoot();
-						
-					else
-						possessed.EndShoot();
-				}
+                if ( possessed.Distance3D(enemy) > 256 + enemy.radius || ( w != null && w.IsMelee() ) )
+                    MoveToward(enemy, 0.282);
+                    
+                else if ( possessed.Distance3D(enemy) < 128 + enemy.radius )
+                    StepBackFrom(enemy);
+                    
+                RandomStrafe();
+                AimToward(enemy, 0.27, 30);
+                
+                if ( fireBestWeapon() )
+                    possessed.BeginShoot();
+                    
+                else
+                    possessed.EndShoot();
 			}
 			
 			else
