@@ -15,7 +15,6 @@ class ZetaBotPawn : Actor
 		+SOLID
 		+SHOOTABLE
 		+DROPOFF
-		+NOTDMATCH
 		+FRIENDLY
 		+SLIDESONWALLS
 		+CANPASS
@@ -27,6 +26,12 @@ class ZetaBotPawn : Actor
 		+FRIENDLY
 		+ISMONSTER
 		+THRUSPECIES
+		+BLOCKASPLAYER
+		+CANUSEWALLS
+		+ACTIVATEMCROSS
+
+		-NOTDMATCH
+		-NOBLOCKMAP
 	}
 
 	static String GetSomeType(Actor anchor = null)

@@ -1,0 +1,7 @@
+SpawnNums
+{
+    83001 = ZTPathNode
+    83003 = ZTUseNode
+    83004 = ZTJumpNode
+    83005 = ZTAvoidNode
+}

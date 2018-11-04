@@ -32,21 +32,24 @@ class ZetaCape : Actor
 	{
 		if ( attached == null )
 			return;
-	
-		angle = attached.angle;
-		scale = (attached.Radius / 25, attached.Height / 70);
-		SetOrigin(attached.Vec3Angle(-5, attached.angle, attached.Height), true);
-	
-		double adiff = angularVelocity();
+
+		if ( !attached.bShootable || attached.health > 0 )
+		{
+			angle = attached.angle;
+			scale = (attached.Radius / 25, attached.Height / 70);
+			SetOrigin(attached.Vec3Angle(-5, attached.angle, attached.Height), true);
 		
-		if ( adiff > 0.16 )
-			frame = 1;
+			double adiff = angularVelocity();
 			
-		else if ( adiff < 0.16 )
-			frame = 2;
-			
-		else
-			frame = 0;
+			if ( adiff > 0.16 )
+				frame = 1;
+				
+			else if ( adiff < 0.16 )
+				frame = 2;
+				
+			else
+				frame = 0;
+		}
 	}
 	
 	Default

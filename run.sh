@@ -1,4 +1,4 @@
-. ./build.sh $@
+. ./build.sh $*
 cd out
-./ZetaBot
+./ZetaBot.sh
 cd ..
