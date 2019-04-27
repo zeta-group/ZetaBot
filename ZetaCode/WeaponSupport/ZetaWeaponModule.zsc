@@ -14,7 +14,8 @@ class ZetaWeaponModule : Actor
 	
 	void addWeapon(String weap) // subclass ZetaWeapon, not Weapon!
 	{
-		weaponsLoaded.Push(Spawn(weap));
+		ZetaWeapon spawnedWeap = ZetaWeapon(Spawn(weap));
+		weaponsLoaded.Push(spawnedWeap);
 	}
 	
 	ZetaWeapon CheckType(Weapon other)

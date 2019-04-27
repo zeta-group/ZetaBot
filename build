@@ -10,6 +10,7 @@ SPFILES=""
 MAP=""
 LZMA=0
 PLATFORM=$(uname -s | head -c 5)
+RUN=0
 
 while [[ $# -gt 0 ]]; do
     key="$1"
@@ -20,22 +21,23 @@ while [[ $# -gt 0 ]]; do
         echo Syntax:
         echo
         echo
-        echo "  ./build.sh \[-f <output folder : out>\] \[-s \<path to source port : gzdoom\>\] -i \<path to the mod's IWAD\> \[-c \<additional cvar\>\=\<value\> \[...\]] \[-e \<source port option\>=\<value\> \[...\]\]"
+        echo "  ./build [-f|--folder <output folder : out>] [-s|--sourceport <path to source port : gzdoom>] [-i|--iwad <path to the mod's IWAD>] [-a|--file|--add <additional PWAD> [-a|--file|--add ...]] [-c|--cvar <additional cvar>=<value> [c|--cvar ...]] [-e|--extra <source port option>=<value> [...]] [-r|--run]"
         echo
         echo For example:
         echo
-        echo "    ./build.sh -f out -s gzdoom -i /usr/games/doom/doom2.wad -c zb_debug=1 -e \"-nomonsters\" -e \"-skill=1\" -e \"+map=MAP18\""
+        echo "    ./build -f out -s gzdoom -i /usr/games/doom/doom2.wad -c zb_debug=1 -e \"-nomonsters\" -e \"-skill=1\" -e \"+map=MAP18\""
         echo
         exit 0
         ;;
-        -l|--lzma)
-        LZMA=1
-        shift # past option
-        ;;
+        # LZMA was removed.
         -f|--folder)
         FOLDER="$2"
         shift # past argument
         shift # past value
+        ;;
+        -r|--run)
+        RUN=1
+        shift
         ;;
         -s|--sourceport)
         SCPORT="$2"
@@ -139,13 +141,13 @@ ADDFOLDER () {
 }
 
 # Build compilation
-if [ -e "./compile.sh" ]; then
-    . ./compile.sh >/dev/null
+if [ -e "./compile" ]; then
+    . ./compile >/dev/null
     
 fi
 
 # Pre-configuration
-. ./config.sh
+. ./config
 NUMFILES=${#FILES[@]}
 FARR=("${FILES[@]}")
 FILES=""
@@ -190,21 +192,21 @@ mkdir -p $FOLDER
 echo Adding $NUMFILES files to output \'${out}\'.
 rm $out 2>/dev/null # just to make sure file doesn't exist
 
-if [ $PLATFORM == "MINGW" ]; then
-    ZIP="./zip.exe"
-    
-else
-    ZIP=zip
-
-fi
-
 if [ $LZMA -eq 1 ]; then
-    echo $FILES | tr " " "\n" | tar cf $out --lzma -T - || {
+    echo ${FILES[@]} | tr " " "\n" | tar cf $out --lzma -T - || {
         echo "Error building PK7 output!"
         exit 1
     }
     
 else
+    if [ $PLATFORM == "MINGW" ]; then
+        ZIP="./zip.exe"
+        
+    else
+        ZIP=zip
+
+    fi
+
     $ZIP -9 $out ${FILES} || {
         echo "Error building PK3 output!"
         exit 1
@@ -213,7 +215,7 @@ else
 fi
 
 # Create launch script
-lout="${owd}/${FOLDER}/${NAME}.sh"
+lout="${owd}/${FOLDER}/${NAME}"
 echo "#!/bin/bash" >"$lout"
 printf "\"${SCPORT}\" -iwad \"${IWAD}\" -file \"./${NAME}_v${VERSION}.pk${PKEXT}\"" >>"$lout"
 
@@ -249,9 +251,18 @@ cd "$owd"
 chmod +x "$lout"
 
 # Post-build
-if [ -e "./postbuild.sh" ]; then
-    . ./postbuild.sh $OUT
+if [ -e "./postbuild" ]; then
+    . ./postbuild $OUT
     
+fi
+
+echo "cd ${FOLDER}; ./${NAME}; cd ${owd}" >run
+chmod +x run
+
+if [ "$RUN" == "1" ]; then
+    ./run >/dev/null 2>error.log &
+    disown
+
 fi
 
 echo "PK${PKEXT} built succesfully: $out"

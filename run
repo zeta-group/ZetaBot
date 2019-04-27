@@ -1,5 +1,1 @@
-#!/bin/bash
-. ./build.sh $*
-cd out
-./ZetaBot.sh
-cd ..
+cd out; ./ZetaBot; cd /home/gustavo6046/Projects/ZetaBot
