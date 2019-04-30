@@ -32,14 +32,14 @@ class Minigun : ZetaWeapon
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-		shooter.SpawnMissileAngle("BallistaMissile", shooter.angle, (target.pos.z - shooter.pos.z) * 15 / target.Distance2D(shooter));
+		shooter.SpawnMissileAngle("BallistaMissile", shooter.angle, target == null ? 0 : ((target.pos.z - shooter.pos.z) * 15 / target.Distance2D(shooter)));
 		shooter.A_PlaySound("fireballista/shoot");
 	}
     
 	override void AltFire(Actor shooter, Actor target)
 	{
         for ( int _ = 0; _ < 11; _++ )
-            shooter.SpawnMissileAngle("DrunkBallistaMissile", shooter.angle + frandom(-3, 3), (target.pos.z - shooter.pos.z) * 15 / target.Distance2D(shooter));
+            shooter.SpawnMissileAngle("DrunkBallistaMissile", shooter.angle + frandom(-3, 3), target == null ? 0 : ((target.pos.z - shooter.pos.z) * 15 / target.Distance2D(shooter)));
             
 		shooter.A_PlaySound("fireballista/shoot");
 	}

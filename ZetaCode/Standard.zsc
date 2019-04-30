@@ -1,279 +1,286 @@
-class Dict : Thinker
+class Dict
 {
-	Array<Object> keys;
-	Array<Object> values;
-	
-	Object get(Object _key)
-	{
-		uint index = -1;
-		
-		for ( uint i = 0; i < keys.Size(); i++ )
-			if ( keys[i] == _key )
-			{
-				index = i;
-				break;
-			}
-		
-		if ( index == -1 )
-			return null;
-	
-		return values[index];
-	}
-	
-	int set(Object _key, Object _val)
-	{
-		uint index = -1;
-		uint i = 0;
-		
-		for ( i = 0; i < keys.Size(); i++ )
-		{
-			if ( keys[i] == _key )
-				break;
-				
-			if ( Object(keys[i]) == null )
-			{
-				index = i;
-				break;
-			}
-		}
-		
-		if ( index == -1 )
-		{
-			keys.Push(_key);
-			values.Push(_val);
-		}	
-	
-		else
-		{
-			keys[i] = _key;
-			values[i] = _val;
-		}
-		
-		return i;
-	}
+    Array<Object> keys;
+    Array<Object> values;
+    
+    Object get(Object _key)
+    {
+        int index = -1;
+        uint i;
+                
+        for ( i = 0; i < keys.Size(); i++ )
+            if ( keys[i] == _key )
+            {
+                index = i;
+                break;
+            }
+        
+        if ( index == -1 )
+            return null;
+    
+        return values[index];
+    }
+    
+    int set(Object _key, Object _val)
+    {
+        int index = -1;
+        int i = 0;
+        
+        for ( i = 0; i < keys.Size(); i++ )
+        {
+            if ( keys[i] == _key )
+                break;
+                
+            if ( Object(keys[i]) == null )
+            {
+                index = i;
+                break;
+            }
+        }
+        
+        if ( index == -1 )
+        {
+            keys.Push(_key);
+            values.Push(_val);
+        }    
+    
+        else
+        {
+            keys[i] = _key;
+            values[i] = _val;
+        }
+        
+        return i;
+    }
 }
 
-class NumberDict : Thinker
+class NumberDict
 {
-	Array<Object> keys;
-	Array<double> values;
-	Array<bool> taken;
-	
-	double get(Object _key, double default)
-	{
-		uint index = -1;
-		
-		for ( uint i = 0; i < keys.Size(); i++ )
-			if ( keys[i] == _key )
-			{
-				index = i;
-				break;
-			}
-		
-		if ( index == -1 )
-			return default;
-	
-		return values[index];
-	}
-	
-	int set(Object _key, double _val)
-	{
-		uint index = -1;
-		uint i = 0;
-		
-		for ( i = 0; i < keys.Size(); i++ )
-			if ( keys[i] == _key || !taken[i] )
-			{
-				index = i;
-				break;
-			}
-		
-		if ( index == -1 )
-		{
-			keys.Push(_key);
-			values.Push(_val);
-			taken.Push(true);
-		}	
-	
-		else
-		{
-			keys[i] = _key;
-			values[i] = _val;
-			taken[i] = true;
-		}
-		
-		return i;
-	}
+    Array<Object> keys;
+    Array<double> values;
+    Array<bool> taken;
+    
+    double get(Object _key, double default)
+    {
+        int index = -1;
+        uint i;
+                
+        for ( i = 0; i < keys.Size(); i++ )
+            if ( keys[i] == _key )
+            {
+                index = i;
+                break;
+            }
+        
+        if ( index == -1 )
+            return default;
+    
+        return values[index];
+    }
+    
+    int set(Object _key, double _val)
+    {
+        int index = -1;
+        int i;
+        
+        for ( i = 0; i < keys.Size(); i++ )
+            if ( keys[i] == _key || !taken[i] )
+            {
+                index = i;
+                break;
+            }
+        
+        if ( index == -1 )
+        {
+            keys.Push(_key);
+            values.Push(_val);
+            taken.Push(true);
+        }    
+    
+        else
+        {
+            keys[i] = _key;
+            values[i] = _val;
+            taken[i] = true;
+        }
+        
+        return i;
+    }
 }
 
-class QueueItem : Thinker
+class QueueItem
 {
-	double cost;
-	Object item;
-	
-	static QueueItem of(Object item, double cost)
-	{
-		QueueItem r = new("QueueItem");
-		r.item = item;
-		r.cost = cost;
-		
-		return r;
-	}
+    double cost;
+    Object item;
+    
+    static QueueItem of(Object item, double cost)
+    {
+        QueueItem r = new("QueueItem");
+        r.item = item;
+        r.cost = cost;
+        
+        return r;
+    }
 }
 
-class PriorityQueue : Thinker
+class PriorityQueue
 {
-	Array<QueueItem> queue;
-	
-	void add(Object item, double cost)
-	{
-		uint i = 0;
-	
-		for ( i = 0; i < queue.Size() && queue[i].cost < cost; i++ )
-			continue;
-			
-		if ( i == queue.Size() )
-			queue.push(QueueItem.of(item, cost));
-			
-		queue.Insert(i, QueueItem.of(item, cost));
-	}
-	
-	bool has(Object other)
-	{
-		for ( uint i = 0; i < length(); i++ )
-			if ( queue[i].item == other )
-				return true;
-				
-		return false;
-	}
-	
-	uint length()
-	{
-		return queue.Size();
-	}
-	
-	Object poll()
-	{
-		if ( queue.Size() == 0 )
-			return null;
-			
-		Object res = queue[0].item;
-		queue.Delete(0);
-		
-		return res;
-	}
-	
-	Object peek()
-	{
-		if ( queue.Size() == 0 )
-			return null;
-		
-		return queue[0].item;
-	}
+    Array<QueueItem> queue;
+    
+    void add(Object item, double cost)
+    {
+        uint i = 0;
+    
+        for ( i = 0; i < queue.Size() && queue[i].cost < cost; i++ )
+            continue;
+            
+        if ( i == queue.Size() )
+            queue.push(QueueItem.of(item, cost));
+            
+        queue.Insert(i, QueueItem.of(item, cost));
+    }
+    
+    bool has(Object other)
+    {
+        uint i = 0;
+
+        for ( i = 0; i < length(); i++ )
+            if ( queue[i].item == other )
+                return true;
+                
+        return false;
+    }
+    
+    uint length()
+    {
+        return queue.Size();
+    }
+    
+    Object poll()
+    {
+        if ( queue.Size() == 0 )
+            return null;
+            
+        Object res = queue[0].item;
+        queue.Delete(0);
+        
+        return res;
+    }
+    
+    Object peek()
+    {
+        if ( queue.Size() == 0 )
+            return null;
+        
+        return queue[0].item;
+    }
 }
 
-class ActorList : Thinker
+class ActorList
 {
-	Array<Actor> all;
-	bool bHas;
-	uint iterIndex;
-	
-	void BeginPlay()
-	{
-		iterIndex = 0;
-	}
-	
-	void iReset()
-	{
-		iterIndex = 0;
-	}
-	
-	Object iNext()
-	{
-		if ( iterIndex >= all.Size() )
-			return null;
-	
-		return all[iterIndex++];
-	}
-	
-	void iSeek(uint i)
-	{
-		iterIndex = i;
-	}
-	
-	Actor get(uint i)
-	{
-		if ( i < 0 )
-			i += all.Size();
-			
-		if ( i < 0 ) // still
-			i = 0;
-	
-		if ( all.Size() <= i )
-			return null;
-	
-		return all[i];
-	}
-	
-	bool remove(uint i)
-	{
-		if ( i < 0 )
-			i += all.Size();
-			
-		if ( i < 0 ) // still
-			i = 0;
-		
-		if ( all.Size() < i )
-			return false;
-			
-		all.Delete(i);
-		return true;
-	}
-	
-	bool isEmpty()
-	{
-		return !bHas;
-	}
-	
-	static ActorList empty()
-	{
-		ActorList res = new("ActorList");
-		res.bHas = false;
-		return res;
-	}
-	
-	void push(Actor node)
-	{
-		all.push(node);
-		bHas = true;
-	}
-	
-	void insert(uint ind, Actor node)
-	{
-		all.Insert(ind, node);
-	} 
-	
-	bool has(Object other)
-	{
-		for ( uint i = 0; i < length(); i++ )
-			if ( get(i) == other )
-				return true;
-				
-		return false;
-	}
-	
-	uint length()
-	{
-		return all.Size();
-	}
+    Array<Actor> all;
+    bool bHas;
+    int iterIndex;
+    
+    void BeginPlay()
+    {
+        iReset();
+    }
+    
+    void iReset()
+    {
+        iterIndex = 0;
+    }
+    
+    Object iNext()
+    {
+        if ( iterIndex >= all.Size() )
+            return null;
+    
+        iterIndex += 1;
+        return all[iterIndex - 1];
+    }
+    
+    void iSeek(int i)
+    {
+        iterIndex = i;
+    }
+    
+    Actor get(int i)
+    {
+        if ( i < 0 )
+            i += all.Size();
+            
+        if ( i < 0 ) // still
+            i = 0;
+    
+        if ( all.Size() <= i )
+            return null;
+    
+        return all[i];
+    }
+    
+    bool remove(int i)
+    {
+        if ( i < 0 )
+            i += all.Size();
+            
+        if ( i < 0 ) // still
+            i = 0;
+        
+        if ( all.Size() < i )
+            return false;
+            
+        all.Delete(i);
+        return true;
+    }
+    
+    bool isEmpty()
+    {
+        return !bHas;
+    }
+    
+    static ActorList empty()
+    {
+        ActorList res = new("ActorList");
+        res.bHas = false;
+        return res;
+    }
+    
+    void push(Actor node)
+    {
+        all.push(node);
+        bHas = true;
+    }
+    
+    void insert(int ind, Actor node)
+    {
+        all.Insert(ind, node);
+    } 
+    
+    bool has(Object other)
+    {
+        uint i;
+
+        for ( i = 0; i < length(); i++ )
+            if ( get(i) == other )
+                return true;
+                
+        return false;
+    }
+    
+    uint length()
+    {
+        return all.Size();
+    }
 }
 
 class DummyInvHolder : Actor
 {
-	States
-	{
-		Spawn:
-			TNT1 A 1;
-			Stop;
-	}
+    States
+    {
+        Spawn:
+            TNT1 A 1;
+            Stop;
+    }
 }

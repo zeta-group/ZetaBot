@@ -11,13 +11,20 @@ class ZetaBotPawn : Actor
 		Obituary "%o wound up smarted out by %NAME%!";
 		Species "ZetaBot";
 		ZetaBotPawn.DefaultInv "";
+		Health 100;
+		Radius 16;
+		Height 56;
+		Mass 100;
+		PainChance 255;
 		
+		+PICKUP
 		+SOLID
 		+SHOOTABLE
 		+DROPOFF
 		+FRIENDLY
 		+SLIDESONWALLS
 		+CANPASS
+		+ACTLIKEBRIDGE
 		+CANPUSHWALLS
 		+FLOORCLIP
 		+WINDTHRUST
@@ -25,10 +32,11 @@ class ZetaBotPawn : Actor
 		+NOBLOCKMONST
 		+FRIENDLY
 		+ISMONSTER
-		+THRUSPECIES
-		+BLOCKASPLAYER
 		+CANUSEWALLS
 		+ACTIVATEMCROSS
+		+PUSHABLE
+		+THRUSPECIES
+		+BLOCKASPLAYER
 
 		-NOTDMATCH
 		-NOBLOCKMAP
@@ -77,7 +85,7 @@ class ZetaBotPawn : Actor
 	MovementModifier moveType;
 	bool bShooting; // for visual purposes
 	ZTBotController cont;
-	const speedMod = 6;
+	const speedMod = 4;
 	
 	override String GetObituary(Actor victim, Actor inflictor, Name mod, bool playerattack)
 	{
@@ -195,10 +203,13 @@ class ZetaBotPawn : Actor
 	
 	void Jump()
 	{
-		if ( pos.z - floorZ > 1 )
+		if ( pos.z - floorZ > 1 || vel.z > 0 )
 			return;
 			
-		RaiseMobj(8);
+		vel.z += 10;
+		vel.x /= 1.1;
+		vel.y /= 1.1;
+
 		A_PlaySound("ztmisc/jump", CHAN_BODY);
 	}
 	

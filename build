@@ -260,9 +260,14 @@ echo "cd ${FOLDER}; ./${NAME}; cd ${owd}" >run
 chmod +x run
 
 if [ "$RUN" == "1" ]; then
-    ./run >/dev/null 2>error.log &
-    disown
+    echo "Running..."
+    ./run && (
+        echo "PK${PKEXT} built succesfully: $out"    
+    ) || (
+        echo "Error while running '$out' through $SCPORT!"
+    )
+
+else
+    echo "PK${PKEXT} built succesfully: $out"
 
 fi
-
-echo "PK${PKEXT} built succesfully: $out"

@@ -27,6 +27,6 @@ class ZetaRL : ZetaWeapon
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-		shooter.SpawnMissileAngle("Rocket", shooter.angle, (target.pos.z - shooter.pos.z) * 20 / target.Distance2D(shooter));
+		shooter.SpawnMissileAngle("Rocket", shooter.angle, target == null ? 0 : ((target.pos.z - shooter.pos.z) * 20 / target.Distance2D(shooter)));
 	}
 }

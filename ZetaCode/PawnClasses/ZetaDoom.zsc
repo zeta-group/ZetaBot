@@ -2,11 +2,6 @@ class ZetaDoom : ZetaBotPawn
 {
 	Default
 	{
-		Health 100;
-		Radius 16;
-		Height 56;
-		Mass 100;
-		PainChance 255;
 		ZetaBotPawn.DefaultInv "Fist,Pistol,Clip";
 	}
 

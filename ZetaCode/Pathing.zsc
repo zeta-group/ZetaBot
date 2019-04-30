@@ -45,7 +45,8 @@ class ZTPathNode : Actor
 		NT_SLOW,
 		NT_CROUCH,
 		NT_JUMP,
-		NT_AVOID
+		NT_AVOID,
+		NT_SHOOT
 	};
 
 	enum LogType
@@ -256,7 +257,6 @@ class ZTPathNode : Actor
 	static PlopResult plopNodes(string code)
 	{
 		uint i = 0;
-		uint total = 0;
 		string c, ncode;
 		let res = new("PlopResult");
 		
@@ -294,7 +294,7 @@ class ZTPathNode : Actor
 			
 			node.useDirection = ud;
 			
-			total++;
+			res.totalNodes++;
 		}
 		
 		return res;
@@ -555,6 +555,19 @@ class ZTJumpNode : Actor
 		Destroy();
 	}
 }
+
+class ZTShootNode : Actor
+{
+	override void PostBeginPlay()
+	{
+		let node = ZTPathNode(Spawn("ZTPathNode", pos));
+		node.nodeType = ZTPathNode.NT_SHOOT;
+		node.angle = angle;
+		
+		Destroy();
+	}
+}
+
 
 class ZTAvoidNode : Actor
 {

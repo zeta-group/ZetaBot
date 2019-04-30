@@ -25,14 +25,24 @@ class ZetaBullet : Actor
 
 	static ZetaBullet FireABullet(Actor shooter, String bulletColor, Actor target, double damage, double spreadX, double spreadY, name damageType = "bullet", string puff = "BulletPuff")
 	{
-		let bullet = ZetaBullet(shooter.SpawnMissile(target, "ZetaBullet", shooter));
+		ZetaBullet bullet;
+
+		if (target == null)
+			bullet = ZetaBullet(shooter.SpawnMissileAngle("ZetaBullet", shooter.angle, 0));
+
+		else
+			bullet = ZetaBullet(shooter.SpawnMissile(target, "ZetaBullet", shooter));
 		
 		if ( bullet != null )
 		{
 			bullet.currDmg = Floor(damage + 0.5);
 			bullet.angle += FRandom(-spreadX, spreadX);
-			bullet.pitch = (target.pos.z - shooter.pos.z) / target.Distance2D(shooter);
-			bullet.pitch += FRandom(-spreadY, spreadY);
+
+			if (target != null) {
+				bullet.pitch = (target.pos.z - shooter.pos.z) / target.Distance2D(shooter);
+				bullet.pitch += FRandom(-spreadY, spreadY);
+			}
+
             bullet.shooter = shooter;
             bullet.damageType = damageType;
 			ZetaBullet(bullet).SetColor(bulletColor ? bulletColor : "Gold");

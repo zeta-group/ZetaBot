@@ -48,6 +48,18 @@ class ZetaWeapon : Actor
 	{
 		return -1;
 	}
+
+	double GetRating(Actor shooter, Actor target)
+	{
+		if (target == null) return FRandom(0, 20);
+		return RateSelf(shooter, target);
+	}
+	
+	double GetAltRating(Actor shooter, Actor target)
+	{
+		if (target == null) return FRandom(0, 20);
+		return AltRateSelf(shooter, target);
+	}
 	
 	virtual bool CanFireAmmo(Actor shooter)
 	{

@@ -31,20 +31,20 @@ class DestBall : PlasmaBall
 
     void A_BallTick()
     {
-		Vector2 offs = Vec2To(targetNode);
-		offs.x /= Distance2D(targetNode);
-		offs.y /= Distance2D(targetNode);
-		
-		Vector2 vel = AngleToVector(angle);
+        Vector2 offs = Vec2To(targetNode);
+        offs.x /= Distance2D(targetNode);
+        offs.y /= Distance2D(targetNode);
+        
+        Vector2 vel = AngleToVector(angle);
 
         if ( Distance3D(targetNode) < 72 || (offs.x * vel.x) + (offs.y * vel.y) < 0 )
-			SetStateLabel("Death");
+            SetStateLabel("Death");
     }
 
-	Default
-	{
-		Damage 0;
-	}
+    Default
+    {
+        Damage 0;
+    }
     
     States
     {
@@ -56,162 +56,184 @@ class DestBall : PlasmaBall
 
 class WeaponRating : Thinker
 {
-	double rating;
-	bool bAlt;
-	
-	void BeginPlay()
-	{
-		rating = 0;
-		bAlt = false;
-	}
+    double rating;
+    bool bAlt;
+    
+    void BeginPlay()
+    {
+        rating = 0;
+        bAlt = false;
+    }
 }
 
 class NumBots : Thinker
 {
-	uint value;
+    uint value;
 
-	NumBots Init()
-	{
-		ChangeStatNum(STAT_INFO);
-		value = 0;
-		return self;
-	}
+    NumBots Init()
+    {
+        ChangeStatNum(STAT_INFO);
+        value = 0;
+        return self;
+    }
 
-	static NumBots Get()
-	{
-		ThinkerIterator it = ThinkerIterator.Create("NumBots", STAT_INFO);
-		let p = NumBots(it.Next());
-		
-		if (p == null)
-			p = new("NumBots").Init();
-		
-		return p;
-	}
+    static NumBots Get()
+    {
+        ThinkerIterator it = ThinkerIterator.Create("NumBots", STAT_INFO);
+        let p = NumBots(it.Next());
+        
+        if (p == null)
+            p = new("NumBots").Init();
+        
+        return p;
+    }
 }
 
 class ZTBotController : Actor
 {
     ObstacleCheckWaiter leftObs, frontObs, rightObs;
+    
+    static uint MaxID() {
+        ThinkerIterator it = ThinkerIterator.Create("ZTBotController", STAT_DEFAULT);
+        uint resMax = 0;
+        ZTBotController p;
 
-	enum BotState
-	{
-		BS_WANDERING = 0,
-		BS_HUNTING,
-		BS_ATTACKING,
-		BS_FOLLOWING,
-		BS_FLEEING
-	};
-	
-	enum LogType
-	{
-		LT_ERROR = 0,
-		LT_WARNING,
-		LT_INFO,
-		LT_VERBOSE
-	};
+        while (p = ZTBotController(it.Next()))
+            if (p.BotID > resMax)
+                resMax = p.BotID;
 
-	void DebugLog(LogType kind, string msg)
-	{
-		if ( CVar.FindCVar("zb_debug").GetInt() > 0 )
-		{
-			string logHeader = "";
-		
-			if ( kind == LT_ERROR )
-				logHeader = "\cr[ERROR]";
-				
-			else if ( kind == LT_WARNING )
-				logHeader = "\cf[WARNING]";
-				
-			else if ( kind == LT_INFO )
-				logHeader = "\ch[INFO]";
-				
-			else if ( kind == LT_VERBOSE )
-			{
-				if ( CVar.FindCVar("zb_debug").GetInt() > 1 )
-					logHeader =	"\cd[VERBOSE]";
-				
-				else
-					return;
-			}
-		
-			A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
-		}
-	}
+        return resMax;
+    }
+
+    enum BotState
+    {
+        BS_WANDERING = 0,
+        BS_HUNTING,
+        BS_ATTACKING,
+        BS_FOLLOWING,
+        BS_FLEEING
+    };
+    
+    enum LogType
+    {
+        LT_ERROR = 0,
+        LT_WARNING,
+        LT_INFO,
+        LT_VERBOSE
+    };
+
+    void DebugLog(LogType kind, string msg)
+    {
+        if ( CVar.FindCVar("zb_debug").GetInt() > 0 )
+        {
+            string logHeader = "";
+        
+            if ( kind == LT_ERROR )
+                logHeader = "\cr[ERROR]";
+                
+            else if ( kind == LT_WARNING )
+                logHeader = "\cf[WARNING]";
+                
+            else if ( kind == LT_INFO )
+                logHeader = "\ch[INFO]";
+                
+            else if ( kind == LT_VERBOSE )
+            {
+                if ( CVar.FindCVar("zb_debug").GetInt() > 1 )
+                    logHeader =	"\cd[VERBOSE]";
+                
+                else
+                    return;
+            }
+        
+            A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
+        }
+    }
 
     bool bReachedGoal;
     ZTPathNode goalNode;
-	ZetaBotPawn possessed;
-	ZetaWeapon lastWeap;
-	BotState bstate;
-	ZTPathNode navDest;
-	Actor goingAfter;
-	Actor enemy;
-	Actor commander;
-	ZTPathNode currNode;
-	double strafeMomentum;
-	double angleMomentum;
+    ZetaBotPawn possessed;
+    ZetaWeapon lastWeap;
+    BotState bstate;
+    ZTPathNode navDest;
+    Actor goingAfter;
+    Actor enemy;
+    Actor commander;
+    ZTPathNode currNode;
+    double strafeMomentum;
+    double angleMomentum;
     Vector3 lastEnemyPos;
-	double age;
-	uint logRate;
-	bool initialized;
-	double blocked;
-	double averageSpeed;
-	uint speedRemaining;
-	Vector3 lastPos;
-	ZTPathNode pastNode;
-	int myVoice;
-	uint index;
-	double lastShot;
-	ZetaWeaponModule loader;
-	uint botID;
-	string myName;
-	uint numShoots;
-	uint pathCountdown;
-	uint retargetCount;
-	Array<ZTLineUseHistoryEntry> UseHistory;
-	
-	bool AutoUseAtAngle(double angle)
-	{
-		FLineTraceData td;
+    double age;
+    uint GruntInterval;
+    uint logRate;
+    uint BotID;
+    bool initialized;
+    double blocked;
+    double averageSpeed;
+    uint speedRemaining;
+    Vector3 lastPos;
+    ZTPathNode pastNode;
+    int myVoice;
+    uint index;
+    double lastShot;
+    ZetaWeaponModule loader;
+    string myName;
+    uint numShoots;
+    uint pathCountdown;
+    uint retargetCount;
+    Array<ZTLineUseHistoryEntry> UseHistory;
+    
+    bool AutoUseAtAngle(double angle)
+    {
+        FLineTraceData td;
 
-		possessed.LineTrace(
-			possessed.angle + angle,
-			possessed.radius + 64,
-			0,
-			flags: TRF_THRUBLOCK | TRF_THRUHITSCAN | TRF_THRUACTORS,
-			offsetz: possessed.height - 24,
-			data: td
-		);
+        possessed.LineTrace(
+            possessed.angle + angle,
+            possessed.radius + 64,
+            0,
+            flags: TRF_THRUBLOCK | TRF_THRUHITSCAN | TRF_THRUACTORS,
+            offsetz: possessed.height - 24,
+            data: td
+        );
 
-		if ( td.HitType != TRACE_HitWall || td.HitLine.Special == 0 )
-			return false;
+        if ( td.HitType != TRACE_HitWall )
+            return false;
 
-		for ( let i = 0; i < UseHistory.Size(); i++ )
-		{
-			if ( UseHistory[i].Used == td.HitLine && age - UseHistory[i].When < CVar.GetCVar('zb_autouseinterval').GetFloat() )
-				return false;
+        if ( td.HitLine.Special == 0 ) {
+            if ( GruntInterval == 0 || GruntInterval-- == 0 ) {
+                A_PlaySound("ztmisc/grunt", CHAN_VOICE, attenuation: 1.1);
+                GruntInterval = 20;
+                Log(GruntInterval);
+            }
 
-			else if ( age - UseHistory[i].When >= CVar.GetCVar('zb_autouseinterval').GetFloat() )
-				UseHistory.Delete(i--);
-		}
+            return false;
+        }
 
-		td.HitLine.Activate(possessed, 0, SPAC_Use);
+        for ( let i = 0; i < UseHistory.Size(); i++ ) {
+            if ( UseHistory[i].Used == td.HitLine && age - UseHistory[i].When < CVar.GetCVar('zb_autouseinterval').GetFloat() )
+                return false;
 
-		ZTLineUseHistoryEntry entry = new("ZTLineUseHistoryEntry");
+            else if ( age - UseHistory[i].When >= CVar.GetCVar('zb_autouseinterval').GetFloat() )
+                UseHistory.Delete(i--);
+        }
 
-		entry.Used = td.HitLine;
-		entry.When = age;
+        td.HitLine.Activate(possessed, 0, SPAC_Use);
 
-		UseHistory.Push(entry);
+        ZTLineUseHistoryEntry entry = new("ZTLineUseHistoryEntry");
 
-		return true;
-	}
+        entry.Used = td.HitLine;
+        entry.When = age;
 
-	ZTPathNode RandomGoalNode()
-	{
+        UseHistory.Push(entry);
+
+        return true;
+    }
+
+    ZTPathNode RandomGoalNode()
+    {
         if ( bReachedGoal )
             return null;
-	
+    
         Array<ZTPathNode> goals;
         let iter = ThinkerIterator.Create("ZTPathNode");
         ZTPathNode cur;
@@ -224,182 +246,185 @@ class ZTBotController : Actor
             return null;
                 
         return goals[Random(0, goals.Size() - 1)];
-	}
-	
-	override void BeginPlay()
-	{
-		super.BeginPlay();
-		
-		if ( CVar.GetCVar('deathmatch').GetInt() == 1 )
-			bFRIENDLY = false;
+    }
+    
+    override void BeginPlay()
+    {
+        super.BeginPlay();
 
-		debugCount = 0;
-		retargetCount = 8;
-		botID = NumBots.Get().value++;
-		age = 0;
-		lastShot = -9999;
-		numShoots = 0;
-	
-		loader = ZetaWeaponModule(Spawn("ZetaWeaponModule"));
-		
-		Array<String> wmodules;
-		let tp = CVar.GetCVar("zb_wtypes").GetString();
-		tp.Split(wmodules, ";");
-		
-		for ( int i = 0; i < wmodules.Size(); i++ )
-		{
-			ZetaWeaponModule zwm = ZetaWeaponModule(Spawn(wmodules[i]));
-			loader.LoadModule(zwm);
-		}
-		
-		navDest = null;
-		bstate = BS_WANDERING;
-		let ptype = ZetaBotPawn.GetSomeType(self);
-		
-		if ( ptype == "" )
-		{
+        GruntInterval = 0;
+        
+        if ( CVar.GetCVar('deathmatch').GetInt() == 1 )
+            bFRIENDLY = false;
+
+        debugCount = 0;
+        retargetCount = 8;
+        NumBots.Get().value++;
+        BotID = MaxID();
+        age = 0;
+        lastShot = -9999;
+        numShoots = 0;
+    
+        loader = ZetaWeaponModule(Spawn("ZetaWeaponModule"));
+        
+        Array<String> wmodules;
+        let tp = CVar.GetCVar("zb_wtypes").GetString();
+        tp.Split(wmodules, ";");
+        
+        for ( int i = 0; i < wmodules.Size(); i++ )
+        {
+            ZetaWeaponModule zwm = ZetaWeaponModule(Spawn(wmodules[i]));
+            loader.LoadModule(zwm);
+        }
+        
+        navDest = null;
+        bstate = BS_WANDERING;
+        let ptype = ZetaBotPawn.GetSomeType(self);
+        
+        if ( ptype == "" )
+        {
             DebugLog(LT_ERROR, "No plausible pawn type found!");
             Destroy();
             return;
-		}
-		
+        }
+        
         else
             SetPossessed(ZetaBotPawn(Spawn(ptype, pos)));
             
-		goingAfter = null;
-		currNode = null;
-		enemy = null;
-		commander = null;
-		strafeMomentum = 0;
-		angleMomentum = 0;
-		blocked = 0;
-		averageSpeed = 0;
-		speedRemaining = 87;
-		pastNode = null;
-		initialized = true;
-		myVoice = Random(1, 4);
-		logRate = 150;
-		
-		leftObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
+        goingAfter = null;
+        currNode = null;
+        enemy = null;
+        commander = null;
+        strafeMomentum = 0;
+        angleMomentum = 0;
+        blocked = 0;
+        averageSpeed = 0;
+        speedRemaining = 87;
+        pastNode = null;
+        initialized = true;
+        myVoice = Random(1, 4);
+        logRate = 150;
+        
+        leftObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
         frontObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
         rightObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
-		
-		Array<String> botNames;
-		CVar.GetCVar('zb_bnames').GetString().Split(botNames, ':');
+        
+        Array<String> botNames;
+        CVar.GetCVar('zb_bnames').GetString().Split(botNames, ':');
 
-		myName = botNames[Random(0, botNames.Size() - 1)];
-	}
-	
-	void PlayPain()
-	{
-		BotChat("PAIN", 0.6);
-	}
-	
-	void aimToward(Actor other, double speed, double threshold = 15)
-	{
-		aimAtAngle(possessed.AngleTo(other), speed, threshold);
-	}
-	
-	void aimAtAngle(double angle, double speed, double threshold = 15)
-	{
-		possessed.angle += DeltaAngle(possessed.angle, angle) * speed;
-		
-		if ( absangle(angle, possessed.angle) <= threshold )
-			possessed.angle = angle;
-	}
-	
-	void AimAwayFrom(Actor other, double speed, double threshold = 15)
-	{
-		AimAtAngle(-possessed.AngleTo(other), speed, threshold);
-	}
-	
-	void SetPossessed(ZetaBotPawn other)
-	{
-		if ( other != null )
-		{
-			DebugLog(LT_INFO, myName.." has possessed a "..other.GetClassName().."!");
-		
-			possessed = other;
-			possessed.cont = self;
-			
-			if ( CVar.GetCVar("deathmatch").GetInt() == 1 )
+        myName = botNames[Random(0, botNames.Size() - 1)];
+    }
+    
+    void PlayPain()
+    {
+        BotChat("HURT", 0.7);
+    }
+    
+    void aimToward(Actor other, double speed, double threshold = 15)
+    {
+        aimAtAngle(possessed.AngleTo(other), speed, threshold);
+    }
+    
+    void aimAtAngle(double angle, double speed, double threshold = 15)
+    {
+        possessed.angle += DeltaAngle(possessed.angle, angle) * speed;
+        
+        if ( absangle(angle, possessed.angle) <= threshold )
+            possessed.angle = angle;
+    }
+    
+    void AimAwayFrom(Actor other, double speed, double threshold = 15)
+    {
+        AimAtAngle(-possessed.AngleTo(other), speed, threshold);
+    }
+    
+    void SetPossessed(ZetaBotPawn other)
+    {
+        if ( other != null )
+        {
+            DebugLog(LT_INFO, myName.." has possessed a "..other.GetClassName().."!");
+        
+            possessed = other;
+            possessed.cont = self;
+            
+            if ( CVar.GetCVar("deathmatch").GetInt() == 1 )
                 other.bFRIENDLY == false;
-			
-			averageSpeed = 0;
-			speedRemaining = 87;
-			angleMomentum = 0;
-			strafeMomentum = 0;
-			enemy = null;
-			commander = null;
-			goingAfter = null;
-			bstate = BS_WANDERING;
-			navDest = null;
-			blocked = 0;
-			lastPos = other.pos;
-		}	
-	}
-	
-	void MoveToward(Actor other, double aimSpeed)
-	{
-		AimToward(other, aimSpeed);
-		MoveForward();
-		
-		if ( possessed.AngleTo(other) > possessed.Angle - 20 )
-			MoveRight();
-			
-		else if ( possessed.Angle + 20 < possessed.AngleTo(other) )
-			MoveLeft();
+            
+            averageSpeed = 0;
+            speedRemaining = 87;
+            angleMomentum = 0;
+            strafeMomentum = 0;
+            enemy = null;
+            commander = null;
+            goingAfter = null;
+            bstate = BS_WANDERING;
+            navDest = null;
+            blocked = 0;
+            lastPos = other.pos;
+        }	
+    }
+    
+    void MoveToward(Actor other, double aimSpeed)
+    {
+        AimToward(other, aimSpeed);
+        MoveForward();
+        
+        if ( possessed.AngleTo(other) > possessed.Angle - 20 )
+            MoveRight();
+            
+        else if ( possessed.Angle + 20 < possessed.AngleTo(other) )
+            MoveLeft();
             
         else
             MoveForward();
-	}
-	
-	void MoveTowardPos(Vector3 other, double aimSpeed)
-	{
+    }
+    
+    void MoveTowardPos(Vector3 other, double aimSpeed)
+    {
         double ang = atan2(possessed.pos.y - other.y, possessed.pos.x - other.x);
     
-		AimAtAngle(ang, aimSpeed);
-		MoveForward();
-		
-		if ( ang > possessed.Angle - 20 )
-			MoveRight();
-			
-		else if ( possessed.Angle + 20 < ang )
-			MoveLeft();
+        AimAtAngle(ang, aimSpeed);
+        MoveForward();
+        
+        if ( ang > possessed.Angle - 20 )
+            MoveRight();
+            
+        else if ( possessed.Angle + 20 < ang )
+            MoveLeft();
             
         else
             MoveForward();
-	}
-	
-	void MoveRight()
-	{
-		possessed.MoveRight();
-	}
-	
-	void MoveLeft()
-	{
-		possessed.MoveLeft();
-	}
-	
-	void MoveAwayFrom(Actor other)
-	{
-		possessed.MoveForward();
-		AimAwayFrom(other, 0.07);
-	}
-	
-	void StepBackFrom(Actor other)
-	{
-		possessed.MoveBackward();
-		AimToward(other, 0.085);
-	}
-	
-	void StepBack()
-	{
-		possessed.StepBackward();
-	}
+    }
+    
+    void MoveRight()
+    {
+        possessed.MoveRight();
+    }
+    
+    void MoveLeft()
+    {
+        possessed.MoveLeft();
+    }
+    
+    void MoveAwayFrom(Actor other)
+    {
+        possessed.MoveForward();
+        AimAwayFrom(other, 0.07);
+    }
+    
+    void StepBackFrom(Actor other)
+    {
+        possessed.MoveBackward();
+        AimToward(other, 0.085);
+    }
+    
+    void StepBack()
+    {
+        possessed.StepBackward();
+    }
 
-	void CheckObstructions()
-	{
+    void CheckObstructions()
+    {
         if ( leftObs.st == frontObs.st && frontObs.st == rightObs.st && leftObs.st != ObstacleCheckWaiter.CS_PENDING )
         {
             if ( frontObs != null && frontObs.st == ObstacleCheckWaiter.CS_WALL )
@@ -418,173 +443,181 @@ class ZTBotController : Actor
             frontObs = ObstacleChecker.MakeFor(self, 0, 5 * Speed);
             rightObs = ObstacleChecker.MakeFor(self, 45, 5 * Speed);
         }
-	}
-	
-	ActorList VisibleEnemies(Actor from)
-	{
-		ActorList res = new("ActorList");
-		ThinkerIterator iter = ThinkerIterator.Create("Actor");
-		Actor cur = null;
-		
-		while ( cur = Actor(iter.Next()) )
-		{
-			Vector2 off = possessed.Vec2To(cur);
+    }
+    
+    ActorList VisibleEnemies(Actor from)
+    {
+        ActorList res = new("ActorList");
+        ThinkerIterator iter = ThinkerIterator.Create("Actor");
+        Actor cur = null;
+        
+        while ( cur = Actor(iter.Next()) )
+        {
+            Vector2 off = possessed.Vec2To(cur);
 
-			double pdot = 1;
+            double pdot = 1;
 
-			if ( possessed.Distance2D(cur) > 0 )
-			{
-				off.x /= possessed.Distance2D(cur);
-				off.y /= possessed.Distance2D(cur); // slightly inneficient but works
+            if ( possessed.Distance2D(cur) > 0 )
+            {
+                off.x /= possessed.Distance2D(cur);
+                off.y /= possessed.Distance2D(cur); // slightly inneficient but works
 
-				Vector2 avec = AngleToVector(possessed.angle);
+                Vector2 avec = AngleToVector(possessed.angle);
 
-				double pdot = off.x * avec.x + off.y * avec.y;
-			}
-			
-			if ( cur != null && cur != from && ( cur.bISMONSTER || cur.CheckClass("PlayerPawn", AAPTR_DEFAULT, true) ) && LineOfSight(cur, from) && isEnemy(from, cur) && cur.Health > 0 && pdot > 0.3 )
-				res.Push(cur);
-		}
-				
-		return res;
-	}
-	
-	ActorList VisibleFriends(Actor from)
-	{
-		ActorList res = new("ActorList");
-		ThinkerIterator iter = ThinkerIterator.Create("Actor");
-		Actor cur = null;
-		
-		while ( cur = Actor(iter.Next()) )
-		{
-			Vector2 off = possessed.Vec2To(cur);
+                double pdot = off.x * avec.x + off.y * avec.y;
+            }
+            
+            if ( cur != null && cur != from && ( cur.bISMONSTER || cur.CheckClass("PlayerPawn", AAPTR_DEFAULT, true) ) && LineOfSight(cur, from) && isEnemy(from, cur) && cur.Health > 0 && pdot > 0.3 )
+                res.Push(cur);
+        }
+                
+        return res;
+    }
+    
+    ActorList VisibleFriends(Actor from)
+    {
+        ActorList res = new("ActorList");
+        ThinkerIterator iter = ThinkerIterator.Create("Actor");
+        Actor cur = null;
+        
+        while ( cur = Actor(iter.Next()) )
+        {
+            Vector2 off = possessed.Vec2To(cur);
 
-			double pdot = 1;
+            double pdot = 1;
 
-			if ( possessed.Distance2D(cur) > 0 )
-			{
-				off.x /= possessed.Distance2D(cur);
-				off.y /= possessed.Distance2D(cur);
+            if ( possessed.Distance2D(cur) > 0 )
+            {
+                off.x /= possessed.Distance2D(cur);
+                off.y /= possessed.Distance2D(cur);
 
-				Vector2 avec = AngleToVector(possessed.angle);
+                Vector2 avec = AngleToVector(possessed.angle);
 
-				double pdot = off.x * avec.x + off.y * avec.y;
-			}
+                double pdot = off.x * avec.x + off.y * avec.y;
+            }
 
-			if ( cur != null && cur != from && cur.Health > 0 && from.CheckSight(cur) && ( ( cur.bISMONSTER && !isEnemy(from, cur) ) || ( cur.CheckClass("PlayerPawn", AAPTR_DEFAULT, true) == from.bFRIENDLY ) ) && pdot > 0.3 )
-				res.Push(cur);
-		}
-				
-		return res;
-	}
+            if ( cur != null && cur != from && cur.Health > 0 && from.CheckSight(cur) && ( ( cur.bISMONSTER && !isEnemy(from, cur) ) || ( cur.CheckClass("PlayerPawn", AAPTR_DEFAULT, true) == from.bFRIENDLY ) ) && pdot > 0.3 )
+                res.Push(cur);
+        }
+                
+        return res;
+    }
 
-	uint debugCount;
-	
-	bool MoveTowardDest()
-	{
-		Actor dest = navDest;
-		
-		if ( !dest )
-			dest = goingAfter;
-			
-		if ( !dest )
-			dest = enemy;
-			
-		if ( !dest )
-			return false;
-	
-		// MakeDestBall(dest);
-		MoveToward(dest, 0.2);
-		return true;
-	}
+    uint debugCount;
+    
+    bool MoveTowardDest()
+    {
+        Actor dest = navDest;
+        
+        if ( !dest )
+            dest = goingAfter;
+            
+        if ( !dest )
+            dest = enemy;
+            
+        if ( !dest )
+            return false;
+    
+        // MakeDestBall(dest);
+        MoveToward(dest, 0.2);
+        return true;
+    }
 
-	void MakeDestBall(Actor Other)
-	{
-		if ( CVar.FindCVar("zb_debug").GetInt() > 0 && debugCount < 1 )
-		{
-			debugCount = 20;
-			DestBall db = DestBall(possessed.SpawnMissile(Other, "DestBall"));
+    void MakeDestBall(Actor Other)
+    {
+        if ( CVar.FindCVar("zb_debug").GetInt() > 0 && debugCount < 1 )
+        {
+            debugCount = 20;
+            DestBall db = DestBall(possessed.SpawnMissile(Other, "DestBall"));
 
-			if ( db != null )
-				db.targetNode = Other;
-		}
-	}
-	
-	void SmartMove()
-	{
-		if ( possessed != null )
-		{
-			if ( currNode != null && currNode.nodeType == ZTPathNode.NT_USE )
+            if ( db != null )
+                db.targetNode = Other;
+        }
+    }
+    
+    void SmartMove()
+    {
+        if ( possessed != null )
+        {
+            if ( currNode != null && currNode.nodeType == ZTPathNode.NT_USE )
                 DodgeAndUse();
 
-			if ( navDest != null )
-			{
-				if ( currNode != null )
-				{
-					if ( navDest.nodeType == ZTPathNode.NT_JUMP )
-					{
-						aimToward(navDest, 0.1, 0.1);
-					
-						if ( possessed.pos.z - possessed.floorz < 1 )
-							possessed.Jump();
-					}
-					
-					else if ( navDest.nodeType == navDest.NT_CROUCH )
-						possessed.moveType = ZetaBotPawn.MM_Crouch;
-						
-					else if ( navDest.nodeType == navDest.NT_SLOW )
-						possessed.moveType = ZetaBotPawn.MM_None;
-						
-					else
-						possessed.moveType = ZetaBotPawn.MM_Run;
-						
-					if ( navDest.pos.z - possessed.pos.z > 28 && possessed.pos.z - possessed.floorz < 1 )
-						possessed.Jump();
-						
-					if ( currNode.nodeType == ZTPathNode.NT_USE )
+            if ( navDest != null )
+            {
+                if ( currNode != null )
+                {
+                    if ( navDest.nodeType == ZTPathNode.NT_JUMP )
+                    {
+                        aimToward(navDest, 0.1, 0.1);
+                    
+                        if ( possessed.pos.z - possessed.floorz < 1 )
+                            possessed.Jump();
+                    }
+                    
+                    else if ( navDest.nodeType == navDest.NT_CROUCH )
+                        possessed.moveType = ZetaBotPawn.MM_Crouch;
+                        
+                    else if ( navDest.nodeType == navDest.NT_SLOW )
+                        possessed.moveType = ZetaBotPawn.MM_None;
+                        
+                    else
+                        possessed.moveType = ZetaBotPawn.MM_Run;
+                        
+                    if ( navDest.pos.z - possessed.pos.z > 28 && possessed.pos.z - possessed.floorz < 1 )
+                        possessed.Jump();
+                        
+                    if ( currNode.nodeType == ZTPathNode.NT_USE )
                         DodgeAndUse();
+
+                    else if ( currNode.nodeType == ZTPathNode.NT_SHOOT ) {
+                        if ( FRandom(0, 1) < 0.7 && FireBestWeapon() )
+                            possessed.BeginShoot();
+
+                        else
+                            possessed.EndShoot();
+                    }
                          
-					MoveTowardDest();
-				}
-					
-				else
-					MoveTowardDest();
-			}
-			
-			else
-				angleMomentum += FRandom(-0.01, 0.01);
-				
-				if ( FRandom(0, 99.9) < 10 )
-					RandomStrafe();
-				
-				else
-					MoveForward();
-		}
-	}
-	
-	void MoveForward()
-	{
-		possessed.MoveForward();
-	}
-	
-	static const string BStateNames[] = {
-		"wandering",
-		"hunting",
-		"attacking",
-		"following",
-		"fleeing"
-	};
-	
-	void SetBotState(uint s)
-	{
-		if ( s != bstate )
+                    MoveTowardDest();
+                }
+                    
+                else
+                    MoveTowardDest();
+            }
+            
+            else
+                angleMomentum += FRandom(-0.01, 0.01);
+                
+                if ( FRandom(0, 99.9) < 10 )
+                    RandomStrafe();
+                
+                else
+                    MoveForward();
+        }
+    }
+    
+    void MoveForward()
+    {
+        possessed.MoveForward();
+    }
+    
+    static const string BStateNames[] = {
+        "wandering",
+        "hunting",
+        "attacking",
+        "following",
+        "fleeing"
+    };
+    
+    void SetBotState(uint s)
+    {
+        if ( s != bstate )
             DebugLog(LT_INFO, myName.." is now \ck"..BStateNames[s].."!");
             
-		bstate = s;
-	}
-	
-	void SetCurrentNode(ZTPathNode pn)
-	{
+        bstate = s;
+    }
+    
+    void SetCurrentNode(ZTPathNode pn)
+    {
         if ( pn != null )
         {   
             bool use = pn.nodeType == ZTPathNode.NT_USE;
@@ -593,26 +626,26 @@ class ZTBotController : Actor
                 DebugLog(LT_VERBOSE, myName.." is now at the node: \ck"..pn.serialize()..(use ? " | It's an USE node!" : ""));
         }   
          
-		currNode = pn;
-	}
-	
-	bool isEnemy(Actor from, Actor other)
-	{
-		return from.bFRIENDLY != other.bFRIENDLY || ( !from.bFRIENDLY && other.CheckClass("PlayerPawn", AAPTR_DEFAULT, true) ) || CVar.GetCVar("deathmatch").GetInt() == 1;
-	}
-	
-	ZTPathNode ClosestNode(Actor other)
-	{
-		ThinkerIterator iter = ThinkerIterator.Create("ZTPathNode");
-		ZTPathNode best = null;
-		ZTPathNode cur = null;
-		
-		while ( cur = ZTPathNode(iter.Next()) )
-			if ( best == null || other.Distance3D(cur) < other.Distance3D(best) )
-				best = cur;
-				
-		return best;
-	}
+        currNode = pn;
+    }
+    
+    bool isEnemy(Actor from, Actor other)
+    {
+        return from.bFRIENDLY != other.bFRIENDLY || ( !from.bFRIENDLY && other.CheckClass("PlayerPawn", AAPTR_DEFAULT, true) ) || CVar.GetCVar("deathmatch").GetInt() == 1;
+    }
+    
+    ZTPathNode ClosestNode(Actor other)
+    {
+        ThinkerIterator iter = ThinkerIterator.Create("ZTPathNode");
+        ZTPathNode best = null;
+        ZTPathNode cur = null;
+        
+        while ( cur = ZTPathNode(iter.Next()) )
+            if ( best == null || other.Distance3D(cur) < other.Distance3D(best) )
+                best = cur;
+                
+        return best;
+    }
     
     bool LineOfSight(Actor other, Actor from = null)
     {
@@ -623,56 +656,56 @@ class ZTBotController : Actor
         // That didn't work, though :(
         return from.CheckSight(other);
     }
-	
-	ZTPathNode ClosestVisibleNode(Actor other)
-	{
-		ThinkerIterator iter = ThinkerIterator.Create("ZTPathNode");
-		ZTPathNode best = null;
-		ZTPathNode cur = null;
-		
-		while ( cur = ZTPathNode(iter.Next()) )
-			if ( ( best == null || other.Distance3D(cur) < other.Distance3D(best) ) && LineOfSight(cur) )
-				best = cur;
-				
-		return best;
-	}
-	
-	void RandomStrafe()
-	{
-		strafeMomentum += FRandom(-0.1, 0.1);
-		
-		if ( strafeMomentum < -1 ) 
-			strafeMomentum = -1;
-			
-		if ( strafeMomentum > 1 ) 
-			strafeMomentum = 1;
-			
-		if ( strafeMomentum > 0 )
-			possessed.MoveRight();
-			
-		else
-			possessed.MoveLeft();
-	}
-	
-	BotState assessBotAttitude(Actor other) // mimicks UT99's TournamentGameInfo(?).AssessBotAttitude(Pawn Other)
-	{
-		if ( isEnemy(possessed, other) )
-			return BS_ATTACKING;
-			
-		else
-			return BS_WANDERING;
-	}
-	
-	ZetaWeapon, bool, double BestWeaponAllTic()
-	{
-		double bestRate = 0;
-		bool bAltFire = false;
-		ZetaWeapon zweap = null;
-		ZetaWeapon bestWeap = null;
-		Weapon weap = null;
-		let iter = ThinkerIterator.create("Weapon");
-		
-		while ( weap = Weapon(iter.Next()) )
+    
+    ZTPathNode ClosestVisibleNode(Actor other)
+    {
+        ThinkerIterator iter = ThinkerIterator.Create("ZTPathNode");
+        ZTPathNode best = null;
+        ZTPathNode cur = null;
+        
+        while ( cur = ZTPathNode(iter.Next()) )
+            if ( ( best == null || other.Distance3D(cur) < other.Distance3D(best) ) && LineOfSight(cur) )
+                best = cur;
+                
+        return best;
+    }
+    
+    void RandomStrafe()
+    {
+        strafeMomentum += FRandom(-0.1, 0.1);
+        
+        if ( strafeMomentum < -1 ) 
+            strafeMomentum = -1;
+            
+        if ( strafeMomentum > 1 ) 
+            strafeMomentum = 1;
+            
+        if ( strafeMomentum > 0 )
+            possessed.MoveRight();
+            
+        else
+            possessed.MoveLeft();
+    }
+    
+    BotState assessBotAttitude(Actor other) // mimicks UT99's TournamentGameInfo(?).AssessBotAttitude(Pawn Other)
+    {
+        if ( isEnemy(possessed, other) )
+            return BS_ATTACKING;
+            
+        else
+            return BS_WANDERING;
+    }
+    
+    ZetaWeapon, bool, double BestWeaponAllTic()
+    {
+        double bestRate = 0;
+        bool bAltFire = false;
+        ZetaWeapon zweap = null;
+        ZetaWeapon bestWeap = null;
+        Weapon weap = null;
+        let iter = ThinkerIterator.create("Weapon");
+        
+        while ( weap = Weapon(iter.Next()) )
             if ( weap.Owner == possessed )
             {
                 ZetaWeapon zweap = loader.CheckType(weap);
@@ -680,8 +713,8 @@ class ZTBotController : Actor
             
                 if ( zweap != null )
                 {
-                    let assessed1 = zweap.RateSelf(self, enemy);
-                    let assessed2 = zweap.AltRateSelf(self, enemy);
+                    let assessed1 = zweap.GetRating(self, enemy);
+                    let assessed2 = zweap.GetAltRating(self, enemy);
                     let alt = zweap.CanAltFire(possessed) && ( assessed2 > assessed1 || !zweap.CanFire(possessed) );
                     
                     if ( !(alt || zweap.CanFire(possessed)) )
@@ -702,72 +735,72 @@ class ZTBotController : Actor
                     }
                 }
             }
-		
-		return bestWeap, bAltFire, bestRate;
-	}
+        
+        return bestWeap, bAltFire, bestRate;
+    }
 
-	bool FireBestWeapon()
-	{
+    bool FireBestWeapon()
+    {
         // if ( absangle(possessed.angle, possessed.AngleTo(enemy)) > 80 )
         //     return false;
     
         // if ( lastWeap != null && BestWeaponAllTic() == lastWeap )
         /*
-		{
-			if ( lastWeap.CanAltFire(possessed) && lastWeap.AltRateSelf(self, enemy) > lastWeap.RateSelf(self, enemy) )
-			{
-				if ( age - lastShot > 0 )
-				{
-					DebugLog(LT_VERBOSE, myName.." fired a "..lastWeap.GetClassName().."!");
-					lastWeap.AltFire(possessed, enemy);
-					lastShot = age + lastWeap.IntervalSeconds();
-					DebugLog(LT_VERBOSE, myName.." can shoot again after "..lastWeap.IntervalSeconds().." seconds, or alt-fire after "..lastWeap.AltIntervalSeconds().." seconds!");
-					
-					return true;
-				}
-					
-				return false;
-			}
-			
-			if ( lastWeap.CanFire(possessed) )
-			{
-				if ( age - lastShot > 0 )
-				{
-					DebugLog(LT_VERBOSE, myName.." alt-fired a "..lastWeap.GetClassName().."!");
-					lastWeap.Fire(possessed, enemy);
-					lastShot = age + lastWeap.IntervalSeconds();
-					DebugLog(LT_VERBOSE, myName.." can shoot again after "..lastWeap.IntervalSeconds().." seconds, or alt-fire after "..lastWeap.AltIntervalSeconds().." seconds!");
+        {
+            if ( lastWeap.CanAltFire(possessed) && lastWeap.GetAltRating(self, enemy) > lastWeap.GetRating(self, enemy) )
+            {
+                if ( age - lastShot > 0 )
+                {
+                    DebugLog(LT_VERBOSE, myName.." fired a "..lastWeap.GetClassName().."!");
+                    lastWeap.AltFire(possessed, enemy);
+                    lastShot = age + lastWeap.IntervalSeconds();
+                    DebugLog(LT_VERBOSE, myName.." can shoot again after "..lastWeap.IntervalSeconds().." seconds, or alt-fire after "..lastWeap.AltIntervalSeconds().." seconds!");
+                    
+                    return true;
+                }
+                    
+                return false;
+            }
+            
+            if ( lastWeap.CanFire(possessed) )
+            {
+                if ( age - lastShot > 0 )
+                {
+                    DebugLog(LT_VERBOSE, myName.." alt-fired a "..lastWeap.GetClassName().."!");
+                    lastWeap.Fire(possessed, enemy);
+                    lastShot = age + lastWeap.IntervalSeconds();
+                    DebugLog(LT_VERBOSE, myName.." can shoot again after "..lastWeap.IntervalSeconds().." seconds, or alt-fire after "..lastWeap.AltIntervalSeconds().." seconds!");
 
-					return true;
-				}
-					
-				return false;
-			}
-		}
-		*/
+                    return true;
+                }
+                    
+                return false;
+            }
+        }
+        */
     
-		if ( age < lastShot )
-			return false;
+        if ( age < lastShot )
+            return false;
 
-		ZetaWeapon bestWeap;
-		bool bAltFire;
+        ZetaWeapon bestWeap;
+        bool bAltFire;
 
-		[ bestWeap, bAltFire ] = BestWeaponAllTic();
+        [ bestWeap, bAltFire ] = BestWeaponAllTic();
         
-		if ( bestWeap == null )
-			return false;
-		
-		if ( bAltFire && bestWeap.CanAltFire(possessed, true) )
-		{
-			lastShot = age + bestWeap.AltIntervalSeconds();
-			bestWeap.AltFire(possessed, enemy);
-		}
-			
-		else if ( bestWeap.CanFire(possessed, true) )
-		{
-			lastShot = age + bestWeap.IntervalSeconds();
-			bestWeap.Fire(possessed, enemy);
-		}
+        if ( bestWeap == null )
+            return false;
+        
+        if ( bAltFire && bestWeap.CanAltFire(possessed, true) )
+        {
+            lastShot = age + bestWeap.AltIntervalSeconds();
+            bestWeap.AltFire(possessed, enemy);
+        }
+            
+        else if ( bestWeap.CanFire(possessed, true) )
+        {
+            lastShot = age + bestWeap.IntervalSeconds();
+            bestWeap.Fire(possessed, enemy);
+        }
             
         else
             return false;
@@ -777,128 +810,130 @@ class ZTBotController : Actor
             
         numShoots++;
         lastWeap = bestWeap;
-			
-		return true;
-	}
-	
-	/* -- unused
-	virtual WeaponRating rateWeapon(Weapon weap)
-	{
-		WeaponRating res = new("WeaponRating");
-		
-		if ( target == null )
-		{
-			res.rating = 0;
-			res.bAlt = false;
-			return res;
-		}
-	
-		double rprimary = 0;
-		double raltern  = 0;
-		double rboth    = 0;
-	
-		if ( possessed.Distance3D(enemy) < target.radius + radius + 256 )
-			rboth += weap.Kickback * 4;
-			
-		if ( weap.ProjectileType != null )
-		{
-			let proj = Spawn(weap.ProjectileType);
-			rprimary += proj.speed * possessed.Distance3D(enemy) + proj.damage;
-			proj.Destroy();
-		}
-		
-		else
-		{
-			double rangeRate = 1024;
-			rangeRate -= possessed.Distance3D(enemy) / 2;
-			
-			if ( rangeRate > 0 )
-				rprimary += rangeRate;
-		}
-		
-		if ( weap.AltProjectileType != null )
-		{
-			let proj = Spawn(weap.AltProjectileType);
-			raltern += proj.speed * possessed.Distance3D(enemy) + proj.damage;
-			proj.Destroy();
-		}
-		
-		else
-		{
-			double rangeRate = 1024;
-			rangeRate -= possessed.Distance3D(enemy) / 2;
-			
-			if ( rangeRate > 0 )
-				raltern += rangeRate;
-		}
-		
-		Inventory ammo1 = FindInventory(weap.AmmoType1);
-		Inventory ammo2 = FindInventory(weap.AmmoType2);
-		
-		if ( ammo1 != null )
-			rboth += ammo1.Amount * 2;
-			
-		if ( ammo2 != null )
-			rboth += ammo2.Amount * 2;
-		
-		if ( raltern > rprimary )
-		{
-			res.rating = raltern + rboth;
-			res.bAlt = true;
-		}
-		
-		else
-		{
-			res.rating = rprimary + rboth;
-			res.bAlt = false;
-		}
-		
-		return res;
-	}
-	*/
-	
-	void BotChat(String kind, double importance)
-	{
-		if ( importance < FRandom(0, 2.25) )
-			return;
-	
-		A_PlaySound("zetabot/"..myVoice.."/"..kind, CHAN_VOICE, attenuation: 0.7);
-		A_PlaySound("misc/chat", CHAN_UI, 1.0, false, ATTN_NONE);
-	}
-	
-	double targetPriority(Actor other)
-	{
-		// The smalest the number, the highest the priority :)
-		double res = possessed.Distance3D(other) / other.Health;
+            
+        return true;
+    }
+    
+    /* -- unused
+    virtual WeaponRating rateWeapon(Weapon weap)
+    {
+        WeaponRating res = new("WeaponRating");
+        
+        if ( target == null )
+        {
+            res.rating = 0;
+            res.bAlt = false;
+            return res;
+        }
+    
+        double rprimary = 0;
+        double raltern  = 0;
+        double rboth    = 0;
+    
+        if ( possessed.Distance3D(enemy) < target.radius + radius + 256 )
+            rboth += weap.Kickback * 4;
+            
+        if ( weap.ProjectileType != null )
+        {
+            let proj = Spawn(weap.ProjectileType);
+            rprimary += proj.speed * possessed.Distance3D(enemy) + proj.damage;
+            proj.Destroy();
+        }
+        
+        else
+        {
+            double rangeRate = 1024;
+            rangeRate -= possessed.Distance3D(enemy) / 2;
+            
+            if ( rangeRate > 0 )
+                rprimary += rangeRate;
+        }
+        
+        if ( weap.AltProjectileType != null )
+        {
+            let proj = Spawn(weap.AltProjectileType);
+            raltern += proj.speed * possessed.Distance3D(enemy) + proj.damage;
+            proj.Destroy();
+        }
+        
+        else
+        {
+            double rangeRate = 1024;
+            rangeRate -= possessed.Distance3D(enemy) / 2;
+            
+            if ( rangeRate > 0 )
+                raltern += rangeRate;
+        }
+        
+        Inventory ammo1 = FindInventory(weap.AmmoType1);
+        Inventory ammo2 = FindInventory(weap.AmmoType2);
+        
+        if ( ammo1 != null )
+            rboth += ammo1.Amount * 2;
+            
+        if ( ammo2 != null )
+            rboth += ammo2.Amount * 2;
+        
+        if ( raltern > rprimary )
+        {
+            res.rating = raltern + rboth;
+            res.bAlt = true;
+        }
+        
+        else
+        {
+            res.rating = rprimary + rboth;
+            res.bAlt = false;
+        }
+        
+        return res;
+    }
+    */
+    
+    void BotChat(String kind, double importance)
+    {
+        if ( importance < FRandom(0, 2.25) )
+            return;
+    
+        A_PlaySound("zetabot/"..myVoice.."/"..kind, CHAN_VOICE, attenuation: 0.7);
+        A_PlaySound("misc/chat", CHAN_UI, 1.0, false, ATTN_NONE);
 
-		if ( other.CheckClass('PlayerPawn') )
-			res /= 1.5;
+        DebugLog(LT_VERBOSE, myName.." called a "..kind.." voice");
+    }
+    
+    double targetPriority(Actor other)
+    {
+        // The smalest the number, the highest the priority :)
+        double res = possessed.Distance3D(other) / other.Health;
 
-		return res;
-	}
-	
-	void LogStats()
-	{
-		if ( possessed == null )
-			return;
-			
-		String enemyType = "NONE";
-		String goingAfterType = "NONE";
-		String currNodeS = "NONE";
-		String navDestS = "NONE";
-		
-		if ( enemy != null )
-			enemyType = enemy.GetClassName();
-			
-		if ( goingAfter != null )
-			goingAfterType = goingAfter.GetClassName();
-		
-		if ( currNode != null )
-			currNodeS = currNode.serialize();
-			
-		if ( navDest != null )
-			navDestS = navDest.serialize();
-	
+        if ( other.CheckClass('PlayerPawn') )
+            res /= 1.5;
+
+        return res;
+    }
+    
+    void LogStats()
+    {
+        if ( possessed == null )
+            return;
+            
+        String enemyType = "NONE";
+        String goingAfterType = "NONE";
+        String currNodeS = "NONE";
+        String navDestS = "NONE";
+        
+        if ( enemy != null )
+            enemyType = enemy.GetClassName();
+            
+        if ( goingAfter != null )
+            goingAfterType = goingAfter.GetClassName();
+        
+        if ( currNode != null )
+            currNodeS = currNode.serialize();
+            
+        if ( navDest != null )
+            navDestS = navDest.serialize();
+    
         string lastWeapS = "none.";
         bool useNode = ( currNode != null && currNode.nodeType == ZTPathNode.NT_USE );
         
@@ -918,25 +953,25 @@ class ZTBotController : Actor
             [ wp, _, rt ] = BestWeaponAllTic();
             DebugLog(LT_VERBOSE, "["..myName.."'s STATS] Health: "..possessed.health.." | Current State: "..BStateNames[bstate].." | Enemy Type: "..enemyType..enemyH.." | Going After Type: "..goingAfterType.." | Current Pathnode: "..currNodeS..(useNode ? " (use)" : "").." | Destination Pathnode: "..navDestS.." | Age: "..age.."s | Best Weapon: "..wp.GetClassName().." ("..rt.." dopamine molecules"..(_ ? ", alt" : "")..") | Last Weapon: "..lastWeapS);
         }
-	}
-	
-	// bot death listener
-	void OnDeath()
-	{
-		A_PrintBold("\cg"..myName.." has just died!");
-		
-		let friends = VisibleFriends(possessed);
-		Object a = null;
-		ZetaBotPawn zb = null;
-		
-		/*
-		while ( a = friends.iNext() )
+    }
+    
+    // bot death listener
+    void OnDeath()
+    {
+        A_PrintBold("\cg"..myName.." has just died!");
+        
+        let friends = VisibleFriends(possessed);
+        Object a = null;
+        ZetaBotPawn zb = null;
+        
+        /*
+        while ( a = friends.iNext() )
             if ( (zb = ZetaBotPawn(a)) && possessed.Distance3D(zb) < 2048 / friends.Length() && zb.cont.bState == BS_ATTACKING && zb.cont != null )
                 zb.cont.SetBotState(BS_FLEEING);
-		*/
+        */
                 
         NumBots.Get().value--;
-	}
+    }
     
     
     bool DodgeAndUse()
@@ -951,41 +986,56 @@ class ZTBotController : Actor
         {
             FLineTraceData useData;
             MoveTowardPos(currNode.pos + currNode.Vec3Angle(64 + possessed.radius, currNode.useDirection, 0, false), 0.45);
-			AimAtAngle(currNode.useDirection, 35);
+            AimAtAngle(currNode.useDirection, 35);
             
             possessed.LineTrace(
-				possessed.angle,
-				possessed.radius + 64,
-				0, // possessed.pitch,
-				flags: TRF_THRUBLOCK | TRF_THRUHITSCAN | TRF_THRUACTORS,
-				offsetz: possessed.height - 24, // offsetz: possessed.height - 12,
-				data: useData
-			);
+                possessed.angle,
+                possessed.radius + 64,
+                0, // possessed.pitch,
+                flags: TRF_THRUBLOCK | TRF_THRUHITSCAN | TRF_THRUACTORS,
+                offsetz: possessed.height - 24, // offsetz: possessed.height - 12,
+                data: useData
+            );
             
             if ( useData.HitType == TRACE_HitWall && useData.HitLine.Special > 0 )
-			{
-				Line l = useData.HitLine;
-				DebugLog(LT_VERBOSE, "["..myName.." USE NODE LOGS] Activating wall! Line special: "..l.Special);
+            {
+                Line l = useData.HitLine;
+                DebugLog(LT_VERBOSE, "["..myName.." USE NODE LOGS] Activating wall! Line special: "..l.Special);
 
-				Level.ExecuteSpecial(
-					l.Special,
-					possessed,
-					l, 0,
+                Level.ExecuteSpecial(
+                    l.Special,
+                    possessed,
+                    l, 0,
 
-					l.Args[0],
-					l.Args[1],
-					l.Args[2],
-					l.Args[3],
-					l.Args[4]
-				);
+                    l.Args[0],
+                    l.Args[1],
+                    l.Args[2],
+                    l.Args[3],
+                    l.Args[4]
+                );
 
                 useData.HitLine.Activate(possessed, 0, SPAC_Use);
-			}
+            }
+
+            else if ( useData.hitType == TRACE_HitWall /* td.HitLine.Special == 0 */ ) {
+                if ( GruntInterval == 0 || GruntInterval-- == 0 ) {
+                    A_PlaySound("ztmisc/grunt", CHAN_VOICE, attenuation: 1.1);
+                    GruntInterval = 20;
+                    Log(GruntInterval);
+                }
+
+                return false;
+            }
         }
 
-		else if ( currNode.nodeType == ZTPathNode.NT_JUMP && FRandom(0, 1) < 0.4 )
-			possessed.Jump();
+        else if ( currNode.nodeType == ZTPathNode.NT_JUMP && FRandom(0, 1) < 0.8 ) {
+            possessed.Jump();
+            AimAtAngle(currNode.Angle, 70, 20);
+        }
         
+        if ( FRandom(0, 1) < 0.03 )
+            possessed.Jump();
+
         possessed.LineTrace(possessed.angle - 45, 200, possessed.pitch, data: leftfront);
         possessed.LineTrace(possessed.angle + 45, 200, possessed.pitch, data: rightfront);
         
@@ -1008,94 +1058,94 @@ class ZTBotController : Actor
             
         return currNode.nodeType == ZTPathNode.NT_USE;
     }
-	
-	void A_BotTick()
-	{
+    
+    void A_BotTick()
+    {
         if ( possessed == null )
         {
             Destroy();
             return;
         }
 
-		if ( currNode != null && currNode.nodeType == ZTPathNode.NT_AVOID )
-			MoveAwayFrom(currNode);
+        if ( currNode != null && currNode.nodeType == ZTPathNode.NT_AVOID )
+            MoveAwayFrom(currNode);
     
-		possessed.angle += angleMomentum;
-		angleMomentum *= 0.92;
-		
-		if ( possessed.health <= 0 )
-			return;
-			
-		age += 1. / 35;
+        possessed.angle += angleMomentum;
+        angleMomentum *= 0.92;
+        
+        if ( possessed.health <= 0 )
+            return;
+            
+        age += 1. / 35;
         debugCount -= 1;
-			
-		if ( age - lastShot > 0.7 && possessed.bShooting )
-			possessed.EndShoot();
-			
-		SetCurrentNode(ClosestVisibleNode(possessed));
-		
-		if ( enemy != null && enemy.Health <= 0 )
-		{
-			enemy = null;
+            
+        if ( age - lastShot > 0.7 && possessed.bShooting )
+            possessed.EndShoot();
+            
+        SetCurrentNode(ClosestVisibleNode(possessed));
+        
+        if ( enemy != null && enemy.Health <= 0 )
+        {
+            enemy = null;
 
-			if ( bstate == BS_ATTACKING )
-			{
-				bstate = BS_WANDERING;
-				
-				enemy = null;
-				goingAfter = null;
+            if ( bstate == BS_ATTACKING )
+            {
+                bstate = BS_WANDERING;
+                
+                enemy = null;
+                goingAfter = null;
 
-				possessed.EndShoot();
-				SetBotState(BS_WANDERING);
-			}
-		}
+                possessed.EndShoot();
+                SetBotState(BS_WANDERING);
+            }
+        }
 
-		if ( --logRate <= 0 )
-		{
-			logRate = 50;
-			LogStats();
-		}
-		
-		if ( possessed.blockingMobj != null || possessed.blockingLine != null )
-			blocked += sqrt(possessed.vel.x * possessed.vel.x + possessed.vel.y * possessed.vel.y) / 2;
-			
-		if ( blocked > 0 )
-		{
-			blocked--;
-			RandomStrafe();
-			possessed.angle += 3;
-			
-			return;
-		}
-		
-		let pickupIter = ThinkerIterator.Create("Weapon");
-		Weapon inv;
-		
-		while ( (inv = Weapon(pickupIter.Next())) != null )
-			if ( inv.owner == null && possessed.Distance2D(inv) < possessed.Radius + inv.Radius && abs(possessed.pos.z - inv.pos.z) < possessed.Height + inv.Height )
-			{
-				ZetaWeapon zw = loader.CheckType(inv);
-			
-				if ( zw != null )	
-					inv.CallTryPickup(possessed); // weapon items are checked by fireBestWeap
-					
-				else
-					if ( inv.CheckClass("HealthPickup") || inv.CheckClass("Ammo") )
-						inv.CallTryPickup(possessed);
-			}
+        if ( --logRate <= 0 )
+        {
+            logRate = 50;
+            LogStats();
+        }
+        
+        if ( possessed.blockingMobj != null || possessed.blockingLine != null )
+            blocked += sqrt(possessed.vel.x * possessed.vel.x + possessed.vel.y * possessed.vel.y) / 2;
+            
+        if ( blocked > 0 )
+        {
+            blocked--;
+            RandomStrafe();
+            possessed.angle += 3;
+            
+            return;
+        }
+        
+        let pickupIter = ThinkerIterator.Create("Weapon");
+        Weapon inv;
+        
+        while ( (inv = Weapon(pickupIter.Next())) != null )
+            if ( inv.owner == null && possessed.Distance2D(inv) < possessed.Radius + inv.Radius && abs(possessed.pos.z - inv.pos.z) < possessed.Height + inv.Height )
+            {
+                ZetaWeapon zw = loader.CheckType(inv);
+            
+                if ( zw != null )	
+                    inv.CallTryPickup(possessed); // weapon items are checked by fireBestWeap
+                    
+                else
+                    if ( inv.CheckClass("HealthPickup") || inv.CheckClass("Ammo") )
+                        inv.CallTryPickup(possessed);
+            }
 
-		if ( currNode != null && currNode.nodeType == ZTPathNode.NT_USE )
-			DodgeAndUse();
+        if ( currNode != null && currNode.nodeType == ZTPathNode.NT_USE )
+            DodgeAndUse();
 
-		else if ( CVar.FindCVar('zb_autouse').GetBool() )
-			AutoUseAtAngle(0);
-			
-		if ( bstate != BS_ATTACKING )
-		{
+        else if ( CVar.FindCVar('zb_autouse').GetBool() )
+            AutoUseAtAngle(0);
+            
+        if ( bstate != BS_ATTACKING )
+        {
             if ( bstate != BS_HUNTING && bstate != BS_FLEEING && bstate != BS_ATTACKING )
             {
                 ActorList mon = VisibleEnemies(possessed);
-			
+            
                 if ( mon.length() > 0 )
                 {
                     PriorityQueue targets = new("PriorityQueue");
@@ -1107,7 +1157,7 @@ class ZTBotController : Actor
                     if ( enemy == null )
                         enemy = Actor(targets.poll());
 
-					/*
+                    /*
                     else
                     {
                         if ( retargetCount < 1 )
@@ -1119,11 +1169,11 @@ class ZTBotController : Actor
                         else
                             retargetCount--;
                     }
-					*/
+                    */
 
                     DebugLog(LT_INFO, "Attacking a "..enemy.GetClassName());
                     
-                    BotChat("TARG", 0.5);
+                    BotChat("TARG", 0.8);
                     
                     if ( !LineOfSight(enemy) && possessed.Distance2D(enemy) > 768 )
                     {
@@ -1139,21 +1189,24 @@ class ZTBotController : Actor
                 }
             }
         
-			if ( navDest != null )
-			{
-				if ( possessed.Distance3D(navDest) > 64 )
-					SmartMove();
-					
-				else if ( bstate == BS_WANDERING )
-					navDest = navDest.randomNeighbor();
-					
-				else
-					navDest = null;
-			}
-			
-			else
-			{
-				if ( currNode != null ) navDest = currNode.RandomNeighbor();
+            if ( navDest != null )
+            {
+                if ( bstate == BS_WANDERING || bstate == BS_FOLLOWING )
+                    BotChat("IDLE", 2.25 / 90);
+
+                if ( possessed.Distance3D(navDest) > 64 )
+                    SmartMove();
+                    
+                else if ( bstate == BS_WANDERING )
+                    navDest = navDest.randomNeighbor();
+                    
+                else
+                    navDest = null;
+            }
+            
+            else
+            {
+                if ( currNode != null ) navDest = currNode.RandomNeighbor();
 
                 if ( bstate == BS_HUNTING )
                 {
@@ -1176,19 +1229,21 @@ class ZTBotController : Actor
                         MoveTowardPos(lastEnemyPos, 0.27);
                 }
             
-				else if ( bstate == BS_FOLLOWING )
-				{
+                else if ( bstate == BS_FOLLOWING )
+                {
+                    BotChat("IDLE", 2.25 / 90);
+
                     if ( DodgeAndUse() )
                         SetBotState(BS_WANDERING);
                 
-					if ( goingAfter != null )
-					{
-						if ( possessed.Distance3D(goingAfter) < 1024 && possessed.CheckSight(goingAfter) )
-							SetBotState(AssessBotAttitude(goingAfter));
-					
-						else if ( currNode != null && ( navDest == null || Distance3D(navDest) < 512 || navDest == currNode ) )
-						{
-							if ( ClosestNode(goingAfter) == currNode )
+                    if ( goingAfter != null )
+                    {
+                        if ( possessed.Distance3D(goingAfter) < 1024 && possessed.CheckSight(goingAfter) )
+                            SetBotState(AssessBotAttitude(goingAfter));
+                    
+                        else if ( currNode != null && ( navDest == null || Distance3D(navDest) < 512 || navDest == currNode ) )
+                        {
+                            if ( ClosestNode(goingAfter) == currNode )
                             {
                                 if ( possessed.Distance3D(goingAfter) < 256 )
                                     SetBotState(BS_ATTACKING);
@@ -1196,71 +1251,72 @@ class ZTBotController : Actor
                                 else if ( possessed.Distance3D(goingAfter) > 5192 && !possessed.CheckSight(goingAfter) )
                                     SetBotState(BS_WANDERING);
                             }
-								
-							else if ( pathCountdown <= 0 )
-							{
-								ActorList path = navDest.findPathTo(ClosestNode(goingAfter), possessed);
-								
-								if ( path != null && path.Length() > 1 )
-								{
-									navDest = ZTPathNode(path.get(1));
-									
-									DebugLog(LT_INFO, "Next navigation point found at: "..navDest.pos);
-									MoveToward(navDest, 0.27);
-								}
-									
-								else if ( possessed.Distance3D(goingAfter) < 256 && possessed.CheckSight(goingAfter) )
-									SetBotState(BS_WANDERING);
-									
-								else
-									MoveToward(goingAfter, 0.27);
+                                
+                            else if ( pathCountdown <= 0 )
+                            {
+                                ActorList path = navDest.findPathTo(ClosestNode(goingAfter), possessed);
+                                
+                                if ( path != null && path.Length() > 1 )
+                                {
+                                    navDest = ZTPathNode(path.get(1));
+                                    
+                                    DebugLog(LT_INFO, "Next navigation point found at: "..navDest.pos);
+                                    MoveToward(navDest, 0.27);
+                                }
+                                    
+                                else if ( possessed.Distance3D(goingAfter) < 256 && possessed.CheckSight(goingAfter) )
+                                    SetBotState(BS_WANDERING);
+                                    
+                                else
+                                    MoveToward(goingAfter, 0.27);
 
-								pathCountdown += 15;
-							}
+                                pathCountdown += 15;
+                            }
 
-							else
-								pathCountdown--;
-						}
-						
-						else if ( navDest != null )
-							SmartMove();
-						
-						else if ( possessed.Distance3D(goingAfter) < 256 )
-							SetBotState(BS_ATTACKING);
-								
-						else if ( possessed.Distance3D(goingAfter) > 1500 && !possessed.CheckSight(goingAfter) )
-							SetBotState(BS_WANDERING);
-							
-						else
-							MoveToward(goingAfter, 0.27);
-					}
-					
-					else
-						SetBotState(BS_WANDERING);
-				}
-				
-				else if ( bstate == BS_FLEEING )
-				{
+                            else
+                                pathCountdown--;
+                        }
+                        
+                        else if ( navDest != null )
+                            SmartMove();
+                        
+                        else if ( possessed.Distance3D(goingAfter) < 256 )
+                            SetBotState(BS_ATTACKING);
+                                
+                        else if ( possessed.Distance3D(goingAfter) > 1500 && !possessed.CheckSight(goingAfter) )
+                            SetBotState(BS_WANDERING);
+                            
+                        else
+                            MoveToward(goingAfter, 0.27);
+                    }
+                    
+                    else
+                        SetBotState(BS_WANDERING);
+                }
+                
+                else if ( bstate == BS_FLEEING )
+                {
                     if ( DodgeAndUse() )
                     {
                         navDest = currNode.RandomNeighbor();
                         SetBotState(BS_WANDERING);
                     }
                 
-					if ( enemy != null && possessed.Distance3D(enemy) < 1024 && possessed.CheckSight(enemy) && possessed.Health < possessed.default.Health / 7 )
-						MoveAwayFrom(enemy);
-					
-					else
-						SetBotState(BS_WANDERING);
-				}
-				
-				else if ( bstate == BS_WANDERING )
-				{
+                    if ( enemy != null && possessed.Distance3D(enemy) < 1024 && possessed.CheckSight(enemy) && possessed.Health < possessed.default.Health / 7 )
+                        MoveAwayFrom(enemy);
+                    
+                    else
+                        SetBotState(BS_WANDERING);
+                }
+                
+                else if ( bstate == BS_WANDERING )
+                {
                     enemy = null;
+                    BotChat("IDLE", 2.25 / 90);
                 
                     if ( currNode == goalNode )
                         bReachedGoal == true;
-				
+                
                     else if ( !bReachedGoal )
                     {
                         if ( goalNode == null )
@@ -1281,22 +1337,22 @@ class ZTBotController : Actor
                             MoveToward(goalNode, 0.6);
                     }
                         
-					MoveForward();
-					
-					if ( commander != null && ( possessed.Distance3D(commander) > 1024 && !possessed.CheckSight(commander) ) && ClosestNode(commander) != currNode )
-					{
+                    MoveForward();
+                    
+                    if ( commander != null && ( possessed.Distance3D(commander) > 1024 && !possessed.CheckSight(commander) ) && ClosestNode(commander) != currNode )
+                    {
                         DodgeAndUse();
                     
-						SetBotState(BS_FOLLOWING);
-						goingAfter = commander;
-					}
-				
-					else if ( commander == null )
-					{ // get a commander
-						ActorList friends = VisibleFriends(possessed);
-						
-						if ( friends.length() > 0 )
-						{
+                        SetBotState(BS_FOLLOWING);
+                        goingAfter = commander;
+                    }
+                
+                    else if ( commander == null )
+                    { // get a commander
+                        ActorList friends = VisibleFriends(possessed);
+                        
+                        if ( friends.length() > 0 )
+                        {
                             commander = friends.get(Random(0, friends.length() - 1));
                             
                             if ( !commander.CheckClass("ZetaBotPawn", AAPTR_DEFAULT, true) )
@@ -1308,294 +1364,292 @@ class ZTBotController : Actor
                                     
                                 else
                                     DebugLog(LT_INFO, myName.." is now following "..ztcom.cont.myName);
-							}
-							
-							BotChat("COMM", 0.8);
-						}
-					}
-				
-					if ( commander == null )
-					{ // wander around
-						if ( currNode == null )
-							SetCurrentNode(ClosestVisibleNode(possessed));
+                            }
+                            
+                            BotChat("COMM", 0.8);
+                        }
+                    }
+                
+                    if ( commander == null )
+                    { // wander around
+                        if ( currNode == null )
+                            SetCurrentNode(ClosestVisibleNode(possessed));
                             
                         if ( DodgeAndUse() )
                             navDest = currNode.RandomNeighbor();
-							
-						ZTPathNode ng = null;
-					
-						if ( currNode != null && (ng = currNode.RandomNeighbor()) != currNode && ng != null )
-							MoveToward(ng, 0.12); // wander to a random 'neighboring' node
-						
-						else
-						{ // just wander around :P
-							
-							angleMomentum += FRandom(-0.04, 0.04);
-							
-							if ( FRandom(0, 1) < 0.7 )
-								MoveForward();
-							
-							else if ( FRandom(0, 1) < 0.5 )
-								RandomStrafe();
-								
-							else
-								StepBack();
-							
-							BotChat("IDLE", 0.1);
-						}
-					}
-				
-					/*
-					if ( currNode == null || possessed.Distance3D(currNode) > 768 )
-						currNode = ZTPathNode.plopNode(pos, ZTPathNode.NT_NORMAL);
-					*/
-				}
-			}
-		}
-			
-		else
-		{
-			if ( enemy != null && enemy.Health >= 1 ) // health is integer
-			{
-				if ( !possessed.CheckSight(enemy) && possessed.Distance2D(enemy) > 768 )
-				{
-					possessed.EndShoot();
+                            
+                        ZTPathNode ng = null;
+                    
+                        if ( currNode != null && (ng = currNode.RandomNeighbor()) != currNode && ng != null ) {
+                            MoveToward(ng, 0.12); // wander to a random 'neighboring' node
+                        }
+                        
+                        else
+                        { // just wander around :P
+                            
+                            angleMomentum += FRandom(-0.04, 0.04);
+                            
+                            if ( FRandom(0, 1) < 0.7 )
+                                MoveForward();
+                            
+                            else if ( FRandom(0, 1) < 0.5 )
+                                RandomStrafe();
+                                
+                            else
+                                StepBack();
+                        }
+                    }
+                
+                    /*
+                    if ( currNode == null || possessed.Distance3D(currNode) > 768 )
+                        currNode = ZTPathNode.plopNode(pos, ZTPathNode.NT_NORMAL);
+                    */
+                }
+            }
+        }
+            
+        else
+        {
+            if ( enemy != null && enemy.Health >= 1 ) // health is integer
+            {
+                if ( !possessed.CheckSight(enemy) && possessed.Distance2D(enemy) > 768 )
+                {
+                    possessed.EndShoot();
                     lastEnemyPos = enemy.pos;
-					SetBotState(BS_HUNTING);
-				}
-				
-				else
-				{
-					if ( FRandom(0, 1) < 0.3 )
-						possessed.Jump();
-				
-					BotChat("ACTV", 0.2);
+                    SetBotState(BS_HUNTING);
+                }
+                
+                else
+                {
+                    if ( FRandom(0, 1) < 0.3 )
+                        possessed.Jump();
+                
+                    BotChat("ACTV", 0.2);
 
-					ZetaWeapon w = BestWeaponAllTic();
+                    ZetaWeapon w = BestWeaponAllTic();
 
-					if ( w == null )
-					{
-						enemy = null;
-						goingAfter = null;
-						
-						SetBotState(BS_WANDERING);
-					}
+                    if ( w == null )
+                    {
+                        enemy = null;
+                        goingAfter = null;
+                        
+                        SetBotState(BS_WANDERING);
+                    }
 
-					else
-					{
-						if ( possessed.Distance3D(enemy) > 256 + enemy.radius || w.IsMelee() )
-							MoveToward(enemy, 0.282);
-							
-						else if ( possessed.Distance3D(enemy) < 128 + enemy.radius )
-							StepBackFrom(enemy);
-							
-						RandomStrafe();
-						AimToward(enemy, 0.27, 30);
-						
-						if ( FireBestWeapon() )
-							possessed.BeginShoot();
-							
-						else
-							possessed.EndShoot();
-					}
-				}
-			}
-		}
-		
-		if ( currNode == null || possessed.Distance2D(currNode) > 512 )
-		{
-			pastNode = currNode;
-			SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL));
-		}	
+                    else
+                    {
+                        if ( possessed.Distance3D(enemy) > 256 + enemy.radius || w.IsMelee() )
+                            MoveToward(enemy, 0.282);
+                            
+                        else if ( possessed.Distance3D(enemy) < 128 + enemy.radius )
+                            StepBackFrom(enemy);
+                            
+                        RandomStrafe();
+                        AimToward(enemy, 0.27, 30);
+                        
+                        if ( FireBestWeapon() )
+                            possessed.BeginShoot();
+                            
+                        else
+                            possessed.EndShoot();
+                    }
+                }
+            }
+        }
+        
+        if ( currNode == null || possessed.Distance2D(currNode) > 512 )
+        {
+            pastNode = currNode;
+            SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL));
+        }	
 
-		if ( angleMomentum > 1.28 )
-			angleMomentum = 1.28;
-			
-		if ( angleMomentum < -1.28 )
-			angleMomentum = -1.28;
-	}
+        if ( angleMomentum > 1.28 )
+            angleMomentum = 1.28;
+            
+        if ( angleMomentum < -1.28 )
+            angleMomentum = -1.28;
+    }
 
-	States
-	{
-		Spawn:
-			TNT1 A 1;
-			Goto TickLoop;
-			
-		TickLoop:
-			TNT1 A 1 A_BotTick;
-			Loop;
-	}
+    States
+    {
+        Spawn:
+            TNT1 A 1;
+            Goto TickLoop;
+            
+        TickLoop:
+            TNT1 A 1 A_BotTick;
+            Loop;
+    }
 }
 
 class ZetaBot : Actor
 {
-	enum LogType
-	{
-		LT_ERROR = 0,
-		LT_WARNING,
-		LT_INFO,
-		LT_VERBOSE
-	};
+    enum LogType
+    {
+        LT_ERROR = 0,
+        LT_WARNING,
+        LT_INFO,
+        LT_VERBOSE
+    };
 
-	void DebugLog(LogType kind, string msg)
-	{
-		if ( CVar.FindCVar("zb_debug").GetInt() > 0 )
-		{
-			string logHeader = "";
-		
-			if ( kind == LT_ERROR )
-				logHeader = "\cr[ERROR]";
-				
-			else if ( kind == LT_WARNING )
-				logHeader = "\cf[WARNING]";
-				
-			else if ( kind == LT_INFO )
-				logHeader = "\ch[INFO]";
-				
-			else if ( kind == LT_VERBOSE )
-			{
-				if ( CVar.FindCVar("zb_debug").GetInt() > 1 )
-					logHeader =	"\cd[VERBOSE]";
-				
-				else
-					return;
-			}
-		
-			A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
-		}
-	}
-	
-	uint botID;
+    void DebugLog(LogType kind, string msg)
+    {
+        if ( CVar.FindCVar("zb_debug").GetInt() > 0 )
+        {
+            string logHeader = "";
+        
+            if ( kind == LT_ERROR )
+                logHeader = "\cr[ERROR]";
+                
+            else if ( kind == LT_WARNING )
+                logHeader = "\cf[WARNING]";
+                
+            else if ( kind == LT_INFO )
+                logHeader = "\ch[INFO]";
+                
+            else if ( kind == LT_VERBOSE )
+            {
+                if ( CVar.FindCVar("zb_debug").GetInt() > 1 )
+                    logHeader =	"\cd[VERBOSE]";
+                
+                else
+                    return;
+            }
+        
+            A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
+        }
+    }
 
-	override void PostBeginPlay()
-	{
-		Super.PostBeginPlay();
+    override void PostBeginPlay()
+    {
+        Super.PostBeginPlay();
 
-		bool bHasNode;
-		let ni = ThinkerIterator.create("ZTPathNode");
-		
-		if ( ni.Next() )
-			bHasNode = true;
-			
-		if ( !bHasNode && CVar.FindCVar("nodelist").GetString() != "::NONE" )
-			ZTPathNode.plopNodes(CVar.FindCVar("nodelist").GetString());
-			
-		DebugLog(LT_VERBOSE, "Serialized Nodes: "..ZTPathNode.serializeLevel());
-	
-		ZTBotController cont = ZTBotController(Spawn("ZTBotController", pos));
-		
-		if ( cont == null )
+        bool bHasNode;
+        let ni = ThinkerIterator.create("ZTPathNode");
+        
+        if ( ni.Next() )
+            bHasNode = true;
+            
+        if ( !bHasNode && CVar.FindCVar("nodelist").GetString() != "::NONE" )
+            ZTPathNode.plopNodes(CVar.FindCVar("nodelist").GetString());
+            
+        DebugLog(LT_VERBOSE, "Serialized Nodes: "..ZTPathNode.serializeLevel());
+    
+        ZTBotController cont = ZTBotController(Spawn("ZTBotController", pos));
+        
+        if ( cont == null )
             return;
-		
-		ZetaCape.MakeFor(cont.possessed);
-		cont.possessed.angle = angle;
-		
-		DebugLog(LT_INFO, "ZetaBot spawned with success! Class: "..cont.possessed.GetClassName());
-		Destroy();
-	}
+        
+        ZetaCape.MakeFor(cont.possessed);
+        cont.possessed.angle = angle;
+        
+        DebugLog(LT_INFO, "ZetaBot spawned with success! Class: "..cont.possessed.GetClassName());
+        Destroy();
+    }
 }
 
 class ZetaSpirit : Actor
 {
-	enum LogType
-	{
-		LT_ERROR = 0,
-		LT_WARNING,
-		LT_INFO,
-		LT_VERBOSE
-	};
+    enum LogType
+    {
+        LT_ERROR = 0,
+        LT_WARNING,
+        LT_INFO,
+        LT_VERBOSE
+    };
 
-	void DebugLog(LogType kind, string msg)
-	{
-		if ( CVar.FindCVar("zb_debug").GetInt() > 0 )
-		{
-			string logHeader = "";
-		
-			if ( kind == LT_ERROR )
-				logHeader = "\cr[ERROR]";
-				
-			else if ( kind == LT_WARNING )
-				logHeader = "\cf[WARNING]";
-				
-			else if ( kind == LT_INFO )
-				logHeader = "\ch[INFO]";
-				
-			else if ( kind == LT_VERBOSE )
-			{
-				if ( CVar.FindCVar("zb_debug").GetInt() > 1 )
-					logHeader =	"\cd[VERBOSE]";
-				
-				else
-					return;
-			}
-		
-			A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
-		}
-	}
-	
-	override void PostBeginPlay()
-	{
-		Super.PostBeginPlay();
+    void DebugLog(LogType kind, string msg)
+    {
+        if ( CVar.FindCVar("zb_debug").GetInt() > 0 )
+        {
+            string logHeader = "";
+        
+            if ( kind == LT_ERROR )
+                logHeader = "\cr[ERROR]";
+                
+            else if ( kind == LT_WARNING )
+                logHeader = "\cf[WARNING]";
+                
+            else if ( kind == LT_INFO )
+                logHeader = "\ch[INFO]";
+                
+            else if ( kind == LT_VERBOSE )
+            {
+                if ( CVar.FindCVar("zb_debug").GetInt() > 1 )
+                    logHeader =	"\cd[VERBOSE]";
+                
+                else
+                    return;
+            }
+        
+            A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
+        }
+    }
+    
+    override void PostBeginPlay()
+    {
+        Super.PostBeginPlay();
 
-		bool bHasNode;
-		let ni = ThinkerIterator.create("ZTPathNode");
-		
-		if ( ni.Next() )
-			bHasNode = true;
-			
-		if ( !bHasNode && CVar.FindCVar("nodelist").GetString() != "::NONE" )
-			ZTPathNode.plopNodes(CVar.FindCVar("nodelist").GetString());
-			
-		DebugLog(LT_VERBOSE, "Serialized Nodes: "..ZTPathNode.serializeLevel());
-	
-		ZTBotController cont = ZTBotController(Spawn("ZTBotController", pos));
-		
-		if ( cont == null )
+        bool bHasNode;
+        let ni = ThinkerIterator.create("ZTPathNode");
+        
+        if ( ni.Next() )
+            bHasNode = true;
+            
+        if ( !bHasNode && CVar.FindCVar("nodelist").GetString() != "::NONE" )
+            ZTPathNode.plopNodes(CVar.FindCVar("nodelist").GetString());
+            
+        DebugLog(LT_VERBOSE, "Serialized Nodes: "..ZTPathNode.serializeLevel());
+    
+        ZTBotController cont = ZTBotController(Spawn("ZTBotController", pos));
+        
+        if ( cont == null )
             return;
-		
-		ZetaCape.MakeFor(cont.possessed);
-		cont.possessed.angle = angle;
-		
-		DebugLog(LT_INFO, "ZetaBot spawned with success! Class: "..cont.possessed.GetClassName());
-		Destroy();
+        
+        ZetaCape.MakeFor(cont.possessed);
+        cont.possessed.angle = angle;
+        
+        DebugLog(LT_INFO, "ZetaBot spawned with success! Class: "..cont.possessed.GetClassName());
+        Destroy();
 
-		let piter = ThinkerIterator.create("PlayerPawn");
-		PlayerPawn pn;
+        let piter = ThinkerIterator.create("PlayerPawn");
+        PlayerPawn pn;
 
-		while ( (pn = PlayerPawn(piter.Next())) ) if ( ZetaBotPawn(pn) != null )
-		{
-			ZetaSpiritEyes zse = ZetaSpiritEyes(Spawn("ZetaSpiritEyes"));
-			zse.SetPlayer(pn);
-			zse.possessed = cont.possessed;
-		}
-	}
+        while ( (pn = PlayerPawn(piter.Next())) ) if ( ZetaBotPawn(pn) != null )
+        {
+            ZetaSpiritEyes zse = ZetaSpiritEyes(Spawn("ZetaSpiritEyes"));
+            zse.SetPlayer(pn);
+            zse.possessed = cont.possessed;
+        }
+    }
 }
 
 class ZetaSpiritEyes : Actor
 {
-	ZetaBotPawn possessed;
-	PlayerPawn playa;
+    ZetaBotPawn possessed;
+    PlayerPawn playa;
 
-	void SetPlayer(PlayerPawn pn)
-	{
-		playa = pn;
-		playa.bInvisible = true;
-	}
+    void SetPlayer(PlayerPawn pn)
+    {
+        playa = pn;
+        playa.bInvisible = true;
+    }
 
-	override void Tick()
-	{
-		if ( playa != null )
-		{
-			playa.SetXYZ(possessed.pos);
-			playa.angle = possessed.angle;
-			playa.health = possessed.health;
-		}
-	}
+    override void Tick()
+    {
+        if ( playa != null )
+        {
+            playa.SetXYZ(possessed.pos);
+            playa.angle = possessed.angle;
+            playa.health = possessed.health;
+        }
+    }
 }
 
 class BotName : Inventory
 {
     int countDown;
+    bool printing;
 
     override void BeginPlay()
     {
@@ -1619,14 +1673,6 @@ class BotName : Inventory
                 
                 double vdot = (v1.x * v2.x + v1.y * v2.y);
                 
-                /*
-                if ( zb.cont == null )
-                    Log(zb.GetClassName()..": "..vdot..", "..Owner.Distance2D(zb));
-                    
-                else
-                    Log(zb.cont.myName..": "..vdot..", "..Owner.Distance2D(zb));
-                */
-                
                 if ( vdot > 1 - 1 / (Owner.Distance2D(zb) / (zb.Radius + 4)) && Owner.CheckSight(zb) && zb.cont != null && zb.Health > 0 && ( closest == null || Owner.Distance2D(zb) < cdist ) ) 
                 {
                     cdist = Owner.Distance2D(zb);
@@ -1637,16 +1683,20 @@ class BotName : Inventory
             if ( closest != null && closest.cont != null )
             {
                 Owner.A_Print("\ci"..closest.cont.myName.."\n\cg"..closest.Health.." HP"..(
-					( closest.cont.bstate != ZTBotController.BS_ATTACKING || closest.cont.enemy == null ) ? "\n\cc"..ZTBotController.BStateNames[closest.cont.bstate]
-					: "\n\n\crAttacking a "..closest.cont.enemy.GetClassName().." with "..closest.cont.enemy.health.." HP!"
-				));
+                    ( closest.cont.bstate != ZTBotController.BS_ATTACKING || closest.cont.enemy == null ) ? "\n\cc"..ZTBotController.BStateNames[closest.cont.bstate]
+                    : "\n\n\crAttacking a "..closest.cont.enemy.GetClassName().." with "..closest.cont.enemy.health.." HP!"
+                ));
+                printing = true;
                 countDown = 3;
             }
                 
             else {
-				Owner.A_Print("");
+                if ( printing )
+                    Owner.A_Print("");
+
+                printing = false;
                 countDown = 2;
-			}
+            }
         }
             
         else

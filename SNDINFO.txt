@@ -3,9 +3,9 @@ $random zetabot/1/actv { zetabot/1/actv/1 zetabot/1/actv/2 zetabot/1/actv/3 zeta
 $random zetabot/2/actv { zetabot/2/actv/1 zetabot/2/actv/2 zetabot/2/actv/3 zetabot/2/actv/4 }
 $random zetabot/3/actv { zetabot/3/actv/1 zetabot/3/actv/2 zetabot/3/actv/3 }
 
-$random zetabot/1/target { zetabot/1/target/1 zetabot/1/target/2 zetabot/1/target/3 }
-$random zetabot/2/target { zetabot/2/target/1 zetabot/2/target/2 zetabot/2/target/3 }
-$random zetabot/3/target { zetabot/3/target/1 zetabot/3/target/2 zetabot/3/target/3 }
+$random zetabot/1/targ { zetabot/1/target/1 zetabot/1/target/2 zetabot/1/target/3 }
+$random zetabot/2/targ { zetabot/2/target/1 zetabot/2/target/2 zetabot/2/target/3 }
+$random zetabot/3/targ { zetabot/3/target/1 zetabot/3/target/2 zetabot/3/target/3 }
 
 $random zetabot/1/elim { zetabot/1/elim/1 zetabot/1/elim/2 zetabot/1/elim/3 }
 $random zetabot/2/elim { zetabot/2/elim/1 zetabot/2/elim/2 zetabot/2/elim/3 }
@@ -23,85 +23,83 @@ $random zetabot/1/idle { zetabot/1/idle/1 zetabot/1/idle/2 zetabot/1/idle/3 zeta
 $random zetabot/2/idle { zetabot/2/idle/1 zetabot/2/idle/2 zetabot/2/idle/3 zetabot/2/idle/4 zetabot/2/idle/5 }
 $random zetabot/3/idle { zetabot/3/idle/1 zetabot/3/idle/2 zetabot/3/idle/3 zetabot/3/idle/4 zetabot/3/idle/5 zetabot/3/idle/6 zetabot/3/idle/7 }
 
-zetabot/1/target/1 "DV1TARG1"
-zetabot/1/target/2 "DV1TARG2"
-zetabot/1/target/3 "DV1TARG3"
+zetabot/1/target/1 "ZV1TARG1"
+zetabot/1/target/2 "ZV1TARG2"
+zetabot/1/target/3 "ZV1TARG3"
 
-zetabot/2/target/1 "DV2TARG1"
-zetabot/2/target/2 "DV2TARG2"
-zetabot/2/target/3 "DV2TARG3"
+zetabot/2/target/1 "ZV2TARG1"
+zetabot/2/target/2 "ZV2TARG2"
+zetabot/2/target/3 "ZV2TARG3"
 
-zetabot/3/target/1 "DV3TARG1"
-zetabot/3/target/2 "DV3TARG2"
-zetabot/3/target/3 "DV3TARG3"
+zetabot/3/target/1 "ZV3TARG1"
+zetabot/3/target/2 "ZV3TARG2"
+zetabot/3/target/3 "ZV3TARG3"
 
-zetabot/1/elim/1 "DV1ELIM1"
-zetabot/1/elim/2 "DV1ELIM2"
-zetabot/1/elim/3 "DV1ELIM3"
+zetabot/1/elim/1 "ZV1ELIM1"
+zetabot/1/elim/2 "ZV1ELIM2"
+zetabot/1/elim/3 "ZV1ELIM3"
 
-zetabot/2/elim/1 "DV2ELIM1"
-zetabot/2/elim/2 "DV2ELIM2"
-zetabot/2/elim/3 "DV2ELIM3"
+zetabot/2/elim/1 "ZV2ELIM1"
+zetabot/2/elim/2 "ZV2ELIM2"
+zetabot/2/elim/3 "ZV2ELIM3"
 
-zetabot/3/elim/1 "DV3ELIM1"
-zetabot/3/elim/2 "DV3ELIM2"
+zetabot/3/elim/1 "ZV3ELIM1"
+zetabot/3/elim/2 "ZV3ELIM2"
 
-zetabot/1/hide/1 "DV1HIDE1"
-zetabot/1/hide/2 "DV1HIDE2"
+zetabot/1/hide/1 "ZV1HIDE1"
+zetabot/1/hide/2 "ZV1HIDE2"
 
-zetabot/2/hide/1 "DV2HIDE1"
-zetabot/2/hide/2 "DV2HIDE2"
+zetabot/2/hide/1 "ZV2HIDE1"
+zetabot/2/hide/2 "ZV2HIDE2"
 
-zetabot/3/hide/1 "DV3HIDE1"
-zetabot/3/hide/2 "DV3HIDE2"
-zetabot/3/hide/3 "DV3HIDE2"
+zetabot/3/hide/1 "ZV3HIDE1"
+zetabot/3/hide/2 "ZV3HIDE2"
+zetabot/3/hide/3 "ZV3HIDE2"
 
-zetabot/1/hurt/1 "DV1HURT1"
-zetabot/1/hurt/2 "DV1HURT2"
-zetabot/1/hurt/3 "DV1HURT3"
+zetabot/1/hurt/1 "ZV1HURT1"
+zetabot/1/hurt/2 "ZV1HURT2"
+zetabot/1/hurt/3 "ZV1HURT3"
 
-zetabot/2/hurt/1 "DV2HURT1"
-zetabot/2/hurt/2 "DV2HURT2"
-zetabot/2/hurt/3 "DV2HURT3"
+zetabot/2/hurt/1 "ZV2HURT1"
+zetabot/2/hurt/2 "ZV2HURT2"
+zetabot/2/hurt/3 "ZV2HURT3"
 
-zetabot/3/hurt/1 "DV3HURT1"
-zetabot/3/hurt/2 "DV3HURT2"
-zetabot/3/hurt/3 "DV3HURT3"
+zetabot/3/hurt/1 "ZV3HURT1"
+zetabot/3/hurt/2 "ZV3HURT2"
+zetabot/3/hurt/3 "ZV3HURT3"
 
-zetabot/1/idle/1 "DV1IDLE1"
-zetabot/1/idle/2 "DV1IDLE2"
-zetabot/1/idle/3 "DV1IDLE3"
-zetabot/1/idle/4 "DV1IDLE4"
-zetabot/1/idle/5 "DV1IDLE5"
-zetabot/1/idle/6 "DV1IDLE6"
+zetabot/1/idle/1 "ZV1IDLE1"
+zetabot/1/idle/2 "ZV1IDLE2"
+zetabot/1/idle/3 "ZV1IDLE3"
+zetabot/1/idle/4 "ZV1IDLE4"
+zetabot/1/idle/5 "ZV1IDLE5"
+zetabot/1/idle/6 "ZV1IDLE6"
 
-zetabot/2/idle/1 "DV2IDLE1"
-zetabot/2/idle/2 "DV2IDLE2"
-zetabot/2/idle/3 "DV2IDLE3"
-zetabot/2/idle/4 "DV2IDLE4"
-zetabot/2/idle/5 "DV2IDLE5"
+zetabot/2/idle/1 "ZV2IDLE1"
+zetabot/2/idle/2 "ZV2IDLE2"
+zetabot/2/idle/3 "ZV2IDLE3"
+zetabot/2/idle/4 "ZV2IDLE4"
+zetabot/2/idle/5 "ZV2IDLE5"
 
-zetabot/3/idle/1 "DV3IDLE1"
-zetabot/3/idle/2 "DV3IDLE2"
-zetabot/3/idle/3 "DV3IDLE3"
-zetabot/3/idle/4 "DV3IDLE4"
-zetabot/3/idle/5 "DV3IDLE5"
-zetabot/3/idle/6 "DV3IDLE6"
-zetabot/3/idle/7 "DV3IDLE7"
+zetabot/3/idle/1 "ZV3IDLE1"
+zetabot/3/idle/2 "ZV3IDLE2"
+zetabot/3/idle/3 "ZV3IDLE3"
+zetabot/3/idle/4 "ZV3IDLE4"
+zetabot/3/idle/5 "ZV3IDLE5"
 
-zetabot/1/actv/1 "DV1ACTV1"
-zetabot/1/actv/2 "DV1ACTV2"
-zetabot/1/actv/3 "DV1ACTV3"
-zetabot/1/actv/4 "DV1ACTV4"
+zetabot/1/actv/1 "ZV1ACTV1"
+zetabot/1/actv/2 "ZV1ACTV2"
+zetabot/1/actv/3 "ZV1ACTV3"
+zetabot/1/actv/4 "ZV1ACTV4"
 
-zetabot/2/actv/1 "DV2ACTV1"
-zetabot/2/actv/2 "DV2ACTV2"
-zetabot/2/actv/3 "DV2ACTV3"
-zetabot/2/actv/4 "DV2ACTV4"
+zetabot/2/actv/1 "ZV2ACTV1"
+zetabot/2/actv/2 "ZV2ACTV2"
+zetabot/2/actv/3 "ZV2ACTV3"
+zetabot/2/actv/4 "ZV2ACTV4"
 
-zetabot/3/actv/1 "DV3ACTV1"
-zetabot/3/actv/2 "DV3ACTV2"
-zetabot/3/actv/3 "DV3ACTV2"
+zetabot/3/actv/1 "ZV3ACTV1"
+zetabot/3/actv/2 "ZV3ACTV2"
+zetabot/3/actv/3 "ZV3ACTV2"
 
 // NEW ZETABOT VOICES
 $random zetabot/4/actv { zetabot/4/actv/1 zetabot/4/actv/2 zetabot/4/actv/3 }
@@ -139,3 +137,5 @@ ztmisc/rico4 "ZSRICO4"
 ztmisc/jump "ZSJUMP"
 ztmisc/die "DSPLDETH"
 ztmisc/xdie "DSPDIEHI"
+
+ztmisc/grunt dsoof
