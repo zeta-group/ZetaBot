@@ -49,6 +49,16 @@ class ZTPathNode : Actor
 		NT_SHOOT
 	};
 
+	static const string ZTNavTypeNames[] = {
+        "Normal",
+        "Use",
+        "Slow",
+        "Crouch",
+        "Jump",
+        "Avoid",
+        "Shoot"
+    };
+
 	enum LogType
 	{
 		LT_ERROR = 0,
@@ -257,7 +267,7 @@ class ZTPathNode : Actor
 	static PlopResult plopNodes(string code)
 	{
 		uint i = 0;
-		string c, ncode;
+		string c, levelMap, ncode;
 		let res = new("PlopResult");
 		
 		if ( code == "::NONE" )
@@ -266,20 +276,23 @@ class ZTPathNode : Actor
 		while ( true )
 		{
 			string cmap = split((c = split(code, ";;", i++)), "::", 0);
+
+			if (cmap == "")
+				break;
+
 			res.mapsFound.Push(cmap);
 			res.nodeMaps.Push(c);
 		
 			if ( cmap == level.mapName )
-				break;
+				levelMap = split(c, "::", 1);
 				
 			if ( c == "" )
 				return res;
 		}
 				
 		i = 0;
-		c = split(c, "::", 1);
 		
-		for ( i = 0; (ncode = split(c, ":", i)) != ""; i++ )
+		for ( i = 0; (ncode = split(levelMap, ":", i)) != ""; i++ )
 		{
 			double nx = SInt(split(ncode, ",", 0));
 			double ny = SInt(split(ncode, ",", 1));
@@ -418,10 +431,11 @@ class ZTPathNode : Actor
 		return res;
 	}
 	
-	static ZTPathNode plopNode(Vector3 position, NavigationType nt)
+	static ZTPathNode plopNode(Vector3 position, NavigationType nt, float angle = 0)
 	{
 		let node = ZTPathNode(Spawn("ZTPathNode", position));
 		node.nodeType = nt;
+		node.angle = angle;
 		
 		return node;
 	}
@@ -556,6 +570,30 @@ class ZTJumpNode : Actor
 	}
 }
 
+class ZTSlowNode : Actor
+{
+	override void PostBeginPlay()
+	{
+		let node = ZTPathNode(Spawn("ZTPathNode", pos));
+		node.nodeType = ZTPathNode.NT_SLOW;
+		node.angle = angle;
+		
+		Destroy();
+	}
+}
+
+class ZTCrouchNode : Actor
+{
+	override void PostBeginPlay()
+	{
+		let node = ZTPathNode(Spawn("ZTPathNode", pos));
+		node.nodeType = ZTPathNode.NT_CROUCH;
+		node.angle = angle;
+		
+		Destroy();
+	}
+}
+
 class ZTShootNode : Actor
 {
 	override void PostBeginPlay()
@@ -617,6 +655,25 @@ class ZTPromptNodes : Actor
 			lst = lst.."  >"..r.mapsFound[i];
 	
 		A_Log(lst);
+		Destroy();
+	}
+}
+
+class ZTDeleteNodes : Actor
+{
+	override void BeginPlay()
+	{
+		ZTPathNode n;
+		let iter = ThinkerIterator.Create("ZTPathNode");
+		String logged = "Deleted %u nodes.";
+		uint count = 0;
+		
+		while ( n = ZTPathNode(iter.Next()) ) {
+			n.Destroy();
+			count++;
+		}
+
+		A_Log(String.Format(logged, count));
 		Destroy();
 	}
 }

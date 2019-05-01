@@ -1,11 +1,13 @@
-defaultbind kp1 "summonfriend zetabot 0"
+defaultbind kp1 "summon ztcrouchnode 0"
 defaultbind kp2 "summon ztpathnode 0"
 defaultbind kp3 "summon ztusenode 0"
 defaultbind kp4 "summon ztjumpnode 0"
 defaultbind kp5 "summon ztshootnode 0"
-defaultbind kp7 "kill zetadoom; kill zetastrife; kill zetasmushes"
+defaultbind kp6 "summon ztslownode 0"
+defaultbind kp7 "summon ZTDeleteNodes 0"
 defaultbind kp8 "summon ZTUploadNodes"
 defaultbind kp9 "summon ZTPromptNodes"
+defaultbind kp* "kill ZetaBotPawn"
 
 addkeysection "ZetaBot" "zetabots"
 
@@ -16,3 +18,7 @@ addmenukey "Create Jump Path Node" "summon ztjumpnode 0"
 addmenukey "Save Path Nodes" "summon ztuploadnodes"
 addmenukey "Load Path Nodes" "summon ztpromptnodes"
 addmenukey "Kill All Bots" "kill zetadoom; kill zetastrife; kill zetasmushes"
+
+alias superzeta "summonfriend ZetaBot 0; wait 1; test $r_superzeta superzeta"
+alias +superzeta "set r_superzeta 1; superzeta"
+alisa -superzeta "set r_superzeta 0"
