@@ -125,3 +125,121 @@ class ZetaWeapon : Actor
 		return false;
 	}
 }
+
+
+// For DECORATE users.
+class ZTMyWeapon : ZetaWeapon {
+	bool bZT_SPLASHDANGER;
+	bool bZT_HASALT;
+	bool bZT_MELEE;
+	bool bZT_ALTMELEE;
+	bool bZT_HITSCAN;
+	bool bZT_ALTHITSCAN;
+
+	double DangerRadius;
+	double MeleeDamage;
+	double AltMeleeDamage;
+	class<Actor> MissileType;
+	class<Actor> AltMissileType;
+	class<Weapon> WeaponType;
+	double BulletMinDamage;
+	double BulletMaxDamage;
+	double AltBulletMinDamage;
+	double AltBulletMaxDamage;
+	double BaseRating;
+	double AltBaseRating;
+	double DangerRating;
+	double BulletSpreadH;
+	double AltBulletSpreadH;
+	double BulletSpreadV;
+	double AltBulletSpreadV;
+	double DangerFactor;
+
+	property MissileType: MissileType;
+	property AltMissileType: MissileType;
+	property MeleeDamage: MeleeDamage;
+	property AltMeleeDamage: AltMeleeDamage;
+	property BulletMinDamage: BulletMinDamage;
+	property BulletMaxDamage: BulletMaxDamage;
+	property AltBulletMinDamage: AltBulletMinDamage;
+	property AltBulletMaxDamage: AltBulletMaxDamage;
+	property BaseRating: BaseRating;
+	property AltBaseRating: AltBaseRating;
+	property DangerRating: DangerRating;
+	property DangerRadius: DangerRadius;
+	property WeaponType: WeaponType;
+	property BulletSpreadH: BulletSpreadH;
+	property AltBulletSpreadH: AltBulletSpreadH;
+	property BulletSpreadV: BulletSpreadV;
+	property AltBulletSpreadV: AltBulletSpreadV;
+	property DangerFactor: DangerFactor;
+
+	default {
+		ZTMyWeapon.DangerRadius 128;
+		ZTMyWeapon.MeleeDamage 3;
+		ZTMyWeapon.AltMeleeDamage 5;
+		ZTMyWeapon.MissileType "Rocket";
+		ZTMyWeapon.AltMissileType "Rocket";
+		ZTMyWeapon.BulletMinDamage 2;
+		ZTMyWeapon.BulletMaxDamage 5;
+		ZTMyWeapon.AltBulletMinDamage 3;
+		ZTMyWeapon.AltBulletMaxDamage 7;
+		ZTMyWeapon.BaseRating 500;
+		ZTMyWeapon.DangerRating 300;
+		ZTMyWeapon.BulletSpreadH 10;
+		ZTMyWeapon.AltBulletSpreadH 10;
+		ZTMyWeapon.BulletSpreadV 3;
+		ZTMyWeapon.AltBulletSpreadV 3;
+		ZTMyWeapon.DangerFactor 2.25;
+	}
+
+	override bool IsPickupOf(Weapon other)
+	{
+		return other.GetClass() == WeaponType;
+	}
+	
+	override bool bHasAltFire(Actor shooter)
+	{
+		return bZT_HASALT;
+	}
+	
+	override double RateSelf(Actor shooter, Actor target)
+	{
+		if ( bZT_SPLASHDANGER && shooter.Distance3D(target) < DangerRadius )
+			return DangerRating - shooter.Distance3D(target) * DangerFactor;
+	
+		return BaseRating / sqrt(shooter.Distance2D(target)) * 2;
+	}
+
+	override double AltRateSelf(Actor shooter, Actor target)
+	{
+		if ( bZT_SPLASHDANGER && shooter.Distance3D(target) < DangerRadius )
+			return DangerRating - shooter.Distance3D(target) * DangerFactor;
+	
+		return AltBaseRating / sqrt(shooter.Distance2D(target)) * 2;
+	}
+	
+	override void Fire(Actor shooter, Actor target)
+	{
+		if (bZT_MELEE)
+			shooter.LineAttack(shooter.angle, 32, 0, MeleeDamage * FRandom(1, 8), "Punch", "BulletPuff", 0);
+
+		else if (bZT_HITSCAN)
+		ZetaBullet.FireABullet(shooter, "Gold", target, random(BulletMinDamage, BulletMaxDamage), BulletSpreadH, BulletSpreadV);
+
+		else
+			shooter.SpawnMissileAngle(MissileType, shooter.angle, target == null ? 0 : ((target.pos.z - shooter.pos.z) * 20 / target.Distance2D(shooter)));
+	}
+
+	override void AltFire(Actor shooter, Actor target)
+	{
+		if (bZT_MELEE)
+			shooter.LineAttack(shooter.angle, 32, 0, AltMeleeDamage * FRandom(1, 8), "Punch", "BulletPuff", 0);
+
+		else if (bZT_ALTHITSCAN)
+			ZetaBullet.FireABullet(shooter, "Gold", target, random(AltBulletMinDamage, AltBulletMaxDamage), AltBulletSpreadH, AltBulletSpreadV);
+
+		else
+			shooter.SpawnMissileAngle(ALtMissileType, shooter.angle, target == null ? 0 : ((target.pos.z - shooter.pos.z) * 20 / target.Distance2D(shooter)));
+	}
+}

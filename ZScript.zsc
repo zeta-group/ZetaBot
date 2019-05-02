@@ -222,7 +222,21 @@ class ZTBotController : Actor
                 UseHistory.Delete(i--);
         }
 
-        td.HitLine.Activate(possessed, 0, SPAC_Use);
+        Line l = td.HitLine;
+        DebugLog(LT_VERBOSE, "["..myName.." USE NODE LOGS] Auto-activating wall! Line special: "..l.Special);
+        l.Activate(possessed, 0, SPAC_Use);
+
+        Level.ExecuteSpecial(
+            l.Special,
+            possessed,
+            l, 0,
+
+            l.Args[0],
+            l.Args[1],
+            l.Args[2],
+            l.Args[3],
+            l.Args[4]
+        );
 
         currNode = ZTPathNode.plopNode(pos, ZTPathNode.NT_USE);
         currNode.Angle = Angle;
@@ -897,7 +911,7 @@ class ZTBotController : Actor
     
     void BotChat(String kind, double importance)
     {
-        if ( importance < FRandom(0, 2.25) )
+        if ( !CVar.FindCVar("zb_talk").GetBool() || importance < FRandom(0, 1.8) )
             return;
     
         A_PlaySound("zetabot/"..myVoice.."/"..kind, CHAN_VOICE, attenuation: 0.7);
@@ -1010,8 +1024,19 @@ class ZTBotController : Actor
                 if ( useData.HitLine.Special > 0 ) {
                     Line l = useData.HitLine;
                     DebugLog(LT_VERBOSE, "["..myName.." USE NODE LOGS] Activating wall! Line special: "..l.Special);
+                    l.Activate(possessed, 0, SPAC_Use);
 
-                    useData.HitLine.Activate(possessed, 0, SPAC_Use);
+                    Level.ExecuteSpecial(
+                        l.Special,
+                        possessed,
+                        l, 0,
+
+                        l.Args[0],
+                        l.Args[1],
+                        l.Args[2],
+                        l.Args[3],
+                        l.Args[4]
+                    );
                 }
 
                 else {
