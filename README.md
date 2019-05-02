@@ -1,16 +1,15 @@
 # ZetaBot
 **The modern ZScript bot made for GZDoom**, made *by ZDoomers for ZDoomers*.
 
-* Exactly **3748 lines** of code written **manually** (verified with `wc`)
 * **Five** possible bot states (Wandering, Following, Attacking, Hunting and Fleeing)
-* **Extensive debugging** (set by CVar `zb_debug`)
-* Has the **attention of official ZDoom developers**
 * Flexible **PK3 mod build script** solution (`build.sh`)
-* Multiple male and female **voices**
+* Multiple _sets_ of **voices**
 * Pathnode system with **A\* pathfinding**
 * Supports **any weapons and player classes** _(given there are modules for them, supplied by their respective modders)_
 * Constraints akin to **real** players _(max speed, max firing rate, etc etc)_
 * Weapon **rating** system
+* Has the **attention of official ZDoom developers**
+* **Extensive debugging** (set by CVar `zb_debug`)
 
 ---
 
