@@ -8,4 +8,4 @@ server bool zb_autouse = true;
 server bool zb_autonodes = true;
 server bool zb_talk = true;
 
-server string zb_bnames = "Jack:Persephone:Èmille:Robert:Amanda:Maria:Mary:Josh:Wagner:John:Louis:Gabriel:Renato:Alejandro:Alexander:Heinrich:Caesar:Walter:Amy:Lawrence:Marylenne:Leonhart:Leonard:Jackson:Lee:Bert:Humberto:Mike:Pablo:Michael:Hitchcock:Hilton:Ronald:Robinson:Son:House:Romulus:Peter:Peterson:Zephyrus:Robin:Paul:Paula:Thorson:Robohead:Minchson:James:Jamilton:Greg:Gregor:Gregory:Victoria:Anita:Whindersson:Melody:Xonon:Xihil";
+server string zb_names = "Jack,Persephone,Èmille,Robert,Amanda,Maria,Mary,Josh,Wagner,John,Louis,Gabriel,Renato,Alejandro,Alexander,Heinrich,Caesar,Walter,Amy,Lawrence,Marylenne,Leonhart,Leonard,Jackson,Lee,Bert,Humberto,Mike,Pablo,Michael,Hitchcock,Hilton,Ronald,Robinson,Son,House,Romulus,Peter,Peterson,Zephyrus,Robin,Paul,Paula,Thorson,Robohead,Minchson,James,Jamilton,Greg,Gregor,Gregory,Victoria,Anita,Whindersson,Melody,Xonon,Xihil,Thought,Hope,Rebecca,Prince,Larry,Barry,Garry,Garmond,Barney";

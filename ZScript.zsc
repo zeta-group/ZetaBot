@@ -238,8 +238,10 @@ class ZTBotController : Actor
             l.Args[4]
         );
 
-        currNode = ZTPathNode.plopNode(pos, ZTPathNode.NT_USE);
-        currNode.Angle = Angle;
+        if ( CVar.FindCVar('zb_autonodes').GetBool() ) {
+            SetCurrentNode(ZTPathNode.plopNode(pos, ZTPathNode.NT_USE, possessed.angle));
+            currNode.Angle = Angle; 
+        }
 
         ZTLineUseHistoryEntry entry = new("ZTLineUseHistoryEntry");
 
@@ -330,9 +332,9 @@ class ZTBotController : Actor
         leftObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
         frontObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
         rightObs = ObstacleChecker.MakeFor(self, -45, 8 * Speed);
-        
+
         Array<String> botNames;
-        CVar.GetCVar('zb_bnames').GetString().Split(botNames, ':');
+        CVar.GetCVar('zb_names').GetString().Split(botNames, ',');
 
         myName = botNames[Random(0, botNames.Size() - 1)];
     }
@@ -591,7 +593,7 @@ class ZTBotController : Actor
                     if ( currNode.nodeType == ZTPathNode.NT_USE )
                         DodgeAndUse();
 
-                    else if ( currNode.nodeType == ZTPathNode.NT_SHOOT ) {
+                    else if ( currNode.nodeType == ZTPathNode.NT_SHOOT && enemy == null ) {
                         if ( FRandom(0, 1) < 0.7 && FireBestWeapon() )
                             possessed.BeginShoot();
 
@@ -640,11 +642,13 @@ class ZTBotController : Actor
     
     void SetCurrentNode(ZTPathNode pn)
     {
-        if ( pn != null )
-        {   
+        if ( pn == null )
+            return;
+
+        if ( pn != currNode )
             DebugLog(LT_VERBOSE, String.Format("%s is now at the %s node: \ck%s", myName, ZTPathNode.ZTNavTypeNames[pn.nodeType], pn.serialize()));
-        }   
          
+        pastNode = currNode;
         currNode = pn;
     }
     
@@ -668,12 +672,17 @@ class ZTBotController : Actor
     
     bool LineOfSight(Actor other, Actor from = null)
     {
+        if ( other == null )
+            return false;
+
         if ( from == null )
             from = possessed;
         
-        // For a while, used to be a LineTrace, for multiple reasons.
-        // That didn't work, though :(
-        return from.CheckSight(other);
+        let off = from.Vec2To(other) / from.Distance2D(other);
+        let dir = AngleToVector(from.angle);
+        double ddot = (off.x * dir.x) + (off.y * dir.y);
+
+        return ddot > 0 && from.CheckSight(other);
     }
     
     ZTPathNode ClosestVisibleNode(Actor other)
@@ -683,7 +692,7 @@ class ZTBotController : Actor
         ZTPathNode cur = null;
         
         while ( cur = ZTPathNode(iter.Next()) )
-            if ( ( best == null || other.Distance3D(cur) < other.Distance3D(best) ) && LineOfSight(cur) )
+            if ( ( other.CheckSight(cur) || other.Distance2D(cur) < 32 ) && ( best == null || other.Distance3D(cur) < other.Distance3D(best) ) )
                 best = cur;
                 
         return best;
@@ -1168,7 +1177,7 @@ class ZTBotController : Actor
             
         if ( bstate != BS_ATTACKING )
         {
-            if (  bstate != BS_FLEEING )
+            if ( bstate != BS_FLEEING )
             {
                 ActorList mon = VisibleEnemies(possessed);
             
@@ -1180,8 +1189,10 @@ class ZTBotController : Actor
                         if ( mon.get(i).Health > 0 )
                             targets.add(mon.get(i), TargetPriority(mon.get(i)));
                 
-                    if ( enemy == null )
-                        enemy = Actor(targets.poll());
+                    Actor newEnemy = Actor(targets.poll());
+
+                    if ( enemy == null || TargetPriority(enemy) < TargetPriority(newEnemy) )
+                        enemy = Actor(newEnemy);
 
                     /*
                     else
@@ -1232,7 +1243,7 @@ class ZTBotController : Actor
             
             else
             {
-                if ( currNode != null ) navDest = currNode.RandomNeighbor();
+                if ( currNode != null && bstate != BS_HUNTING ) navDest = currNode.RandomNeighbor();
 
                 if ( bstate == BS_HUNTING )
                 {
@@ -1242,17 +1253,18 @@ class ZTBotController : Actor
                         SetBotState(BS_WANDERING);
                     }
                 
-                    else if ( possessed.CheckSight(enemy) )
+                    else if ( possessed.CheckSight(enemy) || possessed.Distance3D(enemy) < 96 )
                         SetBotState(BS_ATTACKING);
                 
-                    else if ( (possessed.pos.x - lastEnemyPos.x) * (possessed.pos.x - lastEnemyPos.x) + (possessed.pos.y - lastEnemyPos.y) * (possessed.pos.y - lastEnemyPos.y) < 9216 )
+                    else if ( (possessed.pos.x - lastEnemyPos.x) * (possessed.pos.x - lastEnemyPos.x) + (possessed.pos.y - lastEnemyPos.y) * (possessed.pos.y - lastEnemyPos.y) < 128 * 128 )
                     {
                         enemy = null;
                         SetBotState(BS_WANDERING);
                     }
                         
-                    else
-                        MoveTowardPos(lastEnemyPos, 0.27);
+                    else {
+                        MoveTowardPos(lastEnemyPos, 3);
+                    }
                 }
             
                 else if ( bstate == BS_FOLLOWING )
@@ -1425,11 +1437,6 @@ class ZTBotController : Actor
                                 StepBack();
                         }
                     }
-                
-                    /*
-                    if ( currNode == null || possessed.Distance3D(currNode) > 768 )
-                        currNode = ZTPathNode.plopNode(pos, ZTPathNode.NT_NORMAL);
-                    */
                 }
             }
         }
@@ -1491,19 +1498,18 @@ class ZTBotController : Actor
             }
         }
         
-        if ( ( currNode == null || possessed.Distance2D(currNode) > 400 ) && CVar.FindCVar('zb_autonodes').GetBool() )
+        if ( ( currNode == null || possessed.Distance2D(currNode) > 300 ) && CVar.FindCVar('zb_autonodes').GetBool() )
         {
-            pastNode = currNode;
-            SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL));
+            SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL, possessed.angle));
         }	
 
-        else if ( currNode != null && possessed.Distance2D(currNode) > 48 ) {
+        else if ( currNode != null && possessed.Distance2D(currNode) > 64 && CVar.FindCVar('zb_autonodes').GetBool() ) {
             // barrel shoot check
-            let it_barrels = ThinkerIterator.create("Barrel", STAT_DEFAULT);
-            Barrel bclosest = null, bar = null;
+            let it_barrels = ThinkerIterator.create("ExplosiveBarrel", STAT_DEFAULT);
+            ExplosiveBarrel bclosest = null, bar = null;
             double bdist = 100;
 
-            while ( bar = Barrel(it_barrels.Next()) ) {
+            while ( bar = ExplosiveBarrel(it_barrels.Next()) ) {
                 if ( LineOfSight(bar) && possessed.Distance2D(bar) < bdist ) {
                     bclosest = bar;
                     bdist = possessed.Distance2D(bar);
