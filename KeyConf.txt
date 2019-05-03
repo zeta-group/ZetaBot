@@ -20,6 +20,6 @@ addmenukey "Save Path Nodes" "summon ztuploadnodes"
 addmenukey "Load Path Nodes" "summon ztpromptnodes"
 addmenukey "Kill All Bots" "kill zetadoom; kill zetastrife; kill zetasmushes"
 
-alias superzeta "summonfriend ZetaBot 0; wait 1; test $r_superzeta superzeta"
+alias superzeta "summonfriend ZetaBot 0; wait 3; test $r_superzeta superzeta"
 alias +superzeta "set r_superzeta 1; superzeta"
 alisa -superzeta "set r_superzeta 0"

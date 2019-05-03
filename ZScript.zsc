@@ -1438,7 +1438,7 @@ class ZTBotController : Actor
         {
             if ( enemy != null && enemy.Health >= 1 ) // health is integer
             {
-                if ( !possessed.CheckSight(enemy) && possessed.Distance2D(enemy) > 768 )
+                if ( !possessed.CheckSight(enemy) )
                 {
                     possessed.EndShoot();
                     lastEnemyPos = enemy.pos;
@@ -1459,6 +1459,7 @@ class ZTBotController : Actor
                         enemy = null;
                         goingAfter = null;
                         
+                        possessed.EndShoot();
                         SetBotState(BS_WANDERING);
                     }
 
@@ -1469,11 +1470,18 @@ class ZTBotController : Actor
                             
                         else if ( possessed.Distance3D(enemy) < 128 + enemy.radius )
                             StepBackFrom(enemy);
-                            
+
                         RandomStrafe();
                         AimToward(enemy, 0.27, 30);
-                        
-                        if ( FireBestWeapon() )
+
+                        let off = possessed.Vec2To(enemy) / possessed.Distance2D(enemy);
+                        let dir = AngleToVector(possessed.angle);
+                        double ddot = (off.x * dir.x) + (off.y * dir.y);
+
+                        if ( dDot <= 0 )
+                            possessed.EndShoot();
+
+                        else if ( FireBestWeapon() )
                             possessed.BeginShoot();
                             
                         else
