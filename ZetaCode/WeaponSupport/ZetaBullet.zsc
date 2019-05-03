@@ -38,10 +38,10 @@ class ZetaBullet : Actor
 			bullet.currDmg = Floor(damage + 0.5);
 			bullet.angle += FRandom(-spreadX, spreadX);
 
-			if (target != null) {
-				bullet.pitch = (target.pos.z - shooter.pos.z) / target.Distance2D(shooter);
-				bullet.pitch += FRandom(-spreadY, spreadY);
-			}
+			if (target != null && target.Distance2D(shooter) > 0)
+				bullet.pitch = (target.pos.z - shooter.pos.z);
+
+			bullet.pitch += FRandom(-spreadY, spreadY);
 
             bullet.shooter = shooter;
             bullet.damageType = damageType;

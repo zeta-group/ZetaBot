@@ -15,7 +15,8 @@ class ZTPathNode : Actor
 		NT_CROUCH,
 		NT_JUMP,
 		NT_AVOID,
-		NT_SHOOT
+		NT_SHOOT,
+		NT_RESPAWN
 	};
 
 	static const string ZTNavTypeNames[] = {
@@ -25,7 +26,8 @@ class ZTPathNode : Actor
         "Crouch",
         "Jump",
         "Avoid",
-        "Shoot"
+        "Shoot",
+        "Respawn"
     };
 
 	enum LogType

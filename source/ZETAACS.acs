@@ -1,6 +1,16 @@
 #include "zcommon.acs"
 
-script 1994 ENTER
+script 1992 ENTER
+{
+    GiveInventory("BotName", 1);
+}
+
+script 1993 RETURN
+{
+    GiveInventory("BotName", 1);
+}
+
+script 1994 RESPAWN
 {
     GiveInventory("BotName", 1);
 }
