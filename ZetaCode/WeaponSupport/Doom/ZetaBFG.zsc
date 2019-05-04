@@ -4,6 +4,7 @@ class ZetaBFG : ZetaWeapon
 	{
 		ZetaWeapon.FireInterval 11428571;
 		ZetaWeapon.MinAmmo 40;
+        ZetaWeapon.AmmoUse 40;
 		ZetaWeapon.AmmoType "Cell";
 	}
 

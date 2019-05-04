@@ -7,6 +7,7 @@ class Minigun : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "BallistaAmmo";
 		ZetaWeapon.AltMinAmmo 3;
+        ZetaWeapon.AltAmmoUse 3;
 		ZetaWeapon.AltAmmoType "BallistaAmmo";
 	}
 

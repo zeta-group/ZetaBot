@@ -237,7 +237,9 @@ class ZetaBotPawn : Actor
 				
 				if ( w != null )
 				{
-					w.vel = Vec3Offset(FRandom(-2, 2), FRandom(-2, 2), FRandom(0, 2.5), true);
+					w.vel.x = vel.x + FRandom(-5, 5);
+                    w.vel.y = vel.y + FRandom(-5, 5);
+                    w.vel.z = vel.z + FRandom(2, 7);
 					
 					Inventory ammo1 = FindInventory(w.AmmoType1);
 					Inventory ammo2 = FindInventory(w.AmmoType2);

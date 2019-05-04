@@ -4,6 +4,7 @@ class ZetaSSG : ZetaWeapon
 	{
 		ZetaWeapon.FireInterval 15428571;
 		ZetaWeapon.MinAmmo 2;
+        ZetaWeapon.AmmoUse 2;
 		ZetaWeapon.AmmoType "Shell";
 	}
 

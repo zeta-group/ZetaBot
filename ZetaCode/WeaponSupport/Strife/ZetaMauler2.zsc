@@ -4,6 +4,7 @@ class ZetaMauler2 : ZetaWeapon
 	{
 		ZetaWeapon.FireInterval 15428571;
 		ZetaWeapon.MinAmmo 30;
+        ZetaWeapon.AmmoUse 30;
 		ZetaWeapon.AmmoType "EnergyPod";
 	}
 	

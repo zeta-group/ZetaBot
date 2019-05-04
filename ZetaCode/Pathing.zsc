@@ -77,8 +77,9 @@ class ZTPathNode : Actor
 		Super.BeginPlay();
 		
 		id = 0;
+        ChangeStatNum(91);
 		
-		let iter = ThinkerIterator.create("ZTPathNode");
+		let iter = ThinkerIterator.Create("ZTPathNode", 91);
 		
 		while ( iter.Next() )
 			id++;
@@ -87,11 +88,6 @@ class ZTPathNode : Actor
 	override void PostBeginPlay()
 	{
 		super.PostBeginPlay();
-		
-		/*
-		if ( !bPlopped )
-			uploadLevel();
-		*/
 		
 		DebugLog(LT_VERBOSE, "Created new node: "..serialize());
 	}
@@ -136,40 +132,6 @@ class ZTPathNode : Actor
 			list.push(node);
 			
 		return serializeAll(list);
-	}
-	
-	static string uploadLevel(String cvName = "nodelist")
-	{
-		String code = CVar.FindCVar(cvName).GetString();
-			
-		if ( code == "::NONE" )
-			code = serializeLevel();
-		
-		else
-		{
-			String c;
-			uint i = 0;
-		
-			while ( true )
-			{
-                c = split(code, ";;", i++);
-			
-				if ( split(c, "::", 0) == level.mapName)
-					break;
-					
-				if ( c == "" )
-				{
-                    code = serializeLevel()..";;"..code;
-					CVar.FindCVar(cvName).SetString(code);
-					return code;
-				}
-			}
-			
-			code = code.Left(sindex(code, c))..serializeLevel()..code.Mid(sindex(code, c) + c.Length());
-		}
-		
-		CVar.FindCVar(cvName).SetString(code);
-		return code;
 	}
 	
 	static String split(string other, string sep, uint index)
@@ -456,11 +418,26 @@ class ZTPathNode : Actor
 		
 		return diffZ <= Distance2D(next) || CheckSight(next);
 	}
+
+    override void Tick() {
+        if ( CVar.FindCVar("zb_debug").GetInt() < 1 )
+			SetStateLabel("DLoop");
+			
+        else {
+            angle += 18;
+            SetStateLabel("DVisible");
+        }
+
+        Super.Tick();
+    }
 	
 	Default
 	{
         Scale 0.35;
-        Height 32;
+        Height 16;
+        Radius 18;
+        Alpha 0.25;
+        RenderStyle "Translucent";
 	}
 	
 	States
@@ -470,24 +447,11 @@ class ZTPathNode : Actor
 			Goto DLoop;
 			
 		DLoop:
-			TNT1 A 1;
-			TNT1 A 0
-			{
-				if ( CVar.FindCVar("zb_debug").GetInt() > 0 )
-					SetStateLabel("DVisible");
-			}
+			TNT1 A 2;
 			Loop;
 			
 		DVisible:
-			NODE A 1 Bright;
-			CAND A 0
-			{
-				if ( CVar.FindCVar("zb_debug").GetInt() < 1 )
-					SetStateLabel("DLoop");
-					
-                else
-                    angle += 18;
-			}
+			NODE A 2 Bright;
 			Loop;
 	}
 }
@@ -585,10 +549,47 @@ class ZTUploadNodes : Actor
 {
 	override void BeginPlay()
 	{
-		String code = ZTPathNode.uploadLevel("nodelist");
+		//String code = ZTPathNode.uploadLevel();
+        uploadLevel(CVar.FindCVar("zb_nodevar").GetString());
 		// A_PrintBold("'"..code.."'");
 		
 		Destroy();
+	}
+    
+    static void uploadLevel(String cvName)
+	{
+        if (CVar.FindCVar(cvName) == null)
+            return;
+
+		String code = CVar.FindCVar(cvName).GetString();
+			
+		if ( code == "::NONE" || code == "" )
+			code = ZTPathNode.serializeLevel();
+		
+		else
+		{
+			String c;
+			uint i = 0;
+		
+			while ( true )
+			{
+                c = ZTPathNode.split(code, ";;", i++);
+			
+				if ( ZTPathNode.split(c, "::", 0) == level.mapName)
+					break;
+					
+				if ( c == "" )
+				{
+                    code = ZTPathNode.serializeLevel()..";;"..code;
+					CVar.FindCVar(cvName).SetString(code);
+					return;
+				}
+			}
+			
+			code = code.Left(ZTPathNode.sindex(code, c))..ZTPathNode.serializeLevel()..code.Mid(ZTPathNode.sindex(code, c) + c.Length());
+		}
+		
+		CVar.FindCVar(cvName).SetString(code);
 	}
 }
 
@@ -597,12 +598,12 @@ class ZTPromptNodes : Actor
 	override void BeginPlay()
 	{
 		ZTPathNode n;
-		let iter = ThinkerIterator.Create("ZTPathNode");
+		let iter = ThinkerIterator.Create("ZTPathNode", 91);
 		
 		while ( n = ZTPathNode(iter.Next()) )
 			n.Destroy();
 		
-		cvar cv = CVar.FindCVar("nodelist");
+		cvar cv = CVar.FindCVar(CVar.FindCVar("zb_nodevar").GetString());
 		
 		if ( cv == null )
 		{
@@ -626,7 +627,7 @@ class ZTDeleteNodes : Actor
 	override void BeginPlay()
 	{
 		ZTPathNode n;
-		let iter = ThinkerIterator.Create("ZTPathNode");
+		let iter = ThinkerIterator.Create("ZTPathNode", 91);
 		String logged = "Deleted %u nodes.";
 		uint count = 0;
 		

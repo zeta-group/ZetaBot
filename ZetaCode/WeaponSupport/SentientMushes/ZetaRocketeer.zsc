@@ -6,6 +6,7 @@ class ZetaRocketeer : ZetaWeapon
 		ZetaWeapon.AltFireInterval 5714285;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AltMinAmmo 1;
+        ZetaWeapon.AltAmmoUse 0;
 		ZetaWeapon.AmmoType "RocketAmmo";
 		ZetaWeapon.AltAmmoType "RocketAmmo";
 	}
