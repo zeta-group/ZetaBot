@@ -607,35 +607,40 @@ class ZTBotController : Actor
         }
     }
     
-    void SmartMove()
+    void SmartMove(ZTPathNode toward = null)
     {
+        if (toward == null) toward = navDest;
+        if (toward == null) return;
+
+        if (!possessed.CheckSight(toward)) toward = currNode;
+
         if ( possessed != null )
         {
             if ( currNode != null && currNode.nodeType == ZTPathNode.NT_USE )
                 DodgeAndUse();
 
-            if ( navDest != null )
+            if ( toward != null )
             {
                 if ( currNode != null )
                 {
-                    if ( navDest.nodeType == ZTPathNode.NT_JUMP )
+                    if ( toward.nodeType == ZTPathNode.NT_JUMP )
                     {
-                        aimToward(navDest, 0.1, 0.1);
+                        aimToward(toward, 0.1, 0.1);
                     
                         if ( possessed.pos.z - possessed.floorz < 1 )
                             possessed.Jump();
                     }
                     
-                    else if ( navDest.nodeType == navDest.NT_CROUCH )
+                    else if ( toward.nodeType == toward.NT_CROUCH )
                         possessed.moveType = ZetaBotPawn.MM_Crouch;
                         
-                    else if ( navDest.nodeType == navDest.NT_SLOW )
+                    else if ( toward.nodeType == toward.NT_SLOW )
                         possessed.moveType = ZetaBotPawn.MM_None;
                         
                     else
                         possessed.moveType = ZetaBotPawn.MM_Run;
                         
-                    if ( navDest.pos.z - possessed.pos.z > 28 && possessed.pos.z - possessed.floorz < 1 )
+                    if ( toward.pos.z - possessed.pos.z > 28 && possessed.pos.z - possessed.floorz < 1 )
                         possessed.Jump();
                         
                     if ( currNode.nodeType == ZTPathNode.NT_USE )
@@ -649,11 +654,11 @@ class ZTBotController : Actor
                             possessed.EndShoot();
                     }
                          
-                    MoveTowardDest();
+                    MoveToward(toward15);
                 }
                     
                 else
-                    MoveTowardDest();
+                    MoveToward(toward, 15);
             }
             
             else
@@ -1296,7 +1301,7 @@ class ZTBotController : Actor
                     BotChat("IDLE", 2.25 / 90);
 
                 if ( possessed.Distance3D(navDest) > 64 )
-                    SmartMove();
+                    SmartMove(navDest);
                     
                 else if ( bstate == BS_WANDERING )
                     navDest = navDest.randomNeighbor();
