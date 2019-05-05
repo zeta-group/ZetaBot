@@ -654,7 +654,7 @@ class ZTBotController : Actor
                             possessed.EndShoot();
                     }
                          
-                    MoveToward(toward15);
+                    MoveToward(toward, 15);
                 }
                     
                 else
