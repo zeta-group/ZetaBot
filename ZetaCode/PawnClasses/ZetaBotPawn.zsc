@@ -1,11 +1,11 @@
-class ZetaBotPawn : Actor
-{
+class ZetaBotPawn : Actor {
 	property DefaultInv: defweap;
 	String defweap;
 	bool bMoved;
+	double forward;
+	double rightward;
 
-	Default
-	{
+	Default {
 		PainChance 100;
 		Speed 1;
 		Obituary "%o wound up smarted out by %NAME%!";
@@ -39,16 +39,14 @@ class ZetaBotPawn : Actor
 		-CANPUSHWALLS
 	}
 
-	static String GetSomeType(Actor anchor = null)
-	{
+	static String GetSomeType(Actor anchor = null) {
         Array<String> rset;
 		Array<String> types;
 		Array<String> parms;
 		let btypes = CVar.FindCVar('zb_btypes').GetString();
 		btypes.Split(types, ';');
 		
-		for ( uint i = 0; i < types.Size(); i++ )
-        {
+		for ( uint i = 0; i < types.Size(); i++ ) {
             parms.Clear();
             types[i].Split(parms, ':');
             
@@ -72,8 +70,7 @@ class ZetaBotPawn : Actor
             return "";
 	}
 	
-	enum MovementModifier
-	{
+	enum MovementModifier {
 		MM_None,
 		MM_Run,
 		MM_Crouch,
@@ -82,23 +79,20 @@ class ZetaBotPawn : Actor
 	MovementModifier moveType;
 	bool bShooting; // for visual purposes
 	ZTBotController cont;
-	const speedMod = 4;
+	const speedMod = 1;
 	
-	override String GetObituary(Actor victim, Actor inflictor, Name mod, bool playerattack)
-	{
+	override String GetObituary(Actor victim, Actor inflictor, Name mod, bool playerattack) {
 		if (mod == 'Telefrag')
 			return "$OB_MONTELEFRAG";
 		
 		string newObituary = Obituary;
 		
-		if ( cont != null )
-		{
+		if ( cont != null ) {
 			newObituary.Replace("%ID%", ""..cont.BotID);
 			newObituary.Replace("%NAME%", cont.myName);
 		}
 			
-		else
-		{
+		else {
 			newObituary.Replace("%ID%", ""..-1);
 			newObituary.Replace("%NAME%", "a ghost ZetaBot");
 		}
@@ -106,13 +100,25 @@ class ZetaBotPawn : Actor
 		return newObituary;
 	}
 	
-	void BotThrust(double maxSpeed, double angle)
-	{
-		Thrust(maxSpeed * speedMod - sqrt(vel.x * vel.x + vel.y * vel.y), angle);
+	void BotThrust(double maxSpeed, double angle) {
+		Thrust(maxSpeed * speedMod, angle);
+	}
+
+	void CapSpeed(double maxSpeed) {
+		if (vel.x > maxSpeed * speedMod)
+			vel.x = min(vel.x, maxSpeed * speedMod);
+
+		else if (vel.x < -maxSpeed * speedMod) 
+			vel.x = max(vel.x, -maxSpeed * speedMod);
+
+		if (vel.y > maxSpeed * speedMod)
+			vel.y = min(vel.y, maxSpeed * speedMod);
+
+		else if (vel.y < -maxSpeed * speedMod) 
+			vel.y = max(vel.y, -maxSpeed * speedMod);
 	}
 	
-	override void BeginPlay()
-	{
+	override void BeginPlay() {
 		Array<String> dweap;
 		defweap.split(dweap, ",");
 		
@@ -122,8 +128,7 @@ class ZetaBotPawn : Actor
 		Array<String> eweap;
 		let extra = CVar.GetCVar("zb_extraweap").GetString();
 			
-		if ( extra != "" )
-		{
+		if ( extra != "" ) {
 			extra.split(eweap, ",");	// not ";" to support Bash command
 										//line parameter setting
 			
@@ -131,45 +136,79 @@ class ZetaBotPawn : Actor
 				GiveInventoryType(eweap[i]);
 		}
 	}
-	
-	void MoveForward()
-	{
-		if ( bMoved && FRandom(0, 1) < 0.4 )
-			return;
-			
-		bMoved = true;
+
+	void ApplyMovement() {
+		if ( forward > 0 ) {
+			forward = max(forward - 1.0, 0);
+			RealMoveForward();
+		}
+
+		else if ( forward <= -1 ) {
+			forward = min(forward + 1.0, 0);
+			RealMoveBackward();
+		}
+
+		else if ( forward < 0 ) {
+			forward = min(forward + 0.8, 0);
+			RealStepBackward();
+		}
+
+		if ( rightward > 0 ) {
+			rightward = max(rightward - 1.0, 0);
+			RealMoveRight();
+		}
+
+		else if ( rightward < 0 ) {
+			rightward = max(rightward + 1.0, 0);
+			RealMoveLeft();
+		}
+
+		forward /= 1.5;
+		rightward /= 1.5;
+		CapSpeed(10);
+	}
+
+	void RealMoveForward() {
 		BotThrust(moveType == MM_Run ? 5 : (moveType == MM_Crouch ? 1.2 : 2.5), angle);
 	}
+
+	void RealMoveBackward() {
+		BotThrust(moveType == MM_Run ? -4.5 : (moveType == MM_Crouch ? -1 : -2), angle);
+	}
+
+	void RealStepBackward() {
+		BotThrust(moveType == MM_Run ? -3 : (moveType == MM_Crouch ? -0.8 : -1.35), angle);
+	}
 	
-	void MoveRight()
-	{
-		if ( bMoved && FRandom(0, 1) < 0.4 )
-			return;
-			
-		bMoved = true;
+	void RealMoveRight() {
 		BotThrust(moveType == MM_Run ? 5 : (moveType == MM_Crouch ? 1.2 : 2.5), angle + 90);
 	}
 	
-	void MoveLeft()
-	{
-		if ( bMoved && FRandom(0, 1) < 0.4 )
-			return;
-			
-		bMoved = true;
+	void RealMoveLeft() {
 		BotThrust(moveType == MM_Run ? 5 : (moveType == MM_Crouch ? 1.2 : 2.5), angle - 90);
 	}
 	
-	void MoveBackward()
-	{
-		if ( bMoved && FRandom(0, 1) < 0.4 )
-			return;
-			
-		bMoved = true;
-		BotThrust(moveType == MM_Run ? -4.5 : (moveType == MM_Crouch ? -1 : -2), angle);
+	void MoveForward() {
+		forward += 1;
+	}
+
+	void MoveBackward() {
+		forward -= 1;
+	}
+
+	void StepBackward() {
+		forward -= 0.4;
 	}
 	
-	void SetMoveType(uint nmoveType)
-	{
+	void MoveRight() {
+		rightward += 1;
+	}
+	
+	void MoveLeft() {
+		rightward -= 1;
+	}
+
+	void SetMoveType(uint nmoveType) {
 		moveType = nmoveType;
 		
 		if ( moveType == MM_CROUCH )
@@ -179,27 +218,15 @@ class ZetaBotPawn : Actor
 			Height = Default.Height;
 	}
 	
-	void StepBackward()
-	{
-		if ( bMoved && FRandom(0, 1) < 0.4 )
-			return;
-			
-		bMoved = true;
-		BotThrust(moveType == MM_Run ? -3 : (moveType == MM_Crouch ? -0.8 : -1.35), angle);
-	}
-	
-	void BeginShoot()
-	{
+	void BeginShoot() {
 		bShooting = true;
 	}
 	
-	void EndShoot()
-	{
+	void EndShoot() {
 		bShooting = false;
 	}
 	
-	void Jump()
-	{
+	void Jump() {
 		if ( pos.z - floorZ > 1 || vel.z > 0 )
 			return;
 			
@@ -210,33 +237,28 @@ class ZetaBotPawn : Actor
 		A_PlaySound("ztmisc/jump", CHAN_BODY);
 	}
 	
-	void A_BotPain()
-	{
+	void A_BotPain() {
 		if ( cont != null )
 			cont.PlayPain();
 	}
 	
-	void A_OnDeath()
-	{
+	void A_OnDeath() {
 		if ( cont != null )
 			cont.OnDeath();
 			
 		A_DropWeapons();
 	}
 	
-	void A_DropWeapons()
-	{
+	void A_DropWeapons() {
 		let iter = ThinkerIterator.Create("Weapon");
 		
 		Weapon w;
 		
 		while ( w = Weapon(iter.Next()) )
-			if ( w != null && w.Owner == self )
-			{
+			if ( w != null && w.Owner == self ) {
 				Weapon w = Weapon(Spawn(w.GetClass(), Vec3Offset(0, 0, 2)));				
 				
-				if ( w != null )
-				{
+				if ( w != null ) {
 					w.vel.x = vel.x + FRandom(-5, 5);
                     w.vel.y = vel.y + FRandom(-5, 5);
                     w.vel.z = vel.z + FRandom(2, 7);
@@ -250,8 +272,7 @@ class ZetaBotPawn : Actor
 			}
 	}
 	
-	override void Tick()
-	{
+	override void Tick() {
 		Super.Tick();
 		bMoved = false;
 	}

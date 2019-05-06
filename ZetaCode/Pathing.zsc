@@ -5,7 +5,69 @@ class PlopResult : Thinker
 	Array<String> nodeMaps;
 }
 
-class ZTPathNode : Actor
+class ZTPositionMarker : Actor {
+	Default
+	{
+        Scale 0.2;
+        Height 16;
+        Radius 18;
+        Alpha 0.175;
+        RenderStyle "Translucent";
+	}
+
+	override void Tick() {
+        if ( CVar.FindCVar("zb_debug").GetInt() < 1 )
+			SetStateLabel("DLoop");
+			
+        else {
+            angle += 18;
+            SetStateLabel("DVisible");
+        }
+
+        Super.Tick();
+    }
+	
+	States {
+		Spawn:
+			TNT1 A 0;
+			Goto DLoop;
+			
+		DLoop:
+			TNT1 A 2;
+			Loop;
+			
+		DVisible:
+			NODE A 2 Bright;
+			Loop;
+	}
+}
+
+class NumNodes : Thinker {
+    uint value;
+
+    NumNodes Init() {
+        ChangeStatNum(STAT_INFO);
+        value = 0;
+        return self;
+    }
+
+    static NumNodes Get() {
+        ThinkerIterator it = ThinkerIterator.Create("NumNodes", STAT_INFO);
+        let p = NumNodes(it.Next());
+        
+        if (p == null)
+            p = new("NumNodes").Init();
+        
+        return p;
+    }
+
+	static uint Increment() {
+		NumNodes res = Get();
+		return ++res.value;
+	}
+}
+
+class ZTPathNode : ZTPositionMarker
 {
 	enum NavigationType
 	{
@@ -16,7 +78,8 @@ class ZTPathNode : Actor
 		NT_JUMP,
 		NT_AVOID,
 		NT_SHOOT,
-		NT_RESPAWN
+		NT_RESPAWN,
+		NT_TARGET
 	};
 
 	static const string ZTNavTypeNames[] = {
@@ -27,7 +90,8 @@ class ZTPathNode : Actor
         "Jump",
         "Avoid",
         "Shoot",
-        "Respawn"
+        "Respawn",
+        "Target"
     };
 
 	enum LogType
@@ -70,26 +134,20 @@ class ZTPathNode : Actor
 	double useDirection;
 	bool bPlopped;
 	uint id;
-	bool bGoalNode;
 	
 	override void BeginPlay()
 	{
 		Super.BeginPlay();
 		
-		id = 0;
+		id = NumNodes.Increment();
         ChangeStatNum(91);
-		
-		let iter = ThinkerIterator.Create("ZTPathNode", 91);
-		
-		while ( iter.Next() )
-			id++;
 	}
 	
 	override void PostBeginPlay()
 	{
 		super.PostBeginPlay();
 		
-		DebugLog(LT_VERBOSE, "Created new node: "..serialize());
+		DebugLog(LT_VERBOSE, String.format("Created node #%i at x=%f,y=%f", id, pos.x, pos.y));
 	}
 	
 	static uint sindex(String full, String sub)
@@ -105,7 +163,7 @@ class ZTPathNode : Actor
 	
 	string serialize()
 	{
-		return int(pos.x)..","..int(pos.y)..","..int(pos.z)..","..nodeType..","..int(useDirection)..","..(bGoalNode ? "y" : "n");
+		return int(pos.x)..","..int(pos.y)..","..int(pos.z)..","..nodeType..","..int(useDirection);
 	}
 	
 	static string serializeAll(ActorList allNodes)
@@ -129,7 +187,8 @@ class ZTPathNode : Actor
 		ZTPathNode node = null;
 		
 		while ( node = ZTPathNode(iter.Next()) )
-			list.push(node);
+			if (node.nodeType != NT_TARGET)
+				list.push(node);
 			
 		return serializeAll(list);
 	}
@@ -236,7 +295,6 @@ class ZTPathNode : Actor
 			let node = ZTPathNode(Spawn("ZTPathNode", (nx, ny, nz)));
 			node.nodeType = nt;
 			node.bPlopped = true;
-			node.bGoalNode = split(ncode, ",", 5) == "y";
 			
 			node.useDirection = ud;
 			
@@ -254,39 +312,40 @@ class ZTPathNode : Actor
 		return 0;
 	}
 	
-	ActorList neighbors()
+	ActorList Neighbors()
 	{
-		ThinkerIterator iter = ThinkerIterator.create("ZTPathNode", Thinker.STAT_DEFAULT);
+		ThinkerIterator iter = ThinkerIterator.create("ZTPathNode", 91);
 		ZTPathNode node = null;
+		let preRes = new("ActorList");
 		let res = new("ActorList");
-		let cand = new("ActorList");
-		uint cant = 0;
 	
 		while ( ( node = ZTPathNode(iter.Next()) ) != null )
-			if ( canConnect(node) )
-			{
-				res.push(node);
-				cand.push(node);
+			if ( canConnect(node) ) {
+				preRes.Push(node);
 			}
 		
-		for ( uint i = 0; i < res.length(); i++ )
-			if ( !postCanConnect(ZTPathNode(cand.Get(i - cant)), cand) )
-			{
-				res.remove(i - cant);
-				cant++;
-			}
+		for ( uint i = 0; i < preRes.Length(); i++ ) {
+			ZTPathNode preNeigh = ZTPathNode(preRes.get(i));
+
+			if ( postCanConnect(preNeigh, preRes) )
+				res.Push(preNeigh);
+		}
 		
 		return res;
+	}
+
+	String NodeName() {
+		return String.Format("#%i (x=%f,y=%f)", id, pos.x, pos.y);
 	}
 	
 	ZTPathNode RandomNeighbor()
 	{
-		ActorList nb = neighbors();
+		ActorList nb = Neighbors();
 		
 		if ( nb.Length() < 1 )
 			return self;
 		
-		return ZTPathNode(nb.get(Random(0, nb.length() - 1)));
+		return ZTPathNode(nb.get(Random(0, nb.Length() - 1)));
 	}
 	
 	ActorList findPathTo(ZTPathNode other, Actor traveller = null)
@@ -309,30 +368,38 @@ class ZTPathNode : Actor
 		icosts.set(self, 0);
 		openSet.add(self, 0);
 		
+		DebugLog(LT_VERBOSE, String.Format("> Pathfinding to: %s", other.NodeName()));
+
 		while ( openSet.length() > 0 )
 		{
 			ZTPathNode current = ZTPathNode(openSet.poll());
 			 
-			if ( current == other )
+			if (closedSet.has(current)) continue;
+
+			if (current == other)
 			{
+				DebugLog(LT_VERBOSE, String.Format("Goal node #%i found!", current.id));
 				foundGoal = true;
 				break;
 			}
 			
-			ActorList nb = current.neighbors();
+			DebugLog(LT_VERBOSE, String.Format("+-- Iterating pathfinding for node: %s", current.NodeName()));
+			ActorList nb = current.Neighbors();
 		
-			for ( uint i = 0; i < nb.length(); i++ )
-				if ( !(openSet.has(nb.get(i)) || closedSet.has(nb.get(i))) )
+			for ( uint i = 0; i < nb.Length(); i++ ) {
+				ZTPathNode neigh = ZTPathNode(nb.get(i));
+				DebugLog(LT_VERBOSE, String.Format("+-+-- Considering #%i's neighbor: %s", current.id, neigh.NodeName()));
+
+				if (!(openSet.has(neigh) || closedSet.has(neigh)))
 				{
-					ZTPathNode node = ZTPathNode(nb.get(i));
+					double icost = icosts.get(current, 0) + current.Distance3D(neigh);
+					double cost = neigh.Distance3D(other) + icost + neigh.specialCost(traveller);
 				
-					double icost = icosts.get(current, 0) + current.Distance3D(node);
-					double cost = node.Distance3D(other) + icost + node.specialCost(traveller);
-				
-					icosts.set(node, icost);
-					openSet.add(node, cost);
-					cameFrom.set(node, current);
+					icosts.set(neigh, icost);
+					openSet.add(neigh, cost);
+					cameFrom.set(neigh, current);
 				}
+			}
 				
 			closedSet.push(current);
 		}
@@ -348,9 +415,7 @@ class ZTPathNode : Actor
 			cur = ZTPathNode(cameFrom.get(Object(cur)));
 		}
 		
-		res.insert(0, self);
-		
-		DebugLog(LT_INFO, "Found a "..res.Length().."-node path between "..self.id.." and "..other.id);
+		DebugLog(LT_INFO, String.format("Found a %i-node path between %s and %s!", (res.Length() + 1), NodeName(), other.NodeName()));
 		
 		return res;
 	}
@@ -364,37 +429,42 @@ class ZTPathNode : Actor
 		return node;
 	}
 	
-	bool postCanConnect(ZTPathNode next, ActorList preNeighbors)
+	bool PostCanConnect(ZTPathNode next, ActorList preNeighbors)
 	{
-		preNeighbors.iReset();
+		if (next.nodeType == NT_AVOID)
+			return preNeighbors.Length() < 2;
+
 		ZTPathNode pn = null;
 		let off1 = Vec2To(next) / Distance2D(next);
 		
-		while ( pn = ZTPathNode(preNeighbors.iNext()) )
+		for ( uint i = 0; i < preNeighbors.Length(); i++ )
 		{
-			let off2 = Vec2To(pn) / Distance2D(pn);
+			ZTPathNode pn = ZTPathNode(preNeighbors.get(i));
 			
-			if ( pn.Distance2D(next) < Distance2D(next) - 32 && (off1.x * off2.x + off1.y * off2.y) > 0.625) // all hail the Unit Vector Dot Product!
-				return false; // there is already a shorter path in the same
-				              // direction
+			if (pn != self && pn != next && pn.Distance2D(next) < Distance2D(next) - 32) {
+				let off2 = Vec2To(pn) / Distance2D(pn);
+
+				if ((off1.x * off2.x + off1.y * off2.y) > 0.8)
+					return false; // there is already a shorter path in the same
+								  // direction
+			}
 		}
-	
-		return next.nodeType != NT_AVOID || preNeighbors.Length() < 3;
+
+		return true;
 	}
 	
-	bool canConnect(ZTPathNode next)
+	bool CanConnect(ZTPathNode next)
 	{
         if ( next == null )
             return false;
 	
-		if ( ( nodeType == NT_USE || next.nodeType == NT_USE ) && Distance2D(next) < 128 )
+		if ((nodeType == NT_USE || next.nodeType == NT_USE) && Distance2D(next) < 64)
 			return true; // for doors that block LOS but are traverseable, etc.
 	
 		double maxZDiff = 24;
-		double minZDiff = -Distance2D(next) * 1.3;
 		double minDist = 64;
 	
-		if ( next.nodeType == NT_JUMP )
+		if ( next.nodeType == NT_JUMP || nodeType == NT_JUMP )
 			maxZDiff = 60;
 			
 		if ( next.nodeType == NT_SLOW || nodeType == NT_SLOW || next.nodeType == NT_CROUCH || nodeType == NT_CROUCH )
@@ -403,73 +473,35 @@ class ZTPathNode : Actor
 		else if ( next.nodeType == NT_USE || nodeType == NT_USE )
 			minDist = 4;
 			
-		minDist -= abs(next.pos.z - pos.z) * 1.5;
+		minDist -= abs(next.pos.z - pos.z) * 0.5;
 		
-		if ( minDist < 0 )
-			minDist = 0;
+		if ( minDist <= 0 )
+			return false;
 			
 		if ( Distance3D(next) < minDist )
 			return false;
 			
 		double diffZ = next.pos.z - pos.z;
 			
-		if ( minZDiff > diffZ || diffZ > maxZDiff )
+		if ( diffZ > maxZDiff )
 			return false;
 		
-		return diffZ <= Distance2D(next) || CheckSight(next);
+		if (!CheckSight(next) && LineTrace(AngleTo(next), Distance3D(next), PitchTo(next, 32), TRF_THRUACTORS | TRF_THRUHITSCAN, 32))
+			return false;
+
+		return true;
 	}
 
-    override void Tick() {
-        if ( CVar.FindCVar("zb_debug").GetInt() < 1 )
-			SetStateLabel("DLoop");
-			
-        else {
-            angle += 18;
-            SetStateLabel("DVisible");
-        }
+	double PitchTo(Actor other, double offsZ = 0) {
+        if (other == null)
+            return 0;
 
-        Super.Tick();
+        if (other.pos.z + other.height / 2 == pos.z + height / 2 + offsZ) return 0;
+
+        return atan(offsZ + other.pos.z + other.height / 2 - pos.z - height / 2);
+        //return offsZ + other.pos.z + other.height / 2 - pos.z - height / 2;
     }
-	
-	Default
-	{
-        Scale 0.35;
-        Height 16;
-        Radius 18;
-        Alpha 0.25;
-        RenderStyle "Translucent";
-	}
-	
-	States
-	{
-		Spawn:
-			TNT1 A 0;
-			Goto DLoop;
-			
-		DLoop:
-			TNT1 A 2;
-			Loop;
-			
-		DVisible:
-			NODE A 2 Bright;
-			Loop;
-	}
 }
-
-class ZTGoalNode : Actor // BROKEN!
-{
-	override void PostBeginPlay()
-	{
-		let node = ZTPathNode(Spawn("ZTPathNode", pos));
-		node.bGoalNode = true;
-		node.nodeType = ZTPathNode.NT_USE;
-		node.useDirection = angle;
-		node.angle = angle;
-		
-		Destroy();
-	}
-}
-
 
 class ZTUseNode : Actor
 {

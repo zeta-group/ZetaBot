@@ -228,8 +228,10 @@ class ActorList
         if ( i < 0 ) // still
             i = 0;
         
-        if ( all.Size() < i )
+        if ( all.Size() < i ) {
+            bHas = false;
             return false;
+        }
             
         all.Delete(i);
         return true;
