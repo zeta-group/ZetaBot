@@ -30,11 +30,10 @@ class ZetaCape : Actor
 	
 	override void Tick()
 	{
-		if ( attached == null )
-			return;
+		if (attached == null || (attached.bShootable && attached.health <= 0))
+			Destroy();
 
-		if ( !attached.bShootable || attached.health > 0 )
-		{
+		else {
 			angle = attached.angle;
 			scale = (attached.Radius / 25, attached.Height / 70);
 			SetOrigin(attached.Vec3Angle(-5, attached.angle, attached.Height), true);

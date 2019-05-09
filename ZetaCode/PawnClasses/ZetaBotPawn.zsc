@@ -53,7 +53,7 @@ class ZetaBotPawn : Actor {
 		
             let iter = ThinkerIterator.Create(parms[1]);
             
-            if ( anchor != null ) anchor.A_Log(parms[0]..': '..parms[1]);
+            // if ( anchor != null ) anchor.A_Log(parms[0]..': '..parms[1]);
             
             if ( iter.Next() )
                 rset.Push(parms[0]);

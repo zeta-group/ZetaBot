@@ -137,5 +137,8 @@ ztmisc/rico4 "ZSRICO4"
 ztmisc/jump "ZSJUMP"
 ztmisc/die "DSPLDETH"
 ztmisc/xdie "DSPDIEHI"
+ztmisc/heretic/burndie "HEDAT1"
+ztmisc/heretic/die "plrdth"
+ztmisc/heretic/xdie "gibdth"
 
 ztmisc/grunt dsoof

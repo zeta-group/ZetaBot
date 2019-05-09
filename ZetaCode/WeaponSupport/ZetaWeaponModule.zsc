@@ -12,7 +12,7 @@ class ZetaWeaponModule : Actor
 		loader.A_Log("\cbCan not call LoadWeapons in a ZetaWeaponModule; use a subclass instead!");
 	}
 	
-	void addWeapon(String weap) // subclass ZetaWeapon, not Weapon!
+	void AddWeapon(String weap) // subclass ZetaWeapon, not Weapon!
 	{
 		ZetaWeapon spawnedWeap = ZetaWeapon(Spawn(weap));
 		weaponsLoaded.Push(spawnedWeap);
@@ -20,25 +20,12 @@ class ZetaWeaponModule : Actor
 	
 	ZetaWeapon CheckType(Weapon other)
 	{
-		for ( int i = 0; i < weaponsLoaded.Size(); i++ )
-		{
+		for ( int i = 0; i < weaponsLoaded.Size(); i++ ) {
 			ZetaWeapon zw = weaponsLoaded[i];
 			bool isp = zw.IsPickupOf(other);
 		
 			if ( isp )
-            {
-                /*
-                if ( CVar.GetCVar("zb_debug").GetInt() == 2 )
-                {
-                    String c1 = other.GetClassName();
-                    String c2 = zw.GetClassName();
-                    
-                    A_Log("Supported weapon found: "..c1.." -> "..c2);
-                }
-                */
-                
 				return zw;
-            }
 		}
 			
 		return null;

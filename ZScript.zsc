@@ -10,11 +10,13 @@ version "2.5"
 #include "ZetaCode/WeaponSupport/ZetaWeaponModule.zsc"
 #include "ZetaCode/WeaponSupport/ZetaDoomWeapons.zsc"
 #include "ZetaCode/WeaponSupport/ZetaStrifeWeapons.zsc"
+#include "ZetaCode/WeaponSupport/ZetaHereticWeapons.zsc"
 #include "ZetaCode/WeaponSupport/ZetaSMWeapons.zsc"
 
 // Pawn Modules
 #include "ZetaCode/PawnClasses/ZetaBotPawn.zsc"
 #include "ZetaCode/PawnClasses/ZetaDoom.zsc"
+#include "ZetaCode/PawnClasses/ZetaHeretic.zsc"
 #include "ZetaCode/PawnClasses/ZetaStrife.zsc"
 #include "ZetaCode/PawnClasses/ZetaSMushes.zsc"
 
@@ -255,7 +257,9 @@ class ZTBotController : Actor {
         
         for (int i = 0; i < wmodules.Size(); i++) {
             ZetaWeaponModule zwm = ZetaWeaponModule(Spawn(wmodules[i]));
+            uint oldLoaded = loader.weaponsLoaded.Size();
             loader.LoadModule(zwm);
+            DebugLog(LT_VERBOSE, String.Format("Loaded weapons module: %s (%i weapons)", zwm.GetClassName(), loader.weaponsLoaded.Size() - oldLoaded));
         }
         
         navDest = null;
@@ -269,6 +273,7 @@ class ZTBotController : Actor {
         }
         
         else {
+            DebugLog(LT_INFO, String.Format("Type chosen: %s", ptype));
             SetPossessed(ZetaBotPawn(Spawn(ptype, pos)));
 
             // Telefrag overlaps

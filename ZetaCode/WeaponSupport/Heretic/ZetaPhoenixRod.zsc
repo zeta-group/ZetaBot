@@ -1,0 +1,27 @@
+class ZetaPhoenixRod : ZTMyWeapon {
+    default {
+        ZTMyWeapon.ZT_SPLASHDANGER true;
+
+        ZTMyWeapon.WeaponType "PhoenixRod";
+        ZTMyWeapon.BaseRating 10000;
+        ZTMyWeapon.RatingFade 48;
+
+        ZTMyWeapon.DangerRadius 96;
+        ZTMyWeapon.DangerRating 8000;
+        ZTMyWeapon.DangerFactor 6;
+
+        ZetaWeapon.FireInterval 5714286;
+        ZetaWeapon.AmmoType "PhoenixRodAmmo";
+    }
+
+    override void Fire(Actor shooter, Actor target)
+	{
+        double pitch = 0;
+
+		if (target != null && target.Distance2D(shooter) > 0)
+			pitch = ((target.pos.z - shooter.pos.z) * 25 / target.Distance2D(shooter));
+
+        shooter.SpawnMissileAngle("PhoenixFX1", shooter.angle, pitch);
+        shooter.Thrust(-4);
+	}
+}
