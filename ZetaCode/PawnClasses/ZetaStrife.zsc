@@ -56,18 +56,21 @@ class ZetaStrife : ZetaBotPawn
 			Stop;
 			
 		Death:
-			PLAY H 3;
+			PLAY H 3 A_OnDeath;
 			PLAY I 3 A_PlaySound("ztmisc/die");
 			PLAY J 0 A_NoBlocking;
-			PLAY J 3 A_OnDeath;
+			PLAY J 3;
 			PLAY KLMNO 4;
 			PLAY P -1;
 			Stop;
 			
 		XDeath:
-            RGIB A 5 A_TossGib;
+            RGIB A 5 {
+				A_OnDeath();
+				A_TossGib();
+			}
             RGIB B 5 A_PlaySound("ztmisc/xdie");
-            RGIB C 0 A_OnDeath;
+            RGIB C 0;
             RGIB C 5 A_NoBlocking;
             RGIB DEFG 5 A_TossGib;
             RGIB H -1 A_TossGib;
@@ -83,10 +86,11 @@ class ZetaStrife : ZetaBotPawn
             WAVE ABCD 3;
             Loop;
         Burn:
+			BURN A 0 A_OnDeath;
             BURN A 3 Bright A_PlaySound("human/imonfire", CHAN_VOICE);
             BURN B 3 Bright A_DropFire;
             BURN C 3 Bright A_Wander;
-            BURN D 0 Bright A_OnDeath;
+            BURN D 0 Bright;
             BURN D 3 Bright A_NoBlocking;
             BURN E 5 Bright A_DropFire;
             BURN FGH 5 Bright A_Wander;

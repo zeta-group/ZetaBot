@@ -9,7 +9,6 @@ class ZetaBotPawn : Actor {
 		PainChance 100;
 		Speed 1;
 		Obituary "%o wound up smarted out by %NAME%!";
-		Species "ZetaBot";
 		ZetaBotPawn.DefaultInv "";
 		Health 100;
 		Radius 16;
@@ -33,7 +32,6 @@ class ZetaBotPawn : Actor {
 		+ACTIVATEMCROSS
 		+PUSHABLE
 		+ISMONSTER
-		+THRUSPECIES
 		//+BLOCKASPLAYER
 
 		-CANPUSHWALLS

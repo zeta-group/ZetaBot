@@ -368,7 +368,7 @@ class ZTPathNode : ZTPositionMarker
 		icosts.set(self, 0);
 		openSet.add(self, 0);
 		
-		DebugLog(LT_VERBOSE, String.Format("> Pathfinding to: %s", other.NodeName()));
+		DebugLog(LT_VERBOSE, String.Format("> Pathfinding from %s to %s", NodeName(), other.NodeName()));
 
 		while ( openSet.length() > 0 )
 		{
@@ -486,8 +486,13 @@ class ZTPathNode : ZTPositionMarker
 		if ( diffZ > maxZDiff )
 			return false;
 		
-		if (!CheckSight(next) && LineTrace(AngleTo(next), Distance3D(next), PitchTo(next, 32), TRF_THRUACTORS | TRF_THRUHITSCAN, 32))
-			return false;
+		if (!CheckSight(next)) {
+			FLineTraceData sight;
+			LineTrace(AngleTo(next), Distance2D(next), PitchTo(next, 40), TRF_THRUACTORS | TRF_THRUHITSCAN, 40, data: sight);
+
+			if (sight.HitType == TRACE_HITWALL)
+				return false;
+		}
 
 		return true;
 	}
@@ -498,8 +503,8 @@ class ZTPathNode : ZTPositionMarker
 
         if (other.pos.z + other.height / 2 == pos.z + height / 2 + offsZ) return 0;
 
-        return atan(offsZ + other.pos.z + other.height / 2 - pos.z - height / 2);
-        //return offsZ + other.pos.z + other.height / 2 - pos.z - height / 2;
+        //return atan(offsZ + other.pos.z + other.height / 2 - pos.z - height / 2);
+        return offsZ + other.pos.z + other.height / 2 - pos.z - height / 2;
     }
 }
 
