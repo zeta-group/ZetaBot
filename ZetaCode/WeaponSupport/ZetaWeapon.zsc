@@ -136,6 +136,7 @@ class ZetaWeapon : Actor
 // For simplicity.
 class ZTMyWeapon : ZetaWeapon {
 	bool bZT_SPLASHDANGER;
+	bool bZT_ALTSPLASHDANGER;
 	bool bZT_HASALT;
 	bool bZT_MELEE;
 	bool bZT_ALTMELEE;
@@ -147,6 +148,7 @@ class ZTMyWeapon : ZetaWeapon {
 	bool bZT_ALTMELEECUSTOMDAMAGE;
 
 	property ZT_SPLASHDANGER: bZT_SPLASHDANGER;
+	property bZT_ALTSPLASHDANGER: bZT_ALTSPLASHDANGER;
 	property ZT_HASALT: bZT_HASALT;
 	property ZT_MELEE: bZT_MELEE;
 	property ZT_ALTMELEE: bZT_ALTMELEE;
@@ -158,6 +160,7 @@ class ZTMyWeapon : ZetaWeapon {
 	property ZT_ALTMELEECUSTOMDAMAGE: bZT_ALTMELEECUSTOMDAMAGE;
 
 	double DangerRadius;
+	double AltDangerRadius;
 	double MeleeDamage;
 	double AltMeleeDamage;
 	class<Actor> MissileType;
@@ -170,11 +173,13 @@ class ZTMyWeapon : ZetaWeapon {
 	double BaseRating;
 	double AltBaseRating;
 	double DangerRating;
+	double AltDangerRating;
 	double BulletSpreadH;
 	double AltBulletSpreadH;
 	double BulletSpreadV;
 	double AltBulletSpreadV;
 	double DangerFactor;
+	double AltDangerFactor;
 	string ShootSound;
 	string AltShootSound;
 	double RatingFade;
@@ -193,13 +198,16 @@ class ZTMyWeapon : ZetaWeapon {
 	property BaseRating: BaseRating;
 	property AltBaseRating: AltBaseRating;
 	property DangerRating: DangerRating;
+	property AltDangerRating: AltDangerRating;
 	property DangerRadius: DangerRadius;
+	property AltDangerRadius: AltDangerRadius;
 	property WeaponType: WeaponType;
 	property BulletSpreadH: BulletSpreadH;
 	property AltBulletSpreadH: AltBulletSpreadH;
 	property BulletSpreadV: BulletSpreadV;
 	property AltBulletSpreadV: AltBulletSpreadV;
 	property DangerFactor: DangerFactor;
+	property AltDangerFactor: AltDangerFactor;
 	property ShootSound: ShootSound;
 	property AltShootSound: AltShootSound;
 	property RatingFade: RatingFade;
@@ -209,6 +217,7 @@ class ZTMyWeapon : ZetaWeapon {
 
 	default {
 		ZTMyWeapon.DangerRadius 128;
+		ZTMyWeapon.AltDangerRadius 128;
 		ZTMyWeapon.MeleeDamage 3;
 		ZTMyWeapon.AltMeleeDamage 5;
 		ZTMyWeapon.MissileType "Rocket";
@@ -219,11 +228,13 @@ class ZTMyWeapon : ZetaWeapon {
 		ZTMyWeapon.AltBulletMaxDamage 7;
 		ZTMyWeapon.BaseRating 500;
 		ZTMyWeapon.DangerRating 300;
+		ZTMyWeapon.AltDangerRating 300;
 		ZTMyWeapon.BulletSpreadH 10;
 		ZTMyWeapon.AltBulletSpreadH 10;
 		ZTMyWeapon.BulletSpreadV 0;
 		ZTMyWeapon.AltBulletSpreadV 0;
-		ZTMyWeapon.DangerFactor 2.25;
+		ZTMyWeapon.DangerFactor 1.5;
+		ZTMyWeapon.AltDangerFactor 1.5;
 		ZTMyWeapon.ShootSound "";
 		ZTMyWeapon.AltShootSound "";
 		ZTMyWeapon.RatingFade 1;
@@ -293,18 +304,32 @@ class ZTMyWeapon : ZetaWeapon {
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-		if ( bZT_SPLASHDANGER && shooter.Distance3D(target) < DangerRadius )
-			return DangerRating - shooter.Distance3D(target) * DangerFactor;
+		if (bZT_MELEE) {
+			if (shooter.Distance2D(target) <= 32 + shooter.Radius + target.Radius)
+				return BaseRating;
+
+			return -1000;
+		}
+
+		if (bZT_SPLASHDANGER && shooter.Distance3D(target) < DangerRadius)
+			return DangerRating * ((shooter.Distance3D(target) - DangerRadius) * DangerFactor) / DangerRadius;
 	
-		return BaseRating / sqrt(shooter.Distance2D(target)) / Max(1, RatingFade);
+		return BaseRating / sqrt(shooter.Distance2D(target) * Max(1, RatingFade));
 	}
 
 	override double AltRateSelf(Actor shooter, Actor target)
 	{
-		if ( bZT_SPLASHDANGER && shooter.Distance3D(target) < DangerRadius )
-			return DangerRating - shooter.Distance3D(target) * DangerFactor;
+		if (bZT_ALTMELEE) {
+			if (shooter.Distance2D(target) <= 32 + shooter.Radius + target.Radius)
+				return AltBaseRating;
+
+			return -1000;
+		}
+
+		if (bZT_ALTSPLASHDANGER && shooter.Distance3D(target) < AltDangerRadius)
+			return AltDangerRating * ((AltDangerRadius - shooter.Distance3D(target)) * AltDangerFactor) / AltDangerRadius;
 	
-		return AltBaseRating / sqrt(shooter.Distance2D(target)) / Max(1, AltRatingFade);
+		return AltBaseRating / sqrt(shooter.Distance2D(target) * Max(1, AltRatingFade));
 	}
 	
 	override void Fire(Actor shooter, Actor target)

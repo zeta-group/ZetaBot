@@ -5,7 +5,7 @@ class ZetaGauntlets : ZTMyWeapon {
         
         ZTMyWeapon.WeaponType "Staff";
         ZTMyWeapon.BaseRating 1100;
-        ZTMyWeapon.RatingFade 75;
+        ZTMyWeapon.RatingFade 9;
         ZTMyWeapon.ShootSound "weapons/gauntletsuse";
         ZTMyWeapon.Puff "GauntletPuff1";
         ZetaWeapon.FireInterval 1142857;

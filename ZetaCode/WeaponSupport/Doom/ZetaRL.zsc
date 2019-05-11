@@ -20,9 +20,9 @@ class ZetaRL : ZetaWeapon
 	override double RateSelf(Actor shooter, Actor target)
 	{
 		if ( shooter.Distance3D(target) < 150 )
-			return 300 - shooter.Distance3D(target) * 2;
+			return shooter.Distance3D(target) * 4;
 	
-		return 900 / sqrt(shooter.Distance2D(target)) * 2.5;
+		return 1100 / sqrt(shooter.Distance2D(target)) * 2.5;
 	}
 	
 	override void Fire(Actor shooter, Actor target)

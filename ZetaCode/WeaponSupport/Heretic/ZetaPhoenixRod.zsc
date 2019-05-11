@@ -4,11 +4,11 @@ class ZetaPhoenixRod : ZTMyWeapon {
 
         ZTMyWeapon.WeaponType "PhoenixRod";
         ZTMyWeapon.BaseRating 10000;
-        ZTMyWeapon.RatingFade 48;
+        ZTMyWeapon.RatingFade 2;
 
-        ZTMyWeapon.DangerRadius 96;
+        ZTMyWeapon.DangerRadius 112;
         ZTMyWeapon.DangerRating 8000;
-        ZTMyWeapon.DangerFactor 6;
+        ZTMyWeapon.DangerFactor 2;
 
         ZetaWeapon.FireInterval 5714286;
         ZetaWeapon.AmmoType "PhoenixRodAmmo";

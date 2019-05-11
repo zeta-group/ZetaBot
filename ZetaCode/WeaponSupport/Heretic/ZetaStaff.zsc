@@ -5,7 +5,7 @@ class ZetaStaff : ZTMyWeapon {
         
         ZTMyWeapon.WeaponType "Staff";
         ZTMyWeapon.BaseRating 50;
-        ZTMyWeapon.RatingFade 75;
+        ZTMyWeapon.RatingFade 20;
         ZTMyWeapon.Puff "StaffPuff";
         ZetaWeapon.FireInterval 4000000;
         ZetaWeapon.MinAmmo 0;

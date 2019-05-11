@@ -5,7 +5,7 @@ class ZetaBlaster : ZTMyWeapon {
         
         ZTMyWeapon.WeaponType "Blaster";
         ZTMyWeapon.BaseRating 800;
-        ZTMyWeapon.RatingFade 1.75;
+        ZTMyWeapon.RatingFade 1.2;
         ZTMyWeapon.Puff "BlasterPuff";
         ZTMyWeapon.ShootSound "weapons/blastershoot";
         ZTMyWeapon.BulletSpreadH 5.625;

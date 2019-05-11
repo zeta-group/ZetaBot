@@ -2,7 +2,7 @@ class ZetaSkullRod : ZTMyWeapon {
     default {
         ZTMyWeapon.WeaponType "SkullRod";
         ZTMyWeapon.BaseRating 2000;
-        ZTMyWeapon.RatingFade 1.625;
+        ZTMyWeapon.RatingFade 1.5;
 
         ZetaWeapon.FireInterval 2285714;
         ZetaWeapon.AmmoType "SkullRodAmmo";

@@ -5,7 +5,7 @@ class ZetaGoldWand : ZTMyWeapon {
         
         ZTMyWeapon.WeaponType "GoldWand";
         ZTMyWeapon.BaseRating 300;
-        ZTMyWeapon.RatingFade 1.6;
+        ZTMyWeapon.RatingFade 0.9;
         ZTMyWeapon.Puff "GoldWandPuff1";
         ZTMyWeapon.ShootSound "weapons/wandhit";
         ZTMyWeapon.BulletSpreadH 5.625;

@@ -2,7 +2,7 @@ class ZetaFiremace : ZTMyWeapon {
     default {
         ZTMyWeapon.WeaponType "Mace";
         ZTMyWeapon.BaseRating 2000;
-        ZTMyWeapon.RatingFade 30;
+        ZTMyWeapon.RatingFade 5;
 
         ZetaWeapon.FireInterval 857143;
         ZetaWeapon.AmmoType "MaceAmmo";

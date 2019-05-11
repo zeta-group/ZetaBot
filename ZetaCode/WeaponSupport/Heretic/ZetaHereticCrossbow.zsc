@@ -2,7 +2,7 @@ class ZetaHereticCrossbow : ZTMyWeapon {
     default {
         ZTMyWeapon.WeaponType "Crossbow";
         ZTMyWeapon.BaseRating 1000;
-        ZTMyWeapon.RatingFade 3;
+        ZTMyWeapon.RatingFade 1.5;
 
         ZetaWeapon.FireInterval 6285714;
         ZetaWeapon.AmmoType "CrossbowAmmo";
