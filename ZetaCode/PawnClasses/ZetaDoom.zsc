@@ -9,6 +9,8 @@ class ZetaDoom : ZetaBotPawn
 	{
 		if ( moveType == MM_CROUCH )
 		{
+			Height = Default.Height / 2;
+
 			if ( bShooting )
 				return SetStateLabel("CrouchMissile");
 		
@@ -20,6 +22,8 @@ class ZetaDoom : ZetaBotPawn
 		
 		else
 		{
+			Height = Default.Height;
+
 			if ( bShooting )
 				return SetStateLabel("Missile");
 		

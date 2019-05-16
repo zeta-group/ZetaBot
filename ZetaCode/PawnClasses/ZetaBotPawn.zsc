@@ -138,27 +138,27 @@ class ZetaBotPawn : Actor {
 	void ApplyMovement() {
 		if ( forward > 0 ) {
 			forward = max(forward - 1.0, 0);
-			RealMoveForward();
+			if (z - floorz < 2) RealMoveForward();
 		}
 
 		else if ( forward <= -1 ) {
 			forward = min(forward + 1.0, 0);
-			RealMoveBackward();
+			if (z - floorz < 2) RealMoveBackward();
 		}
 
 		else if ( forward < 0 ) {
 			forward = min(forward + 0.8, 0);
-			RealStepBackward();
+			if (z - floorz < 2) RealStepBackward();
 		}
 
 		if ( rightward > 0 ) {
 			rightward = max(rightward - 1.0, 0);
-			RealMoveRight();
+			if (z - floorz < 2) RealMoveRight();
 		}
 
 		else if ( rightward < 0 ) {
 			rightward = max(rightward + 1.0, 0);
-			RealMoveLeft();
+			if (z - floorz < 2) RealMoveLeft();
 		}
 
 		forward /= 1.5;

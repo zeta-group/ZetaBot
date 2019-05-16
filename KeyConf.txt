@@ -23,3 +23,5 @@ addmenukey "Kill All Bots" "kill zetadoom; kill zetastrife; kill zetasmushes"
 alias superzeta "summonfriend ZetaBot 0; wait 3; test $r_superzeta superzeta"
 alias +superzeta "set r_superzeta 1; superzeta"
 alias -superzeta "set r_superzeta 0"
+
+alias ztpaths "summon ZTShowAllPaths"

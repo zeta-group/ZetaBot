@@ -1,8 +1,26 @@
-class PlopResult : Thinker
-{
+class PlopResult : Thinker {
 	uint totalNodes;
 	Array<String> mapsFound;
 	Array<String> nodeMaps;
+}
+
+class PathMarker : Actor {
+	Default {
+		Scale 0.2;
+		RenderStyle "Add";
+		Alpha 0.7;
+		Radius 2;
+		Height 2;
+		Gravity 0;
+	}
+
+	States {
+		Spawn:
+			CAND A 200 Bright;
+			CAND A 20;
+			MISL CDE 5;
+			Stop;
+	}
 }
 
 class ZTPositionMarker : Actor {
@@ -347,6 +365,34 @@ class ZTPathNode : ZTPositionMarker
 		
 		return ZTPathNode(nb.get(Random(0, nb.Length() - 1)));
 	}
+
+	void ShowPath(ZTPathNode otherNode) {
+		uint maxSeg = 15; // constant
+		
+		Vector3 offs;
+		offs.xy = AngleToVector(AngleTo(otherNode));
+		Vector3 allOffs;
+		allOffs.xy = AngleToVector(AngleTo(otherNode) + 90);
+		
+		for (uint seg = 0; seg < maxSeg; seg++) {
+			double alpha = 1.0 * seg / maxSeg;
+			double scaled = alpha * Distance3D(otherNode);
+			Vector3 pmPos = pos + offs * scaled + allOffs;
+			pmPos.z += (otherNode.pos.z - pos.z) * alpha;
+
+			PathMarker pm = PathMarker(Spawn("PathMarker", pmPos));
+			//pm.pos.z = pm.floorz;
+		}
+	}
+
+	void ShowAllPaths() {
+		ActorList nb = Neighbors();
+
+		for (uint i = 0; i < nb.Length(); i++) {
+			ZTPathNode neigh = ZTPathNode(nb.Get(i));
+			ShowPath(neigh);
+		}
+	}
 	
 	ActorList findPathTo(ZTPathNode other, Actor traveller = null)
 	{
@@ -461,7 +507,7 @@ class ZTPathNode : ZTPositionMarker
 		if ((nodeType == NT_USE || next.nodeType == NT_USE) && Distance2D(next) < 64)
 			return true; // for doors that block LOS but are traverseable, etc.
 	
-		double maxZDiff = 24;
+		double maxZDiff = 48;
 		double minDist = 64;
 	
 		if ( next.nodeType == NT_JUMP || nodeType == NT_JUMP )
@@ -486,6 +532,14 @@ class ZTPathNode : ZTPositionMarker
 		if ( diffZ > maxZDiff )
 			return false;
 		
+		// experimental
+		if (CheckBlock(
+			xofs: next.pos.x - pos.x,
+			yofs: next.pos.y - pos.y,
+			zofs: next.pos.z - pos.z,
+			angle: AngleTo(next)
+		)) continue;
+
 		if (!CheckSight(next)) {
 			FLineTraceData sight;
 			LineTrace(AngleTo(next), Distance2D(next), PitchTo(next, 40), TRF_THRUACTORS | TRF_THRUHITSCAN, 40, data: sight);
@@ -503,8 +557,8 @@ class ZTPathNode : ZTPositionMarker
 
         if (other.pos.z + other.height / 2 == pos.z + height / 2 + offsZ) return 0;
 
-        //return atan(offsZ + other.pos.z + other.height / 2 - pos.z - height / 2);
-        return offsZ + other.pos.z + other.height / 2 - pos.z - height / 2;
+        //return offsZ + other.pos.z + other.height / 2 - pos.z - height / 2;
+        return tan(offsZ + other.pos.z + other.height / 2 - pos.z - height / 2);
     }
 }
 
@@ -674,6 +728,18 @@ class ZTDeleteNodes : Actor
 		}
 
 		A_Log(String.Format(logged, count));
+		Destroy();
+	}
+}
+
+class ZTShowAllPaths : Actor {
+	override void BeginPlay() {
+		ZTPathNode n;
+		let iter = ThinkerIterator.Create("ZTPathNode", 91);
+		
+		while (n = ZTPathNode(iter.Next()))
+			n.ShowAllPaths();
+
 		Destroy();
 	}
 }
