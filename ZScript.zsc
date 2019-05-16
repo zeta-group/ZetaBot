@@ -344,10 +344,10 @@ class ZTBotController : Actor {
 
         while ((pn = ZTPathNode(iter.Next())) != null) {
             if (pn.nodeType == ZTPathNode.NT_RESPAWN || (CVar.FindCVar("zb_anynoderespawn").GetBool() && pn.nodeType != ZTPathNode.NT_USE && pn.nodeType != ZTPathNode.NT_AVOID)) {
-                //pn.Radius = possessed.Radius;
+                pn.A_SetSize(possessed.Radius, possessed.Height);
 
                 if (pn.CheckBlock()) {
-                    //pn.Radius = pn.default.Radius;
+                    pn.A_SetSize(pn.default.Radius, pn.default.Height);
                     continue;
                 }
 
