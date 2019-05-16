@@ -344,13 +344,10 @@ class ZTBotController : Actor {
 
         while ((pn = ZTPathNode(iter.Next())) != null) {
             if (pn.nodeType == ZTPathNode.NT_RESPAWN || (CVar.FindCVar("zb_anynoderespawn").GetBool() && pn.nodeType != ZTPathNode.NT_USE && pn.nodeType != ZTPathNode.NT_AVOID)) {
-                pn.Radius = possessed.Radius;
-                pn.Height = possessed.Height;
+                //pn.Radius = possessed.Radius;
 
                 if (pn.CheckBlock()) {
-                    pn.Radius = pn.default.Radius;
-                    pn.Height = pn.default.Height;
-
+                    //pn.Radius = pn.default.Radius;
                     continue;
                 }
 
@@ -1123,7 +1120,7 @@ class ZTBotController : Actor {
         }
     
         else {
-            RefreshEnemy()
+            RefreshEnemy();
 
             if (bstate == BS_HUNTING) {
                 if (lastEnemyPos == null) {

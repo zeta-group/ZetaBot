@@ -538,7 +538,7 @@ class ZTPathNode : ZTPositionMarker
 			yofs: next.pos.y - pos.y,
 			zofs: next.pos.z - pos.z,
 			angle: AngleTo(next)
-		)) continue;
+		)) return false;
 
 		if (!CheckSight(next)) {
 			FLineTraceData sight;
