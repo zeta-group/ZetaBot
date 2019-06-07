@@ -1,2 +1,0 @@
-#!/bin/bash
-"gzdoom" -iwad "" -file "./ZetaBot_v0.8.1.pk3"
