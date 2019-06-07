@@ -1,1 +1,2 @@
-cd out; ./ZetaBot; cd /home/gustavo6046/Projects/ZetaBot
+#!/bin/bash
+cd "Built"; "./ZetaBot"; cd "/home/gustavo6046/Projects/ZetaBot"

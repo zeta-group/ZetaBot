@@ -1,7 +1,13 @@
 #!/bin/bash
 
+printf "\n ---- ZDBuild ----\n"
+printf "       by Gustavo6046\n"
+printf "       under The MIT License\n"
+printf "       at rehermann6046@gmail.com\n"
+printf "\n\n==========================\n"
+
 POSITIONAL=
-FOLDER="out"
+FOLDER="Built"
 SCPORT="gzdoom"
 CVAR=""
 IWAD=""
@@ -92,20 +98,21 @@ done
 
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-FILES=()
 BUILDDIR=""
 
-ADDFILE () {
+function ADDFILE {
     if [ $# -eq 1 ]; then
-        if [ ! -z "$BUILDDIR" ]; then
-            f="${BUILDDIR}/${1}"
+        if [ -n "$BUILDDIR" ]; then
+            f="$(realpath --relative-to="./$BUILDDIR" "./${BUILDDIR}/${1}")"
         
         else
-            f="./${1}"
+            f="$(realpath --relative-to="." "./${1}")"
         
         fi
         
-        FILES+=($f)
+        #FILES+=( "$f" )
+        printf "%s\n" "$f" >>.FILES.txt
+        printf "+ %s\n" "$f"
 
     else
         echo "[WARNING] Invalid call to ADDFILE with ${#} arguments (expected 1)!"
@@ -113,8 +120,35 @@ ADDFILE () {
     fi
 }
 
-ADDFOLDER () {
-    if [ ! -z "$BUILDDIR" ]; then
+function ADDALL {
+    if [ -n "$BUILDDIR" ]; then
+        d="${BUILDDIR}/${1}"
+        
+    elif [ $# -eq 1 ]; then
+        d=$1
+
+    else
+        echo "[WARNING] Invalid call to ADDALL with no build dir and ${#} arguments (expected either 1 argument or a build dir)!"
+        d=
+    
+    fi
+
+    if [ -n "$d" ]; then
+        find "$d" -maxdepth 1 -type d | while read -r d; do
+            ADDFOLDER "$(echo "$d" | cut -c $((1 + ${#BUILDDIR}))-)"
+
+        done
+
+        find "$d" -maxdepth 1 -type f | while read -r f; do
+            ADDFILE "$(echo "$f" | cut -c $((1 + ${#BUILDDIR}))-)"
+
+        done
+
+    fi
+}
+
+function ADDFOLDER {
+    if [ -n "$BUILDDIR" ]; then
         d="${BUILDDIR}/${1}"
         
     else
@@ -123,14 +157,14 @@ ADDFOLDER () {
     fi
 
     if [ $# -eq 1 ]; then
-        for f in $(find $d -type f); do
-            ADDFILE $(echo $f | cut -c $(expr 1 + ${#BUILDDIR})-)
+        find "$d" -type f | while read -r f; do
+            ADDFILE "$(echo "$f" | cut -c $((1 + ${#BUILDDIR}))-)"
             
         done
         
     elif [ $# -eq 2 ]; then
-        for f in $(find $d -type f -name $2); do
-            ADDFILE $(echo $f | cut -c $(expr 1 + ${#BUILDDIR})-)
+        find "$d" -type f -name "$2" | while read -r f; do
+            ADDFILE "$(echo "$f" | cut -c $((1 + ${#BUILDDIR}))-)"
             
         done
     
@@ -142,33 +176,16 @@ ADDFOLDER () {
 
 # Build compilation
 if [ -e "./compile" ]; then
-    . ./compile >/dev/null
+    . ./compile
     
 fi
 
 # Pre-configuration
 . ./config
+
 NUMFILES=${#FILES[@]}
-FARR=("${FILES[@]}")
-FILES=""
 
-for f in "${FARR[@]}"; do
-    if [ -z "$FILES" ]; then
-        FILES=$f
-    
-    else
-        FILES=$(
-            printf "${FILES}"
-            printf '\n'
-            printf $f
-        )
-    
-    fi
-
-done
-
-
-owd=$(pwd)
+owd="$(pwd)"
 
 if [ $LZMA -eq 1 ]; then
     PKEXT=7
@@ -179,36 +196,36 @@ else
 fi
 
 out="${owd}/${FOLDER}/${NAME}_v${VERSION}.pk${PKEXT}"
-
-if [ ! -z "$BUILDDIR" ]; then
-    echo Moving to build directory.
-    cd $BUILDDIR
-
-fi
-
-mkdir -p $FOLDER
+mkdir -p "$FOLDER"
 
 # Create output file
-echo Adding $NUMFILES files to output \'${out}\'.
-rm $out 2>/dev/null # just to make sure file doesn't exist
+echo Adding "$NUMFILES" files to output \'"${out}"\'.
+rm "$out" 2>/dev/null # just to make sure file doesn't exist
+
+if [ -n "$BUILDDIR" ]; then
+    cd "$BUILDDIR"
+fi
 
 if [ $LZMA -eq 1 ]; then
-    echo ${FILES[@]} | tr " " "\n" | tar cf $out --lzma -T - || {
+    echo "${FILES[@]}" | tr " " "\n" | tar cf "$out" --lzma -T - || {
         echo "Error building PK7 output!"
         exit 1
     }
     
 else
-    if [ $PLATFORM == "MINGW" ]; then
+    if [ "$PLATFORM" == "MINGW" ]; then
         ZIP="./zip.exe"
         
     else
-        ZIP=zip
+        ZIP="zip"
 
     fi
 
-    $ZIP -9 $out ${FILES} || {
+    cat "$owd/.FILES.txt" | "$ZIP" -9 "$out" -@ && {
+        rm "$owd/.FILES.txt"
+    } || {
         echo "Error building PK3 output!"
+        rm "$owd/.FILES.txt"
         exit 1
     }
     
@@ -220,7 +237,7 @@ echo "#!/bin/bash" >"$lout"
 printf "\"${SCPORT}\" -iwad \"${IWAD}\" -file \"./${NAME}_v${VERSION}.pk${PKEXT}\"" >>"$lout"
 
 for cv in $CVAR; do
-    printf " +set $(echo $cv | awk -F\= '{print $1}') $(echo $cv | awk -F\= '{print $2}')" >> "$lout"
+    printf " +set $(echo "$cv" | awk -F\= '{print $1}') $(echo "$cv" | awk -F\= '{print $2}')" >> "$lout"
     
 done
 
@@ -228,9 +245,9 @@ done
     IFS=';'
     
     for spf in $SPFILES; do
-        if [ ! $spf == "" ]; then
+        if [ ! "$spf" == "" ]; then
             printf ' -file "' >> "$lout"
-            printf $spf >> "$lout"
+            printf "$spf" >> "$lout"
             printf '"' >> "$lout"
             
         fi
@@ -238,31 +255,31 @@ done
 )
 
 for eo in $EXTRA; do
-    printf " $(echo $eo | awk -F\= '{print $1}') $(echo $eo | awk -F\= '{print $2}')" >> "$lout"
+    printf " $(echo "$eo" | awk -F\= '{print $1}') $(echo "$eo" | awk -F\= '{print $2}')" >> "$lout"
     
 done
 
-if [ ! MAP == "" ]; then
+if [ ! $MAP == "" ]; then
     printf " +map $MAP" >> "$lout"
 
 fi
 
-cd "$owd"
+cd "$owd" || exit
 chmod +x "$lout"
 
 # Post-build
 if [ -e "./postbuild" ]; then
-    . ./postbuild $OUT
+    . ./postbuild "$OUT"
     
 fi
 
-echo "cd ${FOLDER}; ./${NAME}; cd ${owd}" >run
+printf "#"'!'"/bin/bash\ncd \"${FOLDER}\"; \"./${NAME}\"; cd \"${owd}\"\n" >./run
 chmod +x run
 
 if [ "$RUN" == "1" ]; then
     echo "Running..."
     ./run && (
-        echo "PK${PKEXT} built succesfully: $out"    
+        echo "PK${PKEXT} built succesfully: \"$out\""
     ) || (
         echo "Error while running '$out' through $SCPORT!"
     )
