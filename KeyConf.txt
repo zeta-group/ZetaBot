@@ -9,6 +9,9 @@ defaultbind kp8 "summon ZTUploadNodes"
 defaultbind kp9 "summon ZTPromptNodes"
 defaultbind kp* "kill ZetaBotPawn"
 defaultbind kp. "summonfriend zetabot 0"
+//defaultbind p "summon ZetaHuntOrder 0"
+//defaultbind o "summon ZetaFollowOrder 0"
+//defaultbind i "summon ZetaWanderOrder 0"
 
 addkeysection "ZetaBot" "zetabots"
 

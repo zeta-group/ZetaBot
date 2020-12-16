@@ -2,7 +2,7 @@ class ZetaAK64 : ZetaWeapon
 {
 	default
 	{
-		ZetaWeapon.FireInterval 1142857;
+		ZetaWeapon.FireInterval 5000000;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "ColtAmmo";
 	}

@@ -2,7 +2,7 @@ class ZetaShotgun : ZetaWeapon
 {
 	default
 	{
-		ZetaWeapon.FireInterval 6857142;
+		ZetaWeapon.FireInterval 10571428;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "Shell";
 	}
@@ -24,7 +24,7 @@ class ZetaShotgun : ZetaWeapon
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-		ZetaBullet.FireBullets(shooter, "Gold", target, random(1, 3), 7, 5.6, 0);
+		ZetaBullet.FireBullets(shooter, "Gold", target, random(1, 3) * 8, 7, 5.6, 0);
 		shooter.A_PlaySound("weapons/shotgf", CHAN_WEAPON);
 	}
 }

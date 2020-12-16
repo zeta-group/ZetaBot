@@ -45,6 +45,11 @@ class ZetaBullet : Actor
             bullet.damageType = damageType;
 			ZetaBullet(bullet).SetColor(bulletColor ? bulletColor : "Gold");
             ZetaBullet(bullet).puff = puff;
+
+			// angle mapping to velocity (fix lack of spread)
+			double speed = sqrt(bullet.vel.x * bullet.vel.x + bullet.vel.y * bullet.vel.y);
+			bullet.vel.x = cos(bullet.angle) * speed;
+			bullet.vel.y = sin(bullet.angle) * speed;
 		}
 			
 		return ZetaBullet(bullet);

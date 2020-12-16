@@ -13,5 +13,6 @@ server bool zb_autonoderespawn = true;
 server bool zb_anynoderespawn = true;
 server float zb_talkfrequency = 1;
 server string zb_nodevar = "nodelist";
+server bool zb_noidletalk = false;
 
-server string zb_names = "Jack,Persephone,Èmille,Robert,Amanda,Maria,Mary,Josh,Wagner,John,Louis,Gabriel,Renato,Alejandro,Alexander,Heinrich,Caesar,Walter,Amy,Lawrence,Marylenne,Leonhart,Leonard,Jackson,Lee,Bert,Humberto,Mike,Pablo,Michael,Hitchcock,Hilton,Ronald,Robinson,Son,House,Romulus,Peter,Peterson,Zephyrus,Robin,Paul,Paula,Thorson,Robohead,Minchson,James,Jamilton,Greg,Gregor,Gregory,Victoria,Anita,Whindersson,Melody,Xonon,Xihil,Thought,Hope,Rebecca,Prince,Larry,Barry,Garry,Garmond,Barney,Ade,Nate,Nathan,Jonathan,Jonas,Johnny,Harry,Rita,Rafael,Ben,Benjamin,Brian,Bruce,Bruno,Steve,Stevan,Ivan,Yuri,Laika";
+server string zb_names = "Jack,Persephone,Èmille,Robert,Amanda,Maria,Mary,Josh,Wagner,John,Louis,Gabriel,Renato,Alejandro,Alexander,Heinrich,Caesar,Walter,Amy,Lawrence,Marylenne,Leonhart,Leonard,Jackson,Lee,Bert,Humberto,Mike,Pablo,Michael,Hitchcock,Hilton,Ronald,Robinson,Son,House,Romulus,Peter,Peterson,Zephyrus,Robin,Paul,Paula,Thorson,Robohead,Minchson,James,Jamilton,Greg,Gregor,Gregory,Victoria,Anita,Whindersson,Melody,Xonon,Xihil,Thought,Hope,Rebecca,Prince,Larry,Barry,Garry,Garmond,Barney,Ade,Nate,Nathan,Jonathan,Jonas,Johnny,Harry,Rita,Rafael,Ben,Benjamin,Brian,Bruce,Bruno,Steve,Stevan,Ivan,Yuri,Laika,Edward,Ed,Eddy,Biceps,Triceps,Goron,Gordon,Gorn,Blake,Harlin,Harley,David,Davidson,Eve,Evelyn,Parry,Alice,Aline,Alicia";

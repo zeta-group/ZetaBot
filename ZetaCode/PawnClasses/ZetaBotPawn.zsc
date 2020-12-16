@@ -15,6 +15,7 @@ class ZetaBotPawn : Actor {
 		Height 56;
 		Mass 100;
 		PainChance 255;
+		Species "ZetaBotGuy";
 		
 		+SOLID
 		+SHOOTABLE
@@ -27,6 +28,7 @@ class ZetaBotPawn : Actor {
 		+CANPASS
 		+FLOORCLIP
 		+WINDTHRUST
+		+THRUSPECIES
 		+TELESTOMP
 		+NOBLOCKMONST
 		+ACTIVATEMCROSS
@@ -41,6 +43,7 @@ class ZetaBotPawn : Actor {
         Array<String> rset;
 		Array<String> types;
 		Array<String> parms;
+		
 		let btypes = CVar.FindCVar('zb_btypes').GetString();
 		btypes.Split(types, ';');
 		
