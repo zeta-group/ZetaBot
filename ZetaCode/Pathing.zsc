@@ -7,31 +7,57 @@ class PlopResult : Thinker {
 
 class PathMarker : Actor {
     Default {
-	    Scale 0.2;
-	    RenderStyle "Add";
-	    Alpha 0.7;
+	    Scale 0.15;
+	    RenderStyle "AddStencil";
+	    StencilColor "10A8EC";
+	    Alpha 0.6;
 	    Radius 2;
 	    Height 2;
 	    Gravity 0;
+
+	    +FORCEXYBILLBOARD;
     }
 
     States {
 	    Spawn:
-		    CAND A 200 Bright;
-		    CAND A 20;
+		    MISL C 200 Bright;
+		    MISL C 15;
+			TNT1 A 0 ScaleToRemove();
+		    
+		End:
 		    MISL CDE 5;
 		    Stop;
+		    
+	    EndFast:
+   		    MISL CDE 3;
+   		    Stop;
+    }
+
+    override void BeginPlay() {
+		Super.BeginPlay();
+
+		ChangeStatNum(92);
+	}
+
+	void ScaleToRemove() {
+		scale *= 2;
+	}
+
+    void RemoveEarly() {
+    	ScaleToRemove();
+    	SetStateLabel("EndFast");
     }
 }
 
 class ZTPositionMarker : Actor {
     Default
     {
-        Scale 0.2;
+        Scale 0.4;
         Height 16;
         Radius 18;
-        Alpha 0.175;
-        RenderStyle "Translucent";
+        Alpha 0.75;
+        RenderStyle "Shaded";
+   		StencilColor "ECA810";
     }
 
     override void Tick() {
@@ -62,28 +88,39 @@ class ZTPositionMarker : Actor {
 }
 
 class NumNodes : Thinker {
-    uint value;
+	uint value;
 
-    NumNodes Init() {
-        ChangeStatNum(STAT_INFO);
-        value = 0;
-        return self;
-    }
+	NumNodes Init() {
+		ChangeStatNum(STAT_INFO);
+		value = 0;
+		return self;
+	}
 
-    static NumNodes Get() {
-        ThinkerIterator it = ThinkerIterator.Create("NumNodes", STAT_INFO);
-        let p = NumNodes(it.Next());
-        
-        if (p == null)
-            p = new("NumNodes").Init();
-        
-        return p;
-    }
+	static NumNodes Get() {
+		ThinkerIterator it = ThinkerIterator.Create("NumNodes", STAT_INFO);
+		let p = NumNodes(it.Next());
 
-    static uint Increment() {
-	    NumNodes res = Get();
-	    return ++res.value;
-    }
+		if (p == null) {
+			p = new("NumNodes").Init();
+		}
+
+		return p;
+	}
+
+	static uint Increment() {
+		NumNodes res = Get();
+		return ++res.value;
+	}
+
+	static uint Decrement() {
+		NumNodes res = Get();
+		return --res.value;
+	}
+
+	static void Reset() {
+		NumNodes res = Get();
+		res.value = 0;
+	}
 }
 
 class ZTPathNode : ZTPositionMarker
@@ -96,10 +133,54 @@ class ZTPathNode : ZTPositionMarker
 	    NT_CROUCH,
 	    NT_JUMP,
 	    NT_AVOID,
+	    NT_CANDY,
 	    NT_SHOOT,
 	    NT_RESPAWN,
 	    NT_TARGET
     };
+
+	static string StencilColorForType(NavigationType navType) {
+		if (navType == NT_NORMAL)
+			return "20E020";
+
+		if (navType == NT_RESPAWN)
+			return "502018";
+
+		if (navType == NT_SLOW)
+			return "108810";
+
+		if (navType == NT_CROUCH)
+			return "008038";
+
+		if (navType == NT_JUMP)
+			return "801000";
+
+		if (navType == NT_USE)
+			return "F0F0CC";
+
+		if (navType == NT_AVOID)
+			return "208000";
+
+		if (navType == NT_SHOOT)
+			return "9000C0";
+
+		if (navType == NT_CANDY)
+			return "F01090";
+
+		if (navType == NT_TARGET)
+			return "101028";
+
+		return "000000"; // heck
+	}
+
+	override void Tick() {
+		Super.Tick();
+
+		if (colorSetup == -1 || colorSetup != nodeType) {
+        	SetShade(StencilColorForType(nodeType));
+        	colorSetup = nodeType;
+        }
+	}
 
     static const string ZTNavTypeNames[] = {
         "Normal",
@@ -108,6 +189,7 @@ class ZTPathNode : ZTPositionMarker
         "Crouch",
         "Jump",
         "Avoid",
+        "Candy",
         "Shoot",
         "Respawn",
         "Target"
@@ -150,6 +232,7 @@ class ZTPathNode : ZTPositionMarker
     }
 
     NavigationType nodeType;
+    NavigationType colorSetup;
     double useDirection;
     bool bPlopped;
     uint id;
@@ -157,6 +240,8 @@ class ZTPathNode : ZTPositionMarker
     override void BeginPlay()
     {
 	    Super.BeginPlay();
+
+	    colorSetup = -1;
 	
 	    id = NumNodes.Increment();
         ChangeStatNum(91);
@@ -169,15 +254,22 @@ class ZTPathNode : ZTPositionMarker
 	    DebugLog(LT_VERBOSE, String.format("Created node #%i at x=%f,y=%f", id, pos.x, pos.y));
     }
 
-    static uint sindex(String full, String sub)
+    static int sindex(String full, String sub)
     {
 	    uint i = 0;
-	
-	    while ( i < full.Length() - sub.Length() )
-		    if ( full.Mid(i, sub.Length()) == sub )
+	    uint max_pos = full.Length() - sub.Length();
+
+	    while (i <= max_pos) {
+		    if (full.Mid(i, sub.Length()) == sub) {
 			    return i;
+			}
+
+			else {
+				i++;
+			}
+	    }
 		
-	    return full.Length();
+	    return -1;
     }
 
     string serialize()
@@ -337,6 +429,9 @@ class ZTPathNode : ZTPositionMarker
 	    if ( nodeType == NT_AVOID )
 		    return 512;
 
+		else if ( nodeType == NT_CANDY )
+			return -128;
+
 	    return 0;
     }
 
@@ -399,13 +494,23 @@ class ZTPathNode : ZTPositionMarker
     }
 
     void ShowPath(ZTPathNode otherNode) {
-	    uint maxSeg = 15; // constant
-	
+	    uint segRes = 24; // constant
+	    uint maxSeg = ceil(Distance3D(otherNode) / segRes);
+	    uint fringeSize = 40;
+
+		// regular offsets
 	    Vector3 offs;
 	    offs.xy = AngleToVector(AngleTo(otherNode));
+	    
 	    Vector3 allOffs;
 	    allOffs.xy = AngleToVector(AngleTo(otherNode) + 90);
-	
+
+		// arrow fringe directions
+	    Vector3 fringeDir1,fringeDir2;
+	    fringeDir1.xy = AngleToVector(othernode.AngleTo(self) - 30);
+	    fringeDir2.xy = AngleToVector(othernode.AngleTo(self) + 30);
+
+		// main arrow trunk
 	    for (uint seg = 0; seg < maxSeg; seg++) {
 		    double alpha = 1.0 * seg / maxSeg;
 		    double scaled = alpha * Distance3D(otherNode);
@@ -414,6 +519,17 @@ class ZTPathNode : ZTPositionMarker
 
 		    PathMarker pm = PathMarker(Spawn("PathMarker", pmPos));
 		    //pm.pos.z = pm.floorz;
+	    }
+
+	    // arrow fringes
+	    for (uint seg = 0; seg < 3; seg++) {
+	    	double distance = 1.0 * (seg + 1) / 4 * fringeSize;
+
+	    	Vector3 pmPos1 = otherNode.pos + fringeDir1 * distance;
+	    	Vector3 pmPos2 = otherNode.pos + fringeDir2 * distance;
+
+	    	PathMarker pm1 = PathMarker(Spawn("PathMarker", pmPos1));
+	    	PathMarker pm2 = PathMarker(Spawn("PathMarker", pmPos2));
 	    }
     }
 
@@ -532,16 +648,16 @@ class ZTPathNode : ZTPositionMarker
 	    ZTPathNode pn = null;
 
 		let dist = Distance3D(next);
-	    let off1 = Vec3To(next) / dist;
+	    let off1 = Vec2To(next) / Distance2D(next);
 	
 	    for ( uint i = 0; i < preNeighbors.Length(); i++ )
 	    {
 		    ZTPathNode pn = ZTPathNode(preNeighbors.get(i));
 		
-		    if (pn != self && pn != next && pn.Distance3D(next) < dist - 32) {
+		    if (CheckSight(pn) && pn != self && pn != next && Distance3D(pn) < dist - 40) {
 			    let off2 = Vec2To(pn) / Distance2D(pn);
 
-			    if ((off1.x * off2.x + off1.y * off2.y) > 0.85)
+			    if ((off1.x * off2.x + off1.y * off2.y) > 0.5)
 				    return false; // there is already a shorter path in the same
 							      // direction
 		    }
@@ -555,20 +671,30 @@ class ZTPathNode : ZTPositionMarker
         if ( next == null )
             return false;
 
-	    if ((nodeType == NT_USE || next.nodeType == NT_USE) && Distance2D(next) < 64)
+	    if ((nodeType == NT_USE || next.nodeType == NT_USE) && Distance2D(next) < 80)
 		    return true; // for doors that block LOS but are traverseable, etc.
 
-	    double maxZDiff = 48;
+	    double maxZDiff = 24;
 	    double minDist = 64;
+	    double maxHDist = 1500;
+		double dist2 = Distance2D(next);
+
+		if (dist2 < 1.0) 
+			dist2 = 1.0;
+		
+	    double diffZ = (next.pos.z - pos.z) * 16 / dist2;
+
+		if ( dist2 > maxHDist )
+			return false;
 
 	    if ( next.nodeType == NT_JUMP || nodeType == NT_JUMP )
 		    maxZDiff = 60;
 		
 	    if ( next.nodeType == NT_SLOW || nodeType == NT_SLOW || next.nodeType == NT_CROUCH || nodeType == NT_CROUCH )
-		    minDist = 32;
+		    minDist = 20;
 		
 	    else if ( next.nodeType == NT_USE || nodeType == NT_USE )
-		    minDist = 4;
+		    minDist = 2;
 		
 	    minDist -= abs(next.pos.z - pos.z) * 0.5;
 	
@@ -577,10 +703,8 @@ class ZTPathNode : ZTPositionMarker
 		
 	    if ( Distance3D(next) < minDist )
 		    return false;
-		
-	    double diffZ = next.pos.z - pos.z;
-		
-	    if ( diffZ > maxZDiff )
+
+	    if ( diffZ > 0 && dist2 > 32 && diffZ > maxZDiff ) // nearby nodes can link despite height differences, for steep ladders and the like
 		    return false;
 	
 	    // experimental
@@ -687,8 +811,68 @@ class ZTAvoidNode : Actor
     }
 }
 
+class ZTCandyNode : Actor
+{
+    override void PostBeginPlay()
+    {
+	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
+	    node.nodeType = ZTPathNode.NT_CANDY;
+	    node.angle = angle;
+	
+	    Destroy();
+    }
+}
+
+class ZTRespawnNode : Actor
+{
+    override void PostBeginPlay()
+    {
+	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
+	    node.nodeType = ZTPathNode.NT_RESPAWN;
+	    node.angle = angle;
+	
+	    Destroy();
+    }
+}
+
 class ZTUploadNodes : Actor
 {
+	    enum LogType
+    {
+	    LT_ERROR = 0,
+	    LT_WARNING,
+	    LT_INFO,
+	    LT_VERBOSE
+    };
+
+    void DebugLog(LogType kind, string msg)
+    {
+	    if ( CVar.FindCVar("zb_debug").GetInt() > 0 )
+	    {
+		    string logHeader = "";
+	
+		    if ( kind == LT_ERROR )
+			    logHeader = "\cr[ERROR]";
+			
+		    else if ( kind == LT_WARNING )
+			    logHeader = "\cf[WARNING]";
+			
+		    else if ( kind == LT_INFO )
+			    logHeader = "\ch[INFO]";
+			
+		    else if ( kind == LT_VERBOSE )
+		    {
+			    if ( CVar.FindCVar("zb_debug").GetInt() > 1 )
+				    logHeader =	"\cd[VERBOSE]";
+			
+			    else
+				    return;
+		    }
+	
+		    A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
+	    }
+    }
+
     override void BeginPlay()
     {
 	    //String code = ZTPathNode.uploadLevel();
@@ -698,41 +882,85 @@ class ZTUploadNodes : Actor
 	    Destroy();
 	}
     
-    static void uploadLevel(String cvName)
+    void uploadLevel(String cvName)
     {
         if (CVar.FindCVar(cvName) == null)
             return;
 
 	    String code = CVar.FindCVar(cvName).GetString();
+	    String new_serialized = ZTPathNode.serializeLevel();
 		
-	    if ( code == "::NONE" || code == "" )
+	    if ( code == "::NONE" || code == "" ) {
+	    	DebugLog(LT_VERBOSE, "Empty node list detected; replacing with single entry for "..level.mapName);
 		    code = ZTPathNode.serializeLevel();
+	    }
 	
-	    else
-	    {
+	    else {
 		    String c = "";
 		    uint i = 0;
 	
-		    while ( true )
-		    {
+		    while ( true ) {
                 c = ZTPathNode.split(code, ";;", i++);
 		
-			    if ( ZTPathNode.split(c, "::", 0) == level.mapName)
+			    if ( ZTPathNode.split(c, "::", 0) == level.mapName) {
 				    break;
+			    }
 				
-			    if ( c == "" )
-			    {
-                    code = ZTPathNode.serializeLevel()..";;"..code;
-				    CVar.FindCVar(cvName).SetString(code);
-				    return;
+			    if ( c == "" ) {
+                    DebugLog(LT_VERBOSE, "Node list exists but entry not found for "..level.mapName.."; appended to nodes list at index "..code.Length());
+                    
+                    code = code..";;"..new_serialized;
+
+				    break;
 			    }
 		    }
-		
-		    code = code.Left(ZTPathNode.sindex(code, c))..ZTPathNode.serializeLevel()..code.Mid(ZTPathNode.sindex(code, c) + c.Length());
+
+			if (c != "") {
+				int old_length = c.Length();
+				int new_length = new_serialized.Length();
+
+				int ind = ZTPathNode.sindex(code, c);
+				int ind2 = ind + old_length;
+				int ind3 = ind + new_length;
+
+				if (ind == -1) {
+					DebugLog(LT_ERROR, "Could not save level node list: existing entry for "..level.mapName.." found, but its index could not be determined!");
+					return;
+				}
+
+				String left = code.Left(ind);
+				String right = code.Mid(ind2);
+			
+		    	code = left..new_serialized..right;
+
+		    	DebugLog(LT_VERBOSE, "Overrode existing entry for "..level.mapName.." in nodes list between indices "..ind.." and "..ind2.."; now it spans from the original start till index "..ind3);
+		    }
 	    }
-	
+
 	    CVar.FindCVar(cvName).SetString(code);
     }
+}
+
+class ZTBackspaceNode : Actor {
+	override void BeginPlay() {
+		ZTPathNode last, n;
+	    let iter = ThinkerIterator.Create("ZTPathNode", 91);
+	
+	    while ( n = ZTPathNode(iter.Next()) ) {
+	    	if (!last || n.id > last.id) {
+	    		last = n;
+	    	}
+		}
+
+		if (last != null) {
+			A_Log("Deleted node #"..last.id);
+			last.Destroy();
+		}
+
+		NumNodes.Decrement();
+
+		Destroy();
+	}
 }
 
 class ZTPromptNodes : Actor
@@ -800,17 +1028,32 @@ class ZTPromptNodes : Actor
 				CheckLumpName(mapLump, "ZNODES") ||
 				CheckLumpName(mapLump, "TEXTMAP")
 			) {
-				if (CheckLumpName(++mapLump, "ZBNODES"))
+				if (CheckLumpName(++mapLump, "ZBMNODES"))
 					break;
 			}
 
-			if (!CheckLumpName(mapLump, "ZBNODES"))
+			if (!CheckLumpName(mapLump, "ZBMNODES"))
 				continue;
 
-			A_Log(String.Format("Found ZBNODES @ %i", mapLump));
+			A_Log(String.Format("Found ZBMNODES for %s @ %i", level.mapname, mapLump));
 
 			return ZTPathNode.plopNodes(Wads.ReadLump(mapLump));
 		}
+
+		A_Log("No map-local ZBMNODES lump found for %s, looking for fallback ZBNODES lumps...", level.mapname);
+
+		for (int nodesLump = Wads.FindLump("ZBNODES", 0, 1); nodesLump != -1; nodesLump = Wads.FindLump("ZBNODES", nodesLump + 1, 1)) {
+			A_Log("Trying ZBNODES lump @ %i..", nodesLump);
+			
+			let res = ZTPathNode.plopNodes(Wads.ReadLump(nodesLump));
+
+			if (res.found) {
+				A_Log("Found nodes definitions for %s successfully!", level.mapname);
+				return res;
+			};
+		}
+
+		A_Log(String.Format("Could not find any nodes for %s at either its ZBMNODES or any ZBNODES lumps. Giving up.", level.mapname));
 
 		return null;
 	}
@@ -822,6 +1065,8 @@ class ZTPromptNodes : Actor
 	
 	    while ( n = ZTPathNode(iter.Next()) )
 		    n.Destroy();
+
+	   	NumNodes.Reset();
 	
 	    cvar cv = CVar.FindCVar(CVar.FindCVar("zb_nodevar").GetString());
 	
@@ -839,10 +1084,18 @@ class ZTPromptNodes : Actor
 				r = ReadZBNodes();
 
 				if (!r || !r.found) {
-					string lst = String.format("No nodes found (\"%s\")! %i maps found", level.mapName, r.mapsFound.Size(0));
+					string lst = String.format(
+						"No nodes found (\"%s\")! %s maps found", level.mapName,
+						(r != null) ?
+							( ""..r.mapsFound.Size(0)) :
+							"No"
+					);
 
-					for ( uint i = 0; i < r.mapsFound.Size(); i++ )
-		    			lst = lst.."  \""..r.mapsFound[i].."\"";
+					if (r != null) {
+						for ( uint i = 0; i < r.mapsFound.Size(); i++ ) {
+			    			lst = lst.."  \""..r.mapsFound[i].."\"";
+		    			}
+	    			}
 
 					A_Log(lst);
 					Destroy();
@@ -876,6 +1129,8 @@ class ZTDeleteNodes : Actor
 		    count++;
 	    }
 
+	    NumNodes.Reset();
+
 	    A_Log(String.Format(logged, count));
 	    Destroy();
     }
@@ -883,6 +1138,15 @@ class ZTDeleteNodes : Actor
 
 class ZTShowAllPaths : Actor {
     override void BeginPlay() {
+		// remove previous path markers if any
+		ThinkerIterator it = ThinkerIterator.Create("PathMarker", 92);
+        PathMarker p;
+        
+        while ((p = PathMarker(it.Next())) != null) {
+            p.RemoveEarly();
+		}
+
+		// show all outgoing paths from every single pathnode
 	    ZTPathNode n;
 	    let iter = ThinkerIterator.Create("ZTPathNode", 91);
 	

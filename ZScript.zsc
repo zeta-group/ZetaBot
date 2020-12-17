@@ -223,6 +223,7 @@ class ZTBotController : Actor {
     double strafeMomentum;
     double angleMomentum;
     ZTPathNode lastEnemyPos;
+    Vector3 currEnemyPos;
     double age;
     uint GruntInterval;
     uint logRate;
@@ -363,7 +364,7 @@ class ZTBotController : Actor {
 
             while (mon = Actor(telefragIter.Next())) {
                 if (mon.Distance2D(possessed) <= mon.Radius + possessed.Radius && mon != possessed) {
-                    if (ZetaBotPawn(mon) == null || ZetaBotPawn(mon).cont.TelefragTimer == 0) {
+                    if (ZetaBotPawn(mon) == null || ZetaBotPawn(mon).cont == null || ZetaBotPawn(mon).cont.TelefragTimer == 0) {
                         uint tries = 20; // for things that absorb less damage
                         uint damage = mon.Health;
 
@@ -404,7 +405,7 @@ class ZTBotController : Actor {
     }
     
     void aimAtAngle(double angle, double speed, double threshold = 5) {
-        possessed.angle += DeltaAngle(possessed.angle, angle) * speed / 15;
+        possessed.angle += DeltaAngle(possessed.angle, angle) * speed / 25;
         
         if (absangle(angle, possessed.angle) <= threshold)
             possessed.angle = angle;
@@ -777,8 +778,9 @@ class ZTBotController : Actor {
         if (pn == null)
             return;
 
-        if (pn != currNode)
+        if (pn != currNode) {
             DebugLog(LT_VERBOSE, String.Format("%s is now at the %s node: \ck%s", myName, ZTPathNode.ZTNavTypeNames[pn.nodeType], pn.NodeName()));
+        }
          
         pastNode = currNode;
         currNode = pn;
@@ -839,10 +841,36 @@ class ZTBotController : Actor {
         ZTPathNode cur = null;
         
         while (cur = ZTPathNode(iter.Next())) {
+			if (cur == null)
+				break;
+        
             if (!other.CheckSight(cur))
                 continue;
 
             if (best == null || other.Distance3D(cur) < other.Distance3D(best))
+                best = cur;
+        }
+                
+        return best;
+    }
+
+    ZTPathNode ClosestVisibleNodeAt(Vector3 location) {
+        ThinkerIterator iter = ThinkerIterator.Create("ZTPathNode", 91);
+        ZTPathNode best = null;
+        ZTPathNode cur = null;
+        
+        while (cur = ZTPathNode(iter.Next())) {
+			if (cur == null)
+				break;
+
+			Actor dummy = Spawn("Candle", location);
+        
+            if (!dummy.CheckSight(cur)) {
+            	dummy.Destroy();
+                continue;
+            }
+
+            if (best == null || dummy.Distance3D(cur) < dummy.Distance3D(best))
                 best = cur;
         }
                 
@@ -1239,7 +1267,9 @@ class ZTBotController : Actor {
         }
     
         else {
-            RefreshEnemy();
+            if (enemy == null && bstate != BS_HUNTING) {
+            	RefreshEnemy();
+            }
 
             if (bstate == BS_HUNTING) {
                 if (lastEnemyPos == null) {
@@ -1250,7 +1280,9 @@ class ZTBotController : Actor {
                 double lastPosSqDist = ((possessed.pos.x - lastEnemyPos.pos.x) * (possessed.pos.x - lastEnemyPos.pos.x))
                                         + ((possessed.pos.y - lastEnemyPos.pos.y) * (possessed.pos.y - lastEnemyPos.pos.y));
 
-                if (lastPosSqDist < 40 * 40) {
+                if (lastPosSqDist < 48 * 48) {
+					DebugLog(LT_VERBOSE, String.Format("Close to last seen enemy pos but no enemy spotted! Going back to wandering. (expected x > %i, got = %i)", 40 * 40, lastPosSqDist));
+                
                     enemy = null;
                     ConsiderSetBotState(BS_WANDERING);
 
@@ -1273,20 +1305,23 @@ class ZTBotController : Actor {
 
                             navDest = ZTPathNode(path.get(0));
 
-                            if (navDest == null) {
-                                ConsiderSetBotState(BS_WANDERING);
-                                return;
-                            }
-
-                            else {
+                            if (navDest != null) {
                                 SmartMove(navDest);
                                 
                                 DebugLog(LT_INFO, "Next navigation point found: "..navDest.NodeName());
                             }
                         }
 
-                        if (navDest == null)
-                            ConsiderSetBotState(BS_WANDERING);
+                        if (navDest == null) {
+                        	DebugLog(LT_INFO, "No path found to last enemy pos! Going back to wandering.");
+
+                        	if (lastEnemyPos == null) {
+                        		lastEnemyPos.Destroy();
+                        	}
+                        	                            
+           	                ConsiderSetBotState(BS_WANDERING);
+           	                return;
+                        }
                     }
 
                     else if (navDest != null)
@@ -1444,18 +1479,33 @@ class ZTBotController : Actor {
     }
 
     void Subroutine_Attack() {
+		if (bstate != BS_ATTACKING && enemy == null) {
+			currEnemyPos = pos;
+		}
+    
         if (enemy != null && enemy.Health >= 1) { // health is integer
             if (bstate != BS_HUNTING && !LineOfSight(enemy)) {
                 possessed.EndShoot();
 
                 if (lastEnemyPos != null) lastEnemyPos.Destroy();
-                lastEnemyPos = ZTPathNode.plopNode(enemy.pos, ZTPathNode.NT_TARGET);
+
+                let node = ClosestVisibleNodeAt(currEnemyPos);
+
+                if (node == null) {
+                	lastEnemyPos = ZTPathNode.plopNode(currEnemyPos, ZTPathNode.NT_TARGET);
+               	}
+
+               	else {
+               		lastEnemyPos = node;
+               	}
                 
                 navDest = null;
                 ConsiderSetBotState(BS_HUNTING);
             }
             
             else {
+				currEnemyPos = enemy.pos;
+            
                 if (FRandom(0, 1) < 0.06)
                     possessed.Jump();
             
@@ -1631,6 +1681,8 @@ class ZTBotController : Actor {
             }
         }
     }
+
+    int thinkTimer;
     
     void A_ZetaTick() {
         if (TelefragTimer > 0) TelefragTimer--;
@@ -1667,6 +1719,15 @@ class ZTBotController : Actor {
             possessed.EndShoot();
             
         SetCurrentNode(ClosestVisibleNode(possessed));
+
+        if (thinkTimer > 0) {
+        	thinkTimer--;
+        	return;
+       	}
+
+       	else {
+       		thinkTimer = 3;
+       	}
         
         if (enemy != null && enemy.Health <= 0) {
             if (lastEnemyPos != null) lastEnemyPos.Destroy();
@@ -2006,6 +2067,38 @@ class BotName : Inventory {
     bool printing;
     Actor lastShown;
 
+    enum LogType {
+        LT_ERROR = 0,
+        LT_WARNING,
+        LT_INFO,
+        LT_VERBOSE
+    };
+
+    void DebugLog(LogType kind, String msg) {
+        if (CVar.FindCVar("zb_debug").GetInt() > 0) {
+            String logHeader = "";
+        
+            if (kind == LT_ERROR)
+                logHeader = "\cr[ERROR]";
+                
+            else if (kind == LT_WARNING)
+                logHeader = "\cf[WARNING]";
+                
+            else if (kind == LT_INFO)
+                logHeader = "\ch[INFO]";
+                
+            else if (kind == LT_VERBOSE) {
+                if (CVar.FindCVar("zb_debug").GetInt() > 1)
+                    logHeader =	"\cd[VERBOSE]";
+                
+                else
+                    return;
+            }
+        
+            A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
+        }
+    }
+
     override void BeginPlay() {
         super.BeginPlay();
         countDown = 0;
@@ -2033,7 +2126,10 @@ class BotName : Inventory {
             }
             
             if (closest != null && closest.cont != null) {
+                DebugLog(LT_WARNING, "Printing status for bot "..closest.cont.myName.." in state "..ZTBotController.BStateNames[closest.cont.bstate]);
+                
                 countDown = 2;
+                
                 Owner.A_Print("\ci"..closest.cont.myName.."\n\cg"..closest.Health.." HP"..(
                     (
                         (closest.cont.bstate != ZTBotController.BS_ATTACKING || closest.cont.enemy == null)
@@ -2058,6 +2154,7 @@ class BotName : Inventory {
                         )
                     )
                 ));
+                
                 lastShown = closest;
                 printing = true;
             }

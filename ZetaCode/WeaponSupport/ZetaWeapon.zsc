@@ -74,6 +74,10 @@ class ZetaWeapon : Actor
 
 	virtual bool CanFire(Actor shooter, bool bUseAmmo = false)
 	{
+		if (CVar.FindCVar("sv_infiniteammo").GetBool()) {
+			return true;
+		}
+	
 		Inventory inv = shooter.FindInventory(ammotype);
 
 		if ( inv == null )

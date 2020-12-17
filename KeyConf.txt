@@ -4,27 +4,45 @@ defaultbind kp3 "summon ztusenode 0"
 defaultbind kp4 "summon ztjumpnode 0"
 defaultbind kp5 "summon ztshootnode 0"
 defaultbind kp6 "summon ztslownode 0"
-defaultbind kp7 "summon ZTDeleteNodes 0"
+defaultbind kp7 "summon ZTShowPaths 0"
 defaultbind kp8 "summon ZTUploadNodes"
 defaultbind kp9 "summon ZTPromptNodes"
+defaultbind kp/ "summon ZTDeleteNodes"
 defaultbind kp* "kill ZetaBotPawn"
 defaultbind kp. "summonfriend zetabot 0"
 //defaultbind p "summon ZetaHuntOrder 0"
 //defaultbind o "summon ZetaFollowOrder 0"
 //defaultbind i "summon ZetaWanderOrder 0"
 
+//----------
+
 addkeysection "ZetaBot" "zetabots"
 
 addmenukey "Spawn ZetaBot" "summonfriend zetabot 0"
+addmenukey "Kill All Bots" "kill ZetaBotPawn"
+
 addmenukey "Create Normal Path Node" "summon ztpathnode 0"
 addmenukey "Create Use Path Node" "summon ztusenode 0"
 addmenukey "Create Jump Path Node" "summon ztjumpnode 0"
+addmenukey "Create Shoot Path Node" "summon ztshootnode 0"
+addmenukey "Create Crouch Path Node" "summon ztcrouchnode 0"
+addmenukey "Create Slow Path Node" "summon ztslownode 0"
+addmenukey "Create Avoid Path Node" "summon ztavoidnode 0"
+addmenukey "Create Candy Path Node" "summon ztcandynode 0"
+addmenukey "Create Respawn Node" "summon ztrespawnnode 0"
+addmenukey "Delete Last Path Node" "summon ztbackspacenode"
+addmenukey "Clear Path Nodes" "summon ztdeletenodes"
+
 addmenukey "Save Path Nodes" "summon ztuploadnodes"
 addmenukey "Load Path Nodes" "summon ztpromptnodes"
-addmenukey "Kill All Bots" "kill zetadoom; kill zetastrife; kill zetasmushes"
+addmenukey "Toggle Pathing Mode" "zt_pathmode"
+addmenukey "Show All Paths" "zt_showpaths"
+
+//----------
 
 alias superzeta "summonfriend ZetaBot 0; wait 3; test $r_superzeta superzeta"
 alias +superzeta "set r_superzeta 1; superzeta"
 alias -superzeta "set r_superzeta 0"
 
-alias ztpaths "summon ZTShowAllPaths"
+alias zt_showpaths "summon ZTShowAllPaths"
+alias zt_pathmode "god; noclip; notarget"

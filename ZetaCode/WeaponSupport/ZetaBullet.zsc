@@ -8,10 +8,12 @@ class ZetaBullet : Actor
 	Property BulletColor: bulletColor;
     name damageType;
 
+    const BulletSpeed = 100; // We need the most reasonable possible speed for a bullet while avoiding FastProjectile.
+
 	Default
 	{
 		Damage (0);
-		Speed 100; // We need the most reasonable possible speed for a bullet while avoiding FastProjectile.
+		Speed 0;
 		ZetaBullet.BulletColor "Gold";
 		Species "ZetaBot";
 		+THRUSPECIES
@@ -25,7 +27,7 @@ class ZetaBullet : Actor
 		bulletColor = col;
 	}
 
-	static ZetaBullet FireABullet(Actor shooter, String bulletColor, Actor target, double damage, double spreadX, double spreadY, name damageType = "bullet", string puff = "BulletPuff")
+	static ZetaBullet FireABullet(Actor shooter, String bulletColor, Actor target, double damage, double spreadX, double spreadY, name damageType = "bullet", string puff = "BulletPuff", double damage_spread = 0)
 	{
 		ZetaBullet bullet;
 
@@ -33,29 +35,44 @@ class ZetaBullet : Actor
 		
 		if ( bullet != null )
 		{
-			bullet.currDmg = Floor(damage + 0.5);
-			bullet.angle += FRandom(-spreadX, spreadX);
+			if (target != null) {
+				double vertdiff = target.pos.z + (target.height / 2) - shooter.pos.z;
+				Vector2 horzdiff = target.pos.xy - shooter.pos.xy;
+	            double vertdist = Abs(vertdiff);
+       			double horzdist = sqrt(horzdiff.x * horzdiff.x + horzdiff.y * horzdiff.y);
 
-			if (target != null && target.Distance2D(shooter) > 0)
-				bullet.pitch = (target.pos.z - shooter.pos.z);
+				// pitch as in angle, not velocity. there, I said it!
+				if (target != null && target.Distance2D(shooter) > 0) {
+					bullet.pitch = atan2(vertdiff, horzdist);
+				}
+			}
+
+			else {
+				bullet.pitch = shooter.pitch;
+			}
 
 			bullet.pitch += FRandom(-spreadY, spreadY);
 
-            bullet.shooter = shooter;
+			bullet.shooter = shooter;
             bullet.damageType = damageType;
 			ZetaBullet(bullet).SetColor(bulletColor ? bulletColor : "Gold");
             ZetaBullet(bullet).puff = puff;
+		
+			bullet.currDmg = Floor(damage + 0.5 + FRandom(-damage_spread, damage_spread));
+			bullet.angle += FRandom(-spreadX, spreadX);
 
-			// angle mapping to velocity (fix lack of spread)
-			double speed = sqrt(bullet.vel.x * bullet.vel.x + bullet.vel.y * bullet.vel.y);
-			bullet.vel.x = cos(bullet.angle) * speed;
-			bullet.vel.y = sin(bullet.angle) * speed;
+			// angle mapping to velocity
+			double velspeed = 0;
+			
+			bullet.vel.x = cos(bullet.angle) * BulletSpeed * cos(bullet.pitch);
+			bullet.vel.y = sin(bullet.angle) * BulletSpeed * cos(bullet.pitch);
+			bullet.vel.z = sin(bullet.pitch) * BulletSpeed;
 		}
 			
 		return ZetaBullet(bullet);
 	}
 
-	static void FireBullets(Actor shooter, String bulletColor, Actor target, double damage, int numBullets, double spreadX, double spreadY, name damageType = "bullet", string puff = "BulletPuff")
+	static void FireBullets(Actor shooter, String bulletColor, Actor target, double damage, int numBullets, double spreadX, double spreadY, name damageType = "bullet", string puff = "BulletPuff", double damage_spread = 0)
     {
 		for ( int i = 0; i < numBullets; i++ )
 			FireABullet(shooter, bulletColor, target, damage, spreadX, spreadY, damageType, puff);
