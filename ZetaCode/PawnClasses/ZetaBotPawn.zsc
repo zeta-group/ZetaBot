@@ -45,6 +45,9 @@ class ZetaBotPawn : Actor {
 	}
 
 	virtual void SetColor(float red, float green, float blue) {
+		// translation does not work for now -- rely on team markers instead
+	
+		/*
 		Translation trans;
 
 		for (int i = ColorRangeStart; i < ColorRangeEnd; i++) {
@@ -53,6 +56,7 @@ class ZetaBotPawn : Actor {
 		}
 
 		translation = trans.AddTranslation();
+		*/
 	}
 
 	static String GetSomeType(Actor anchor = null) {
