@@ -116,8 +116,10 @@ class ZetaTeamMarker : Actor {
 		}
 
 		else {
-			SetOrigin(attached.pos);
-			pos.z += attached.Height + 8;
+			Vector3 newPos = attached.pos;
+			newPos.z += attached.Height + 8;
+		
+			SetOrigin(newPos, true);
 		}
 	}
 }
