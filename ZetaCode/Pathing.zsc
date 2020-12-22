@@ -641,6 +641,11 @@ class ZTPathNode : ZTPositionMarker
 	    }
 	
 	    DebugLog(LT_INFO, String.format("Found a %i-node path between %s and %s!", (res.Length() + 1), NodeName(), goal.NodeName()));
+
+	    cameFrom.Destroy();
+	    openSet.Destroy();
+	    closedSet.Destroy();
+	    icosts.Destroy();
 	
 	    return res;
     }

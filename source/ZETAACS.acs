@@ -1,16 +1,12 @@
+#library "ZETAACS"
 #include "zcommon.acs"
 
-script 1992 ENTER
+script "__ZetaBot_enter" ENTER
 {
     GiveInventory("BotName", 1);
 }
 
-script 1993 RETURN
-{
-    GiveInventory("BotName", 1);
-}
-
-script 1994 RESPAWN
+script "__ZetaBot_respawn" RESPAWN
 {
     GiveInventory("BotName", 1);
 }
