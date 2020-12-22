@@ -99,6 +99,90 @@ class ZTBotOrder : Actor {
     }
 }
 
+class ZTBotOrderCode : Actor {
+	// Sets all bots in a 512 units radius
+	// to be of an order of a specific type.
+
+	uint orderType;
+
+	property OrderType: orderType;
+
+	override void PostBeginPlay() {
+		// Find owner
+		PlayerPawn Owner;
+
+		ThinkerIterator ownIter = ThinkerIterator.Create("PlayerPawn", STAT_DEFAULT);
+		PlayerPawn pp;
+
+		while ((pp = PlayerPawn(ownIter.Next()))) {
+			if (Owner == null || pp.Distance3D(self) < Owner.Distance3D(self)) {
+				Owner = pp;
+			}
+		}
+
+		// Find object looked at by owner
+		FLineTraceData td;
+		Actor lookedAt = null;
+	
+		Owner.LineTrace(
+            Owner.angle,
+            Owner.radius + 512,
+            0,
+            flags: TRF_THRUBLOCK | TRF_THRUHITSCAN,
+            offsetz: Owner.height - 24,
+            data: td
+        );
+
+        if (td.hitActor) {
+        	lookedAt = td.hitActor;
+        }
+
+		// Mke order and give it to all bots in radius
+		ZTBotOrder order = ZTBotOrder.Make(Owner, lookedAt, orderType);
+
+		ThinkerIterator botIter = ThinkerIterator.Create("ZetaBotPawn", STAT_DEFAULT);
+		ZetaBotPawn zbp;
+
+		while ((zbp = ZetaBotPawn(botIter.Next()))) {
+			ZTBotController cont = zbp.cont;
+
+			if (cont == null) {
+				continue;
+			}
+
+			if (cont.commander == Owner && zbp.Distance2D(self) < 512) {
+				cont.SetOrder(order);
+			}
+		}
+
+		Destroy();
+	}
+}
+
+class ZTBotAttackOrder : ZTBotOrderCode {
+	Default {
+		ZTBotOrderCode.OrderType 2; // ZetaBotPawn.BS_ATTACKING;
+	}
+}
+
+class ZTBotWanderOrder : ZTBotOrderCode {
+	Default {
+		ZTBotOrderCode.OrderType 0; // ZetaBotPawn.BS_WANDERING;
+	}
+}
+
+class ZTBotFleeOrder : ZTBotOrderCode {
+	Default {
+		ZTBotOrderCode.OrderType 4; // ZetaBotPawn.BS_FLEEING;
+	}
+}
+
+class ZTBotFollowOrder : ZTBotOrderCode {
+	Default {
+		ZTBotOrderCode.OrderType 3; // ZetaBotPawn.BS_FOLLOWING;
+	}
+}
+
 class ZTLineUseHistoryEntry {
     Line Used;
     double When; // zetabot age in seconds
@@ -307,12 +391,14 @@ class ZTBotController : Actor {
             currNode.Angle = Angle; 
         }
 
+		/*
         ZTLineUseHistoryEntry entry = new("ZTLineUseHistoryEntry");
 
         entry.Used = td.HitLine;
         entry.When = age;
 
         UseHistory.Push(entry);
+        */
 
         return true;
     }
@@ -719,7 +805,7 @@ class ZTBotController : Actor {
                 double pdot = off.x * avec.x + off.y * avec.y;
             }
 
-            if (cur != null && cur != from && cur.Health > 0 && from.CheckSight(cur) && (( cur.bISMONSTER && !isEnemy(from, cur)) || (cur.CheckClass("PlayerPawn", AAPTR_DEFAULT, true) == from.bFRIENDLY)) && pdot > 0.3)
+            if (cur != null && cur != from && cur.Health > 0 && from.CheckSight(cur) && (((ZetaBotPawn(cur) != null || PlayerPawn(cur) != null) && !isEnemy(from, cur))) && pdot > 0.3)
                 res.Push(cur);
         }
                 
@@ -2236,6 +2322,20 @@ class BotName : Inventory {
         super.BeginPlay();
         countDown = 0;
     }
+
+    string ActorName(Actor Other) {
+    	if (ZetaBotPawn(Other) != null) {
+    		ZTBotController cont = ZetaBotPawn(Other).cont;
+
+    		if (cont != null) return cont.myName;
+    	}
+
+    	if (PlayerPawn(Other) != null && playeringame[Other.PlayerNumber()]) {
+    		return players[Other.PlayerNumber()].GetUserName();
+    	}
+
+    	return "a "..Other.GetClassName();
+    }
     
     override void Tick() {
         bool showing = false;
@@ -2268,28 +2368,23 @@ class BotName : Inventory {
 	                	? "\n\crTeam: \cg"..ZTBotController.teamNames[closest.cont.myTeam]
 	                	: ""
 	                )..(
-                    (
-                        (closest.cont.bstate != ZTBotController.BS_ATTACKING || closest.cont.enemy == null)
-                        ? "\n\cc"..ZTBotController.BStateNames[closest.cont.bstate]
-                        : "\n\n\crAttacking a "..closest.cont.enemy.GetClassName().." with "..closest.cont.enemy.health.." HP!"
-                    ).."\n\n"..(
-                        closest.cont.currentOrder == null ? "\ccNo orders\cr"
-                        : String.format("\crOrdered by %s; currently \cc", (
-                            ZetaBotPawn(closest.cont.currentOrder.orderer) != null
-                            ? ZetaBotPawn(closest.cont.currentOrder.orderer).cont.myName
-                            : "a "..closest.cont.currentOrder.orderer.GetClassName()
-                        ))..(closest.cont.currentOrder.v_continuous)..(
-                            !(closest.cont.currentOrder.lookedAt != null && closest.cont.currentOrder.orderType != ZTBotController.BS_WANDERING) ? ""
-                            : String.Format(" a %s with %d HP", closest.cont.enemy.GetClassName(), closest.cont.enemy.health)
-                        ).."...\cr"
-                    ).."\n"..(
-                        closest.cont.commander == null ? "\crNo commander"
-                        : "Commander: "..(
-                            ZetaBotPawn(closest.cont.commander) != null
-                            ? ZetaBotPawn(closest.cont.commander).cont.myName
-                            : "a "..closest.cont.commander.GetClassName()
-                        )
-                    )
+	                    (
+	                        (closest.cont.bstate != ZTBotController.BS_ATTACKING || closest.cont.enemy == null)
+	                        ? "\n\cc"..ZTBotController.BStateNames[closest.cont.bstate]
+	                        : "\n\n\crAttacking "..ActorName(closest.cont.enemy).." with "..closest.cont.enemy.health.." HP!"
+	                    ).."\n\n"..(
+	                        closest.cont.currentOrder == null ? "\ccNo orders\cr"
+	                        : (
+	                        	String.format("\crOrdered by %s; currently \cc", ActorName(closest.cont.currentOrder.orderer))
+	                        	..(closest.cont.currentOrder.v_continuous)..(!(closest.cont.currentOrder.lookedAt != null && closest.cont.currentOrder.orderType != ZTBotController.BS_WANDERING)
+	                        	? ""
+	                            : String.Format(" %s with %d HP", ActorName(closest.cont.currentOrder.lookedAt), closest.cont.enemy.health)
+	                        ).."...\cr"
+	                    ).."\n"..(
+	                        closest.cont.commander == null ? "\crNo commander"
+	                        : "Commander: "..ActorName(closest.cont.commander)
+	                    )
+	                )
                 ));
                 
                 lastShown = closest;

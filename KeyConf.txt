@@ -16,10 +16,19 @@ defaultbind kp. "summonfriend zetabot 0"
 
 //----------
 
-addkeysection "ZetaBot" "zetabots"
+addkeysection "ZetaBot General" "zetabots_general"
 
 addmenukey "Spawn ZetaBot" "summonfriend zetabot 0"
 addmenukey "Kill All Bots" "kill ZetaBotPawn"
+
+addkeysection "ZetaBot Orders" "zetabots_order"
+
+addmenukey "Order Nearby Commanded Bots to Wander" "summon ztbotwanderorder"
+addmenukey "Order Nearby Commanded Bots to Attack Looked" "summon ztbotattackorder"
+addmenukey "Order Nearby Commanded Bots to Flee Looked" "summon ztbotfleeorder"
+addmenukey "Order Nearby Commanded Bots to Follow Looked" "summon ztbotfolloworder"
+
+addkeysection "ZetaBot Pathing" "zetabots_paths"
 
 addmenukey "Create Normal Path Node" "summon ztpathnode 0"
 addmenukey "Create Use Path Node" "summon ztusenode 0"
