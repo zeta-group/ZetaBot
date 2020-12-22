@@ -1290,8 +1290,10 @@ class ZTBotController : Actor {
                 
         NumBots.Get().value--;
 
-        teamMarker.Destroy();
-        teamMarker = null;
+		if (teamMarker != null) {
+	        teamMarker.Destroy();
+	        teamMarker = null;
+        }
     }
 
     void Subroutine_Follow() {
