@@ -93,3 +93,31 @@ class ZTGiveCape : Actor
 			Stop;
 	}
 }
+
+class ZetaTeamMarker : Actor {
+	Default {
+		Height 5;
+		Radius 5;
+		Gravity 0;
+		Alpha 0.6;
+		Scale 0.8;
+		DrawStyle "Shaded";
+	}
+
+	Actor attached;
+
+	void SetColor(string Col) {
+		SetShade(Col);
+	}
+
+	override void Tick() {
+		if (attached == null || (attached.bShootable && attached.health <= 0)) {
+			Destroy();
+		}
+
+		else {
+			SetOrigin(attached.pos);
+			pos.z += attached.Height + 8;
+		}
+	}
+}

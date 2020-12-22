@@ -230,6 +230,7 @@ class ZTBotController : Actor {
     uint BotID;
     uint TelefragTimer;
     bool initialized;
+    ZetaTeamMarker teamMarker;
     double blocked;
     double averageSpeed;
     uint speedRemaining;
@@ -522,6 +523,20 @@ class ZTBotController : Actor {
     	0.5, 0.4, 0.1
     };
 
+    static const String teamColorsHex[/* 11 */] = {
+    	"F00804",
+    	"0804F0",
+    	"08F004",
+    	"F0E004",
+    	"101016",
+    	"F4F4EC",
+    	"E87018",
+    	"C820E8",
+    	"30A0C8",
+    	"807060",
+    	"806810"
+    };
+
     int myTeam;
 
     void SetTeam(int team) {
@@ -530,6 +545,10 @@ class ZTBotController : Actor {
     	int tcolind = myTeam * 3;
 
     	possessed.SetColor(teamColors[tcolind], teamColors[tcolind + 1], teamColors[tcolind + 2]);
+
+    	if (teamMarker != null) {
+	   		teamMarker.SetColor(teamColorsHex[myTeam]);
+	   	}
     }
 
 	int PickTeam(bool bCVarCap) {
@@ -1761,9 +1780,24 @@ class ZTBotController : Actor {
     }
 
 	void StatusDoubleCheck() {
-		if (CVar.FindCVar("teamplay").GetBool() && myTeam >= CVar.FindCVar("zb_maxteams").GetInt()) {
-			// cap team back to maxteams
-			SetTeam(myTeam % CVar.FindCVar("zb_maxteams").GetInt());
+		if (CVar.FindCVar("teamplay").GetBool()) {
+			if (myTeam >= CVar.FindCVar("zb_maxteams").GetInt()) {
+				// cap team back to maxteams
+				SetTeam(myTeam % CVar.FindCVar("zb_maxteams").GetInt());
+			}
+
+			if (teamMarker == null) {
+				teamMarker = ZetaTeamMarker(Spawn("ZetaTeamMarker"));
+				ZetaTeamMarker.attached = possessed;
+
+				ZetaTeamMarker.SetColor(teamColorsHex[myTeam]);
+			}
+		}
+
+		else {
+			if (teamMarker != null) {
+				teamMarker.Destroy();
+			}
 		}
 	}
 
