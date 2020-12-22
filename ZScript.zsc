@@ -111,13 +111,17 @@ class ZTBotOrderCode : Actor {
 		// Find owner
 		PlayerPawn Owner;
 
-		ThinkerIterator ownIter = ThinkerIterator.Create("PlayerPawn", STAT_DEFAULT);
+		ThinkerIterator ownIter = ThinkerIterator.Create("PlayerPawn");
 		PlayerPawn pp;
 
 		while ((pp = PlayerPawn(ownIter.Next()))) {
 			if (Owner == null || pp.Distance3D(self) < Owner.Distance3D(self)) {
 				Owner = pp;
 			}
+		}
+
+		if (Owner == null) {
+			return;
 		}
 
 		// Find object looked at by owner
@@ -1773,7 +1777,11 @@ class ZTBotController : Actor {
     }
 
     void GiveCommands() {
-        ZTBotOrder myOrder = ZTBotOrder.Make(bstate == BS_ATTACKING ? enemy : possessed, bstate == BS_FOLLOWING ? goingAfter : enemy, bstate == BS_ATTACKING ? BS_HUNTING : bstate);
+        ZTBotOrder myOrder = ZTBotOrder.Make(
+        	bstate == BS_ATTACKING ? Actor(enemy) : Actor(possessed),
+        	bstate == BS_FOLLOWING ? goingAfter : enemy,
+        	bstate == BS_ATTACKING ? BS_HUNTING : bstate
+        );
 
         ActorList friends = VisibleFriends(possessed);
         ZetaBotPawn friend;
