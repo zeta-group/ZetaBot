@@ -1788,9 +1788,9 @@ class ZTBotController : Actor {
 
 			if (teamMarker == null) {
 				teamMarker = ZetaTeamMarker(Spawn("ZetaTeamMarker"));
-				ZetaTeamMarker.attached = possessed;
+				teamMarker.attached = possessed;
 
-				ZetaTeamMarker.SetColor(teamColorsHex[myTeam]);
+				teamMarker.SetColor(teamColorsHex[myTeam]);
 			}
 		}
 
