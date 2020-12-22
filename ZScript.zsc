@@ -1060,15 +1060,18 @@ class ZTBotController : Actor {
 			if (cur == null)
 				break;
 
-			Actor dummy = Spawn("Candle", location);
+			Actor dummy = Spawn("Candle", pos);
         
             if (!dummy.CheckSight(cur)) {
             	dummy.Destroy();
                 continue;
             }
 
-            if (best == null || dummy.Distance3D(cur) < dummy.Distance3D(best))
+            if (best == null || dummy.Distance3D(cur) < dummy.Distance3D(best)) {
                 best = cur;
+            }
+
+            dummy.Destroy();
         }
                 
         return best;
