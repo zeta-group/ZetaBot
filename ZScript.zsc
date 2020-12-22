@@ -319,9 +319,7 @@ class ZTBotController : Actor {
 
         GruntInterval = 0;
         TelefragTimer = 17;
-        
-        if (CVar.FindCVar('deathmatch').GetInt() > 0)
-            bFRIENDLY = false;
+       
 
         debugCount = 0;
         retargetCount = 8;
@@ -477,17 +475,84 @@ class ZTBotController : Actor {
         DebugLog(LT_VERBOSE, String.format("%s respawned!", myName));
     }
 
+    const numTeams = 11;
+
+    static const String teamNames[/* 11 */] = {
+    	// for deathmatch or teamplay
+    	"Red",
+    	"Blue",
+    	"Green",
+    	"Gold", // yellow
+		"Black",
+		"White"
+		"Orange",
+		"Purple",
+		"Cyan",
+		"Gray",
+		"Brown"
+    };
+
+    bool IsSameTeam(Actor Other) {
+		if (PlayerPawn(Other)) {
+	    	PlayerInfo player = players[Other.PlayerNumber()];
+	   		return teamNames[myTeam] == Teams[player.GetTeam()].mname;
+   		}
+
+   		if (ZetaBotPawn(Other)) {
+   			ZTBotController cont = ZetaBotPawn(Other).cont;
+
+   			return cont != null && cont.myTeam == myTeam;
+   		}
+
+   		return false;
+   	}
+
+	// 3 per team
+    static const float teamColors[/* 33 */] = {
+    	1.0, 0.1, 0.1,
+    	0.1, 0.1, 1.0,
+    	0.1, 1.0, 0.1,
+    	0.9, 0.8, 0.1,
+    	0.2, 0.2, 0.25,
+    	0.95, 0.95, 0.9,
+    	0.9, 0.4, 0.1,
+    	0.7, 0.1, 0.8,
+    	0.2, 0.7, 0.85,
+    	0.5, 0.45, 0.4,
+    	0.5, 0.4, 0.1
+    };
+
+    int myTeam;
+
+    void SetTeam(int team) {
+		myTeam = team % numTeams % CVar.FindCVar("zb_maxteams").GetInt();
+    
+    	int tcolind = myTeam * 3;
+
+    	possessed.SetColor(teamColors[tcolind], teamColors[tcolind + 1], teamColors[tcolind + 2]);
+    }
+
+	int PickTeam(bool bCVarCap) {
+		return Random(0, bCVarCap ? (CVar.FindCVar("zb_maxteams").GetInt() - 1) : numTeams - 1);
+	}
+
     void SetPossessed(ZetaBotPawn other) {
         if (other != null) {
             DebugLog(LT_INFO, myName.." has possessed a "..other.GetClassName().."!");
         
             possessed = other;
-            ZetaCape.MakeFor(other);
-            possessedType = possessed.GetClass();
-            possessed.cont = self;
+
+            if (CVar.FindCVar("zb_cape").GetBool()) {
+	            ZetaCape.MakeFor(other);
+	            possessedType = possessed.GetClass();
+	            possessed.cont = self;
+            }
             
-            if (CVar.FindCVar("deathmatch").GetInt() == 1)
-                other.bFRIENDLY == false;
+            if (CVar.FindCVar("deathmatch").GetInt() > 0) {
+                other.bFRIENDLY = false;
+            }
+
+			SetTeam(PickTeam(CVar.FindCVar("teamplay").GetBool()));
             
             averageSpeed = 0;
             speedRemaining = 87;
@@ -787,6 +852,19 @@ class ZTBotController : Actor {
     }
     
     bool isEnemy(Actor from, Actor other) {
+    	ZetaBotPawn zbp;
+    	PlayerPawn pp;
+
+		if (CVar.FindCVar('teamplay').GetInt() > 0) {
+			Actor comparee;
+		
+			if (((zbp = ZetaBotPawn(from)) && (comparee = other)) || ((zbp = ZetaBotPawn(other)) && (comparee = from))) {
+				ZTBotController cont = zbp.cont;
+			
+	    		if (cont && cont.IsSameTeam(comparee)) return true;
+	    	}
+		}
+    
         return from.bFRIENDLY != other.bFRIENDLY || (!from.bFRIENDLY && other.CheckClass("PlayerPawn", AAPTR_DEFAULT, true)) || CVar.FindCVar('deathmatch').GetInt() > 0;
     }
     
@@ -1253,7 +1331,7 @@ class ZTBotController : Actor {
             ConsiderSetBotState(BS_WANDERING);
             SetOrder(null);
 
-            if (lastEnemyPos != null) lastEnemyPos.Destroy();
+            if (lastEnemyPos != null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
             lastEnemyPos = null;
         }
     
@@ -1262,7 +1340,7 @@ class ZTBotController : Actor {
             ConsiderSetBotState(BS_ATTACKING);
             possessed.Jump();
 
-            if (lastEnemyPos != null) lastEnemyPos.Destroy();
+            if (lastEnemyPos != null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
             lastEnemyPos = null;
         }
     
@@ -1286,7 +1364,7 @@ class ZTBotController : Actor {
                     enemy = null;
                     ConsiderSetBotState(BS_WANDERING);
 
-                    if (lastEnemyPos != null) lastEnemyPos.Destroy();
+                    if (lastEnemyPos != null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
                     lastEnemyPos = null;
                 }
                     
@@ -1315,7 +1393,7 @@ class ZTBotController : Actor {
                         if (navDest == null) {
                         	DebugLog(LT_INFO, "No path found to last enemy pos! Going back to wandering.");
 
-                        	if (lastEnemyPos == null) {
+                        	if (lastEnemyPos == null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) {
                         		lastEnemyPos.Destroy();
                         	}
                         	                            
@@ -1487,7 +1565,7 @@ class ZTBotController : Actor {
             if (bstate != BS_HUNTING && !LineOfSight(enemy)) {
                 possessed.EndShoot();
 
-                if (lastEnemyPos != null) lastEnemyPos.Destroy();
+                if (lastEnemyPos != null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
 
                 let node = ClosestVisibleNodeAt(currEnemyPos);
 
@@ -1682,13 +1760,22 @@ class ZTBotController : Actor {
         }
     }
 
+	void StatusDoubleCheck() {
+		if (CVar.FindCVar("teamplay").GetBool() && myTeam >= CVar.FindCVar("zb_maxteams").GetInt()) {
+			// cap team back to maxteams
+			SetTeam(myTeam % CVar.FindCVar("zb_maxteams").GetInt());
+		}
+	}
+
     int thinkTimer;
     
     void A_ZetaTick() {
+		StatusDoubleCheck();
+    
         if (TelefragTimer > 0) TelefragTimer--;
 
         if (possessed == null || possessed.Health <= 0) {
-            if (lastEnemyPos != null) lastEnemyPos.Destroy();
+            if (lastEnemyPos != null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
 
             if (CVar.FindCVar('zb_respawn').GetBool() && (CVar.FindCVar('deathmatch').GetInt() > 0 || CVar.FindCVar('zb_cooprespawn').GetBool())) {
                 DebugLog(LT_VERBOSE, String.format("Setting Respawn mode for %s.", myName));
@@ -1730,7 +1817,7 @@ class ZTBotController : Actor {
        	}
         
         if (enemy != null && enemy.Health <= 0) {
-            if (lastEnemyPos != null) lastEnemyPos.Destroy();
+            if (lastEnemyPos != null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
             enemy = null;
 
             if (bstate == BS_ATTACKING) {

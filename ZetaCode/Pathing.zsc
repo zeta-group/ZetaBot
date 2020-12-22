@@ -41,6 +41,7 @@ class PathMarker : Actor {
 
 	void ScaleToRemove() {
 		scale *= 2;
+		alpha /= 2;
 	}
 
     void RemoveEarly() {
@@ -495,41 +496,41 @@ class ZTPathNode : ZTPositionMarker
 
     void ShowPath(ZTPathNode otherNode) {
 	    uint segRes = 24; // constant
-	    uint maxSeg = ceil(Distance3D(otherNode) / segRes);
-	    uint fringeSize = 40;
+	    uint numSegs = ceil(Distance3D(otherNode) / segRes);
+	    uint fringeSegs = 4;
+	    double fringeSize = 28;
+	    double fringeAngle = 45;
+	    double fringeDotScale = 0.8;
 
 		// regular offsets
-	    Vector3 offs;
-	    offs.xy = AngleToVector(AngleTo(otherNode));
-	    
-	    Vector3 allOffs;
-	    allOffs.xy = AngleToVector(AngleTo(otherNode) + 90);
+	    Vector3 offs = otherNode.pos - pos;
 
 		// arrow fringe directions
 	    Vector3 fringeDir1,fringeDir2;
-	    fringeDir1.xy = AngleToVector(othernode.AngleTo(self) - 30);
-	    fringeDir2.xy = AngleToVector(othernode.AngleTo(self) + 30);
+	    fringeDir1.xy = AngleToVector(othernode.AngleTo(self) - fringeAngle);
+	    fringeDir2.xy = AngleToVector(othernode.AngleTo(self) + fringeAngle);
 
 		// main arrow trunk
-	    for (uint seg = 0; seg < maxSeg; seg++) {
-		    double alpha = 1.0 * seg / maxSeg;
-		    double scaled = alpha * Distance3D(otherNode);
-		    Vector3 pmPos = pos + offs * scaled + allOffs;
-		    pmPos.z += (otherNode.pos.z - pos.z) * alpha;
+	    for (uint seg = 0; seg < numSegs; seg++) {
+		    double alpha = 1.0 * seg / numSegs;
+		    Vector3 pmPos = pos + offs * alpha;
 
 		    PathMarker pm = PathMarker(Spawn("PathMarker", pmPos));
 		    //pm.pos.z = pm.floorz;
 	    }
 
 	    // arrow fringes
-	    for (uint seg = 0; seg < 3; seg++) {
-	    	double distance = 1.0 * (seg + 1) / 4 * fringeSize;
+	    for (uint seg = 0; seg < fringeSegs; seg++) {
+	    	double distance = 1.0 * (seg + 1) / fringeSegs * fringeSize;
 
 	    	Vector3 pmPos1 = otherNode.pos + fringeDir1 * distance;
 	    	Vector3 pmPos2 = otherNode.pos + fringeDir2 * distance;
 
 	    	PathMarker pm1 = PathMarker(Spawn("PathMarker", pmPos1));
 	    	PathMarker pm2 = PathMarker(Spawn("PathMarker", pmPos2));
+
+	    	pm1.scale *= fringeDotScale;
+	    	pm2.scale *= fringeDotScale;
 	    }
     }
 
@@ -642,24 +643,30 @@ class ZTPathNode : ZTPositionMarker
 
     bool PostCanConnect(ZTPathNode next, ActorList preNeighbors)
     {
-	    if (next.nodeType == NT_AVOID)
-		    return preNeighbors.Length() < 2;
-
 	    ZTPathNode pn = null;
 
-		let dist = Distance3D(next);
+		let dist = Distance2D(next);
 	    let off1 = Vec2To(next) / Distance2D(next);
+
+	    double minCullLimit 	= 0.5;
+	    double maxCullLimit 	= 0.9;
+	    double cullPostScale 	= maxCullLimit - minCullLimit;
+	    double cullPreScale 	= 512;
 	
 	    for ( uint i = 0; i < preNeighbors.Length(); i++ )
 	    {
 		    ZTPathNode pn = ZTPathNode(preNeighbors.get(i));
+		    let dist2 = Distance2D(pn);	
 		
-		    if (CheckSight(pn) && pn != self && pn != next && Distance3D(pn) < dist - 40) {
-			    let off2 = Vec2To(pn) / Distance2D(pn);
+		    if (CheckSight(pn) && pn != self && pn != next && dist2 < dist - 64) {
+			    let off2 = Vec2To(pn) / dist2;
 
-			    if ((off1.x * off2.x + off1.y * off2.y) > 0.5)
+			    //A_Log((dist2 / cullPreScale).." -> "..(off1.x * off2.x + off1.y * off2.y).." > "..minCullLimit + ((1.0 / (1.0 + exp(-(dist2 / cullPreScale)))) * 2 - 1.0) * cullPostScale);
+
+			    if ((off1.x * off2.x + off1.y * off2.y) > minCullLimit + ((1.0 / (1.0 + exp(-(dist2 / cullPreScale)))) * 2 - 1.0) * cullPostScale) {
 				    return false; // there is already a shorter path in the same
-							      // direction
+							      // practical direction
+		      	}
 		    }
 	    }
 
@@ -676,7 +683,7 @@ class ZTPathNode : ZTPositionMarker
 
 	    double maxZDiff = 24;
 	    double minDist = 64;
-	    double maxHDist = 1500;
+	    double maxHDist = 2048;
 		double dist2 = Distance2D(next);
 
 		if (dist2 < 1.0) 
@@ -687,14 +694,20 @@ class ZTPathNode : ZTPositionMarker
 		if ( dist2 > maxHDist )
 			return false;
 
-	    if ( next.nodeType == NT_JUMP || nodeType == NT_JUMP )
+	    if ( next.nodeType == NT_JUMP || nodeType == NT_JUMP ) {
 		    maxZDiff = 60;
+		    maxHDist = 256;
+	    }
 		
-	    if ( next.nodeType == NT_SLOW || nodeType == NT_SLOW || next.nodeType == NT_CROUCH || nodeType == NT_CROUCH )
+	    if ( next.nodeType == NT_SLOW || nodeType == NT_SLOW || next.nodeType == NT_CROUCH || nodeType == NT_CROUCH ) {
 		    minDist = 20;
+		    maxHDist = 1024;
+	    }
 		
-	    else if ( next.nodeType == NT_USE || nodeType == NT_USE )
+	    else if ( next.nodeType == NT_USE || nodeType == NT_USE ) {
 		    minDist = 2;
+		    maxZDiff = 16;
+	    }
 		
 	    minDist -= abs(next.pos.z - pos.z) * 0.5;
 	
@@ -708,19 +721,23 @@ class ZTPathNode : ZTPositionMarker
 		    return false;
 	
 	    // experimental
+	    /*
 	    if (CheckBlock(
 		    xofs: next.pos.x - pos.x,
 		    yofs: next.pos.y - pos.y,
 		    zofs: next.pos.z - pos.z,
 		    angle: AngleTo(next)
 	    )) return false;
+	    */
 
 	    if (!CheckSight(next)) {
+	    /*
 		    FLineTraceData sight;
 		    LineTrace(AngleTo(next), Distance2D(next), PitchTo(next, 40), TRF_THRUACTORS | TRF_THRUHITSCAN, 40, data: sight);
 
 		    if (sight.HitType == TRACE_HITWALL)
-			    return false;
+	    */
+		    return false;
 	    }
 
 	    return true;
@@ -891,7 +908,7 @@ class ZTUploadNodes : Actor
 	    String new_serialized = ZTPathNode.serializeLevel();
 		
 	    if ( code == "::NONE" || code == "" ) {
-	    	DebugLog(LT_VERBOSE, "Empty node list detected; replacing with single entry for "..level.mapName);
+	    	DebugLog(LT_VERBOSE, "Empty node list detected; replacing with single entry for "..level.mapName.MakeUpper());
 		    code = ZTPathNode.serializeLevel();
 	    }
 	
@@ -902,12 +919,12 @@ class ZTUploadNodes : Actor
 		    while ( true ) {
                 c = ZTPathNode.split(code, ";;", i++);
 		
-			    if ( ZTPathNode.split(c, "::", 0) == level.mapName) {
+			    if ( ZTPathNode.split(c, "::", 0) == level.mapName.MakeUpper()) {
 				    break;
 			    }
 				
 			    if ( c == "" ) {
-                    DebugLog(LT_VERBOSE, "Node list exists but entry not found for "..level.mapName.."; appended to nodes list at index "..code.Length());
+                    DebugLog(LT_VERBOSE, "Node list exists but entry not found for "..level.mapName.MakeUpper().."; appended to nodes list at index "..code.Length());
                     
                     code = code..";;"..new_serialized;
 
@@ -924,7 +941,7 @@ class ZTUploadNodes : Actor
 				int ind3 = ind + new_length;
 
 				if (ind == -1) {
-					DebugLog(LT_ERROR, "Could not save level node list: existing entry for "..level.mapName.." found, but its index could not be determined!");
+					DebugLog(LT_ERROR, "Could not save level node list: existing entry for "..level.mapName.MakeUpper().." found, but its index could not be determined!");
 					return;
 				}
 
@@ -933,7 +950,7 @@ class ZTUploadNodes : Actor
 			
 		    	code = left..new_serialized..right;
 
-		    	DebugLog(LT_VERBOSE, "Overrode existing entry for "..level.mapName.." in nodes list between indices "..ind.." and "..ind2.."; now it spans from the original start till index "..ind3);
+		    	DebugLog(LT_VERBOSE, "Overrode existing entry for "..level.mapName.MakeUpper().." in nodes list between indices "..ind.." and "..ind2.."; now it spans from the original start till index "..ind3);
 		    }
 	    }
 
@@ -1085,7 +1102,7 @@ class ZTPromptNodes : Actor
 
 				if (!r || !r.found) {
 					string lst = String.format(
-						"No nodes found (\"%s\")! %s maps found", level.mapName,
+						"No nodes found (\"%s\")! %s maps found", level.mapName.MakeUpper(),
 						(r != null) ?
 							( ""..r.mapsFound.Size(0)) :
 							"No"

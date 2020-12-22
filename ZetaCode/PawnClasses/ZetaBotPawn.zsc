@@ -5,6 +5,11 @@ class ZetaBotPawn : Actor {
 	double forward;
 	double rightward;
 
+	int ColorRangeStart, ColorRangeEnd;
+
+	property ColorRangeStart: ColorRangeStart;
+	property ColorRangeEnd: ColorRangeEnd;
+
 	Default {
 		PainChance 100;
 		Speed 1;
@@ -37,6 +42,17 @@ class ZetaBotPawn : Actor {
 		//+BLOCKASPLAYER
 
 		-CANPUSHWALLS
+	}
+
+	virtual void SetColor(float red, float green, float blue) {
+		Translation trans;
+
+		for (int i = ColorRangeStart; i < ColorRangeEnd; i++) {
+			float value = trans.colors[i].r * 0.2126 + trans.colors[i].g * 0.7152 + trans.colors[i].b * 0.0722;
+			trans.colors[i] = Color(red * value, green * value, blue * value);
+		}
+
+		translation = trans.AddTranslation();
 	}
 
 	static String GetSomeType(Actor anchor = null) {

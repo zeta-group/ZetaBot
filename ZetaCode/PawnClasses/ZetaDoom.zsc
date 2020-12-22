@@ -3,6 +3,8 @@ class ZetaDoom : ZetaBotPawn
 	Default
 	{
 		ZetaBotPawn.DefaultInv "Fist,Pistol,Clip";
+		ZetaBotPawn.ColorRangeStart 112;
+		ZetaBotPawn.ColorRangeEnd 127;
 	}
 
 	bool A_SpeedCheck()
