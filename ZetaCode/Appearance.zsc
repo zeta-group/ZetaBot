@@ -30,8 +30,9 @@ class ZetaCape : Actor
 	
 	override void Tick()
 	{
-		if (attached == null || (attached.bShootable && attached.health <= 0))
+		if (attached == null || attached.health <= 0) {
 			Destroy();
+		}
 
 		else {
 			angle = attached.angle;
@@ -99,8 +100,8 @@ class ZetaTeamMarker : Actor {
 		Height 5;
 		Radius 5;
 		Gravity 0;
-		Alpha 0.6;
-		Scale 0.8;
+		Alpha 0.8;
+		Scale 0.5;
 		RenderStyle "Shaded";
 	}
 
@@ -111,15 +112,21 @@ class ZetaTeamMarker : Actor {
 	}
 
 	override void Tick() {
-		if (attached == null || (attached.bShootable && attached.health <= 0)) {
+		if (attached == null || attached.health <= 0) {
 			Destroy();
 		}
 
 		else {
 			Vector3 newPos = attached.pos;
-			newPos.z += attached.Height + 8;
+			newPos.z += attached.Height;
 		
 			SetOrigin(newPos, true);
 		}
+	}
+
+	States {
+		Spawn:
+			ZBTM A -1;
+			Stop;
 	}
 }
