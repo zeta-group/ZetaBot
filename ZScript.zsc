@@ -183,10 +183,12 @@ class ZTBotFollowOrder : ZTBotOrderCode {
 	}
 }
 
+/*
 class ZTLineUseHistoryEntry {
     Line Used;
     double When; // zetabot age in seconds
 }
+*/
 
 class DestBall : PlasmaBall {
     Actor targetNode;
@@ -328,7 +330,7 @@ class ZTBotController : Actor {
     uint numShoots;
     uint pathCountdown;
     uint retargetCount;
-    Array<ZTLineUseHistoryEntry> UseHistory;
+    //Array<ZTLineUseHistoryEntry> UseHistory;
     
     bool AutoUseAtAngle(double angle) {
         FLineTraceData td;
@@ -362,6 +364,7 @@ class ZTBotController : Actor {
             return false;
         }
 
+		/*
         for (let i = 0; i < UseHistory.Size(); i++) {
             if (UseHistory[i].Used == td.HitLine && age - UseHistory[i].When < CVar.FindCVar('zb_autouseinterval').GetFloat())
                 return false;
@@ -369,6 +372,7 @@ class ZTBotController : Actor {
             else if (age - UseHistory[i].When >= CVar.FindCVar('zb_autouseinterval').GetFloat())
                 UseHistory.Delete(i--);
         }
+        */
 
         Line l = td.HitLine;
         DebugLog(LT_VERBOSE, "["..myName.." USE NODE LOGS] Auto-activating wall! Line special: "..l.Special);
@@ -1411,8 +1415,13 @@ class ZTBotController : Actor {
                             SmartMove(navDest);
                         }
                             
-                        else
+                        else {
                             MoveToward(goingAfter, 0.27);
+                        }
+
+                        if (path != null) {
+                        	path.Destroy(); // clean actorlists after use
+                        }
 
                         pathCountdown += 24;
                     }
@@ -1493,6 +1502,10 @@ class ZTBotController : Actor {
                             for (uint iii = 0; iii < path.Length(); iii++) {
                                 if (path.get(iii) == null)
                                     DebugLog(LT_VERBOSE, String.Format("Null node in path: %i", iii));
+                            }
+
+                            if (path != null) {
+                            	path.Destroy(); // clean actorlists after use
                             }
 
                             navDest = ZTPathNode(path.get(0));
@@ -1650,6 +1663,10 @@ class ZTBotController : Actor {
             
             ConsiderSetBotState(BS_ATTACKING);
         }
+
+        if (mon != null) {
+        	mon.Destroy(); // clean actorlists after use
+        }
     }
 
     void Subroutine_Flee() {
@@ -1756,7 +1773,7 @@ class ZTBotController : Actor {
     }
 
     void GiveCommands() {
-        ZTBotOrder myOrder = ZTBotOrder.Make(possessed, bstate == BS_FOLLOWING ? goingAfter : enemy, bstate == BS_ATTACKING ? BS_HUNTING : bstate);
+        ZTBotOrder myOrder = ZTBotOrder.Make(bstate == BS_ATTACKING ? enemy : possessed, bstate == BS_FOLLOWING ? goingAfter : enemy, bstate == BS_ATTACKING ? BS_HUNTING : bstate);
 
         ActorList friends = VisibleFriends(possessed);
         ZetaBotPawn friend;
@@ -1777,6 +1794,10 @@ class ZTBotController : Actor {
                     chat = true;
                 }
             }
+        }
+
+        if (friends != Null) {
+        	friends.Destroy(); // clean actorlists after use
         }
     }
 
@@ -1815,6 +1836,10 @@ class ZTBotController : Actor {
                 }
                 
                 BotChat("COMM", 0.8);
+            }
+
+            if (friends != Null) {
+            	friends.Destroy(); // clean actorlists after use
             }
         }
     

@@ -302,7 +302,10 @@ class ZTPathNode : ZTPositionMarker
 		    if (node.nodeType != NT_TARGET)
 			    list.push(node);
 		
-	    return serializeAll(list);
+	    let res = serializeAll(list);
+	    list.Destroy(); // clean actorlists after use
+
+	    return res;
     }
 
     static String split(string other, string sep, uint index)
@@ -454,6 +457,8 @@ class ZTPathNode : ZTPositionMarker
 		    if ( postCanConnect(preNeigh, preRes) )
 			    res.Push(preNeigh);
 	    }
+	    
+	    preRes.Destroy(); // clean actorlists after use
 	
 	    return res;
     }
@@ -476,6 +481,8 @@ class ZTPathNode : ZTPositionMarker
 		    if ( postCanConnect(preNeigh, preRes) )
 			    res.Push(preNeigh);
 	    }
+
+	    preRes.Destroy(); // clean actorlists after use
 	
 	    return res;
     }
@@ -491,7 +498,10 @@ class ZTPathNode : ZTPositionMarker
 	    if ( nb.Length() < 1 )
 		    return self;
 	
-	    return ZTPathNode(nb.get(Random(0, nb.Length() - 1)));
+	    let res = ZTPathNode(nb.get(Random(0, nb.Length() - 1)));
+	    nb.Destroy(); // clean actorlists after use
+	    
+	    return res;
     }
 
     void ShowPath(ZTPathNode otherNode) {
@@ -541,6 +551,8 @@ class ZTPathNode : ZTPositionMarker
 		    ZTPathNode neigh = ZTPathNode(nb.Get(i));
 		    ShowPath(neigh);
 	    }
+
+	    nb.Destroy(); // clean actorlists after use
     }
 
     ActorList findPathTo(ZTPathNode goal, Actor traveller = null)
@@ -599,6 +611,7 @@ class ZTPathNode : ZTPositionMarker
 		    }
 			
 		    closedSet.push(current);
+		    nb.Destroy(); // clean actorlists after use
 	    }
 	
 	    if ( !foundGoal ) {
