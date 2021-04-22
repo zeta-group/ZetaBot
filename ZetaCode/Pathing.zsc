@@ -137,7 +137,9 @@ class ZTPathNode : ZTPositionMarker
 	    NT_CANDY,
 	    NT_SHOOT,
 	    NT_RESPAWN,
-	    NT_TARGET
+	    NT_TARGET,
+	    NT_TELEPORT_SOURCE,
+	    NT_BLOCK,
     };
 
 	static string StencilColorForType(NavigationType navType) {
@@ -171,6 +173,12 @@ class ZTPathNode : ZTPositionMarker
 		if (navType == NT_TARGET)
 			return "101028";
 
+		if (navType == NT_BLOCK)
+		    return "901000";
+
+        if (navType == NT_TELEPORT_SOURCE)
+            return "1030D0";
+
 		return "000000"; // heck
 	}
 
@@ -193,7 +201,9 @@ class ZTPathNode : ZTPositionMarker
         "Candy",
         "Shoot",
         "Respawn",
-        "Target"
+        "Target",
+        "Teleport Source",
+        "Block",
     };
 
     enum LogType
@@ -215,7 +225,7 @@ class ZTPathNode : ZTPositionMarker
 			
 		    else if ( kind == LT_WARNING )
 			    logHeader = "\cf[WARNING]";
-			
+			    
 		    else if ( kind == LT_INFO )
 			    logHeader = "\ch[INFO]";
 			
@@ -237,6 +247,7 @@ class ZTPathNode : ZTPositionMarker
     double useDirection;
     bool bPlopped;
     uint id;
+    uint assoc_id;
 
     override void BeginPlay()
     {
@@ -246,6 +257,8 @@ class ZTPathNode : ZTPositionMarker
 	
 	    id = NumNodes.Increment();
         ChangeStatNum(91);
+
+        assoc_id = 0;
     }
 
     override void PostBeginPlay()
@@ -275,7 +288,7 @@ class ZTPathNode : ZTPositionMarker
 
     string serialize()
     {
-	    return int(pos.x)..","..int(pos.y)..","..int(pos.z)..","..nodeType..","..int(useDirection);
+	    return int(pos.x)..","..int(pos.y)..","..int(pos.z)..","..nodeType..","..int(useDirection)..","..assoc_id;
     }
 
     static string serializeAll(ActorList allNodes)
@@ -414,6 +427,7 @@ class ZTPathNode : ZTPositionMarker
 		    double nz = SInt(split(ncode, ",", 2));
 		    NavigationType nt = SInt(split(ncode, ",", 3));
 		    double ud = SInt(split(ncode, ",", 4));
+		    int as = SInt(split(ncode, ",", 5));
 		
 		    let node = ZTPathNode(Spawn("ZTPathNode", (nx, ny, nz)));
 		    node.nodeType = nt;
@@ -421,6 +435,7 @@ class ZTPathNode : ZTPositionMarker
 		
 		    node.useDirection = ud;
 			node.angle = ud;
+            node.assoc_id = as;
 		
 		    res.totalNodes++;
 	    }
@@ -428,13 +443,16 @@ class ZTPathNode : ZTPositionMarker
 	    return res;
     }
 
-    double specialCost(actor Other) // mimicks UT99's NavigationPoint.SpecialCost(Pawn Other)
+    double SpecialCost(ZTPathNode from, ZTPathNode goal, actor Other) // mimicks UT99's NavigationPoint.SpecialCost(Pawn Other)
     {
 	    if ( nodeType == NT_AVOID )
 		    return 512;
 
 		else if ( nodeType == NT_CANDY )
 			return -128;
+
+		else if ( nodeType == NT_TELEPORT_SOURCE && from )
+		    return 128 - Distance3D(from);
 
 	    return 0;
     }
@@ -603,7 +621,7 @@ class ZTPathNode : ZTPositionMarker
 					}
 
 				    double icost = icosts.get(current, 0) + goal.Distance3D(neigh);
-				    double cost = neigh.Distance3D(self) + icost + neigh.specialCost(traveller);
+				    double cost = neigh.Distance3D(self) + icost + neigh.specialCost(current, goal, traveller);
 			
 				    icosts.set(neigh, icost);
 				    openSet.add(neigh, cost);
@@ -663,6 +681,9 @@ class ZTPathNode : ZTPositionMarker
     {
 	    ZTPathNode pn = null;
 
+	    if (nodeType == NT_TELEPORT_SOURCE)
+	        return true;
+
 		let dist = Distance2D(next);
 	    let off1 = Vec2To(next) / Distance2D(next);
 
@@ -693,6 +714,12 @@ class ZTPathNode : ZTPositionMarker
 
     bool CanConnect(ZTPathNode next)
     {
+        if (nodeType == NT_BLOCK || next.nodeType == NT_BLOCK)
+            return false;
+    
+        if (nodeType == NT_TELEPORT_SOURCE)
+	        return next.id == assoc_id;
+    
         if ( next == null )
             return false;
 
@@ -841,6 +868,44 @@ class ZTAvoidNode : Actor
 	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_AVOID;
 	    node.angle = angle;
+	
+	    Destroy();
+    }
+}
+
+class ZTBlockNode : Actor
+{
+    override void PostBeginPlay()
+    {
+	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
+	    node.nodeType = ZTPathNode.NT_BLOCK;
+	    node.angle = angle;
+	
+	    Destroy();
+    }
+}
+
+class ZTTeleportToNextNode : Actor
+{
+    override void PostBeginPlay()
+    {
+	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
+	    node.nodeType = ZTPathNode.NT_TELEPORT_SOURCE;
+	    node.angle = angle;
+	    node.assoc_id = node.id + 1; // next node
+	
+	    Destroy();
+    }
+}
+
+class ZTTeleportToPrevNode : Actor
+{
+    override void PostBeginPlay()
+    {
+	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
+	    node.nodeType = ZTPathNode.NT_TELEPORT_SOURCE;
+	    node.angle = angle;
+	    node.assoc_id = node.id - 1; // previous node
 	
 	    Destroy();
     }
