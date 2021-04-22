@@ -1942,7 +1942,7 @@ class ZTBotController : Actor {
         if (possessed == null || possessed.Health <= 0) {
             if (lastEnemyPos != null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
 
-            if (CVar.FindCVar('zb_respawn').GetBool() && (CVar.FindCVar('deathmatch').GetInt() > 0 || CVar.FindCVar('zb_cooprespawn').GetBool())) {
+            if (CVar.FindCVar('zb_respawn').GetBool() && (CVar.FindCVar('deathmatch').GetInt() > 0 || CVar.FindCVar('zb_alsocooprespawn').GetBool())) {
                 DebugLog(LT_VERBOSE, String.format("Setting Respawn mode for %s.", myName));
                 SetStateLabel("Respawn");
             }
