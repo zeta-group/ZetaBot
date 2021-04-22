@@ -2398,7 +2398,7 @@ class BotName : Inventory {
             }
             
             if (closest != null && closest.cont != null) {
-                DebugLog(LT_WARNING, "Printing status for bot "..closest.cont.myName.." in state "..ZTBotController.BStateNames[closest.cont.bstate]);
+                DebugLog(LT_VERBOSE, "Printing status for bot "..closest.cont.myName.." in state "..ZTBotController.BStateNames[closest.cont.bstate]);
                 
                 countDown = 2;
                 
