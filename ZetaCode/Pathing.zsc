@@ -203,7 +203,7 @@ class ZTPathNode : ZTPositionMarker
         "Respawn",
         "Target",
         "Teleport Source",
-        "Block",
+        "Block"
     };
 
     enum LogType
