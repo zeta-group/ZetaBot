@@ -851,9 +851,7 @@ class ZTBotController : Actor {
     
     void SmartMove(ZTPathNode toward = null) {
         if (toward == null) toward = navDest;
-        if (toward == null) return;
-
-        if (!possessed.CheckSight(toward)) toward = currNode;
+        if (toward == null || !possessed.CheckSight(toward)) toward = currNode;
 
         if (currNode != null && currNode.nodeType == ZTPathNode.NT_USE)
             DodgeAndUse();
