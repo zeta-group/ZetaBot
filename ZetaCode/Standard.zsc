@@ -228,11 +228,11 @@ class Set {
     }
 
     bool has(Object _key) {
-        return selfMap.has(_key);
+        return selfMap.has(_key) == _key;
     }
 
     void put(Object _key) {
-        selfMap.set(_key, _key)
+        selfMap.set(_key, _key);
     }
 
     void remove(Object _key) {
@@ -282,11 +282,12 @@ class QueueItem
 class PriorityQueue {
     Array<QueueItem> heap;
     Set hasCheck;
+    NumberDict index;
     int firstFree;
     int numFree;
     int size, depth;
 
-    static PriorityQueue new(int numCheckBuckets = 12) {
+    static PriorityQueue new(int numBuckets = 32) {
         PriorityQueue res = new("PriorityQueue");
 
         res.size = 0;
@@ -296,7 +297,8 @@ class PriorityQueue {
 
         res.GrowDepth();
 
-        res.hasCheck = Set.new(numCheckBuckets);
+        res.hasCheck = Set.new(numBuckets);
+        res.index = NumberDict.new(numBuckets);
 
         return res;
     }
@@ -310,6 +312,10 @@ class PriorityQueue {
     bool Has(Object other)
     {
         return hasCheck.has(other);
+    }
+
+    int Find(Object other) {
+        return index.get(other, -1.0);
     }
 
     int Length() {
@@ -401,11 +407,15 @@ class PriorityQueue {
 
     void SetAt(int which, Object item, double cost) {
         hasCheck.put(item);
+        index.set(item, which);
         heap[which].set(item, cost);
     }
 
     void UnsetAt(int which) {
-        hasCheck.remove(heap[which].item);
+        let item = heap[which].item;
+
+        hasCheck.remove(item);
+        index.remove(item);
         heap[which].unset();
     }
 
@@ -449,13 +459,34 @@ class PriorityQueue {
         } while (CheckSwap(which, childSwap));
     }
 
+    void UpdateCost(int which, duoble newCost) {
+        double oldCost = heap[which].cost;
+
+        if (newCost == oldCost) {
+            return;
+        }
+
+        heap[which].cost = newCost;
+
+        if (newCost < oldCost) {
+            SiftUp(which);
+        }
+
+        else {
+            SiftDown(whcih);
+        }
+    }
+
     void Add(Object item, double cost) {
-        if (Has(item)) {
-            
+        int existing = Has(item);
+
+        if (existing != -1) {
+            UpdateCost(existing, cost);
+
+            return;
         }
         
         SetFree(item, cost);
-        SiftUp()
     }
 
     void Poll(out Object item, out Double cost) {
