@@ -126,7 +126,11 @@ class NumNodes : Thinker {
 
 class ZTPathNodeHasher : Hasher {
 	override int Hash(Object key) {
-		return key.id;
+		if (!ZTPathNode(key)) {
+			return 0;
+		}
+
+		return ZTPathNode(key).id;
 	}
 }
 
