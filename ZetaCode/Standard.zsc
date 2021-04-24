@@ -459,7 +459,7 @@ class PriorityQueue {
         } while (CheckSwap(which, childSwap));
     }
 
-    void UpdateCost(int which, duoble newCost) {
+    void UpdateCost(int which, double newCost) {
         double oldCost = heap[which].cost;
 
         if (newCost == oldCost) {
