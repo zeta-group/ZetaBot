@@ -504,7 +504,7 @@ class PriorityQueue {
     }
 
     void Add(Object item, double cost) {
-        int existing = Has(item);
+        int existing = Find(item);
 
         if (existing != -1) {
             UpdateCost(existing, cost);
