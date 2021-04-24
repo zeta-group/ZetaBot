@@ -301,7 +301,7 @@ class QueueItem
     }
 }
 
-class PriorityQueue play {
+class PriorityQueue {
     Array<QueueItem> heap;
     Set hasCheck;
     NumberDict index;
