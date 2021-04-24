@@ -127,7 +127,7 @@ class Dict {
 
     void Remove(Object key)
     {
-        return buckets[Hash(key) % numBuckets].Remove(key);
+        buckets[Hash(key) % numBuckets].Remove(key);
     }
 }
 
