@@ -77,7 +77,7 @@ class Dict {
         res.numBuckets = numBuckets;
 
         for (int i = 0 ; i < numBuckets; i++) {
-            res.buckets.append(new("DictBucket"));
+            res.buckets.Push(new("DictBucket"));
         }
 
         return res;
@@ -184,7 +184,7 @@ class NumberDict {
         res.numBuckets = numBuckets;
 
         for (int i =0 ; i < numBuckets; i++) {
-            res.buckets.append(new("NumberDictBucket"));
+            res.buckets.Push(new("NumberDictBucket"));
         }
 
         return res;
@@ -376,7 +376,7 @@ class PriorityQueue {
     }
 
     void GrowOne() {
-        heap.Append(QueueItem.empty());
+        heap.Push(QueueItem.empty());
     }
 
     void GrowHeight() {
