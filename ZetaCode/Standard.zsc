@@ -285,17 +285,17 @@ class PriorityQueue {
     NumberDict index;
     int firstFree;
     int numFree;
-    int size, depth;
+    int size, height;
 
     static PriorityQueue new(int numBuckets = 32) {
         PriorityQueue res = new("PriorityQueue");
 
         res.size = 0;
-        res.depth = 0;
+        res.height = 0;
         res.numFree = 0;
         res.firstFree = 0;
 
-        res.GrowDepth();
+        res.GrowHeight();
 
         res.hasCheck = Set.new(numBuckets);
         res.index = NumberDict.new(numBuckets);
@@ -379,9 +379,9 @@ class PriorityQueue {
         heap.Append(QueueItem.empty());
     }
 
-    void GrowDepth() {
-        depth++;
-        int layerSize = 1 << depth; // 2 ** depth
+    void GrowHeight() {
+        height++;
+        int layerSize = 1 << height; // 2 ** height
         
         for (int i = 0; i < layerSize; i++) {
             GrowOne();
