@@ -337,7 +337,7 @@ class PriorityQueue {
 
     int Length() {
         // for backwards compat's sake
-        return size;
+        return numItems;
     }
 
     void Swap(int a, int b) {
