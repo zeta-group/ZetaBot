@@ -112,22 +112,22 @@ class Dict {
             res = -res - numBuckets;
         }
 
-        return res;
+        return res % numBuckets;
     }
 
     Object Get(Object key)
     {
-        return buckets[Hash(key) % numBuckets].Get(key);
+        return buckets[Hash(key)].Get(key);
     }
 
     int Set(Object key, Object val)
     {
-        return buckets[Hash(key) % numBuckets].Set(key, val);
+        return buckets[Hash(key)].Set(key, val);
     }
 
     void Remove(Object key)
     {
-        buckets[Hash(key) % numBuckets].Remove(key);
+        buckets[Hash(key)].Remove(key);
     }
 }
 
@@ -219,7 +219,7 @@ class NumberDict {
     }
 
     int Hash(Object key) {
-        return hasher.Hash(key);
+        return hasher.Hash(key) % numBuckets;
     }
 
     double Get(Object key, double default)
