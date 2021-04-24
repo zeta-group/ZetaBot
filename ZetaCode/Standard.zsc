@@ -47,6 +47,10 @@ class DictBucket
         keys.Delete(i);
         values.Delete(i);
     }
+
+    int Length() {
+        return keys.Size();
+    }
 }
 
 class Hasher abstract {
@@ -97,6 +101,16 @@ class Dict {
         return res;
     }
 
+    int Length() {
+        int sum;
+
+        for (int i = 0; i < numBuckets; i++) {
+            sum += buckets[i].Length();
+        }
+
+        return sum;
+    }
+
     int Hash(Object key) {
         return hasher._Hash(key, numBuckets);
     }
@@ -121,6 +135,10 @@ class NumberDictBucket
 {
     Array<Object> keys;
     Array<double> values;
+
+    int Length() {
+        return keys.Size();
+    }
     
     double Get(Object key, double default) {
         uint i;
@@ -169,6 +187,16 @@ class NumberDict {
     Array<NumberDictBucket> buckets;
     Hasher hasher;
 
+    int Length() {
+        int sum;
+
+        for (int i = 0; i < numBuckets; i++) {
+            sum += buckets[i].Length();
+        }
+
+        return sum;
+    }
+
     static NumberDict Make(String hasherType, int numBuckets = 16) {
         NumberDict res = NumberDict(new("NumberDict"));
 
@@ -211,6 +239,10 @@ class Set {
         res.selfMap = Dict.Make(hasherType, numBuckets);
 
         return res;
+    }
+
+    int Length() {
+        return selfMap.Length();
     }
 
     bool Has(Object key) {
