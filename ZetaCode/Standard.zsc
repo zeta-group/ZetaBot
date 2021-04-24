@@ -1,4 +1,4 @@
-class Dict
+class DictBucket
 {
     Array<Object> keys;
     Array<Object> values;
@@ -52,9 +52,60 @@ class Dict
         
         return i;
     }
+
+    void remove(Object _key) {
+        uint i = 0;
+        
+        for ( i = 0; i < keys.Size(); i++ )
+        {
+            if ( keys[i] == _key )
+                break;
+        }
+        
+        keys.Delete(i);
+        values.Delete(i);
+    }
 }
 
-class NumberDict
+class Dict {
+    int numBuckets;
+    Array<DictBucket> buckets;
+
+    static Dict new(int numBuckets) {
+        Dict res = new("Dict");
+
+        res.numBuckets = numBuckets;
+
+        for (int i =0 ; i < numBuckets; i++) {
+            buckets.append(new("DictBucket"));
+        }
+
+        return res;
+    }
+
+    void OnDestroy() {
+        for (int i = 0; i < numBuckets; i++) {
+            buckets[i].Destroy();
+        }
+    }
+
+    Object get(Object _key)
+    {
+        return buckets[_key % numBuckets].get(_key);
+    }
+
+    int set(Object _key, Object _val)
+    {
+        return buckets[_key % numBuckets].get(_key, _val);
+    }
+
+    void remove(Object _key)
+    {
+        return buckets[_key % numBuckets].remove(_key);
+    }
+}
+
+class NumberDictBucket
 {
     Array<Object> keys;
     Array<double> values;
@@ -106,7 +157,91 @@ class NumberDict
         
         return i;
     }
+
+    void remove(Object _key) {
+        uint i = 0;
+        
+        for ( i = 0; i < keys.Size(); i++ )
+        {
+            if ( keys[i] == _key )
+                break;
+        }
+        
+        if (i < keys.Size()) {
+            keys.Delete(i);
+            values.Delete(i);
+        }
+    }
 }
+
+class NumberDict {
+    int numBuckets;
+    Array<NumberDictBucket> buckets;
+
+    static NumberDict new(int numBuckets) {
+        NumberDict res = new("NumberDict");
+
+        res.numBuckets = numBuckets;
+
+        for (int i =0 ; i < numBuckets; i++) {
+            buckets.append(new("NumberDictBucket"));
+        }
+
+        return res;
+    }
+
+    void OnDestroy() {
+        for (int i = 0; i < numBuckets; i++) {
+            buckets[i].Destroy();
+        }
+    }
+
+    Object get(int _key)
+    {
+        return buckets[_key % numBuckets].get(_key);
+    }
+
+    int set(int _key, Object _val)
+    {
+        return buckets[_key % numBuckets].get(_key, _val);
+    }
+
+    void remove(Object _key)
+    {
+        return buckets[_key % numBuckets].remove(_key);
+    }
+}
+
+class Set {
+    Dict selfMap;
+
+    static Set new(int numBuckets) {
+        Set res = new("Set");
+
+        res.selfMap = Dict.new(numBuckets);
+
+        return res;
+    }
+
+    void OnDestroy() {
+        selfMap.Destroy();
+    }
+
+    bool has(Object _key) {
+        return selfMap.has(_key);
+    }
+
+    void put(Object _key) {
+        selfMap.set(_key, _key)
+    }
+
+    void remove(Object _key) {
+        selfMap.remove(_key);
+    }
+}
+
+///////
+
 
 class QueueItem
 {
@@ -121,9 +256,224 @@ class QueueItem
         
         return r;
     }
+
+    static QueueItem empty() {
+        QueueItem r = new("QueueItem");
+        r.item = null;
+        r.cost = 0;
+        
+        return r;
+    }
+
+    void set(Object item, double cost) {
+        self.item = item;
+        self.cost = cost;
+    }
+    
+    void unset() {
+        self.item = null;
+        self.cost = 0.0;
+    }
+
+    bool has() {
+        return self.item != null;
+    }
 }
 
-class PriorityQueue
+class PriorityQueue {
+    Array<QueueItem> heap;
+    Set hasCheck;
+    int firstFree;
+    int numFree;
+    int size, depth;
+
+    static PriorityQueue new(int numCheckBuckets = 12) {
+        PriorityQueue res = new("PriorityQueue");
+
+        res.size = 0;
+        res.depth = 0;
+        res.numFree = 0;
+        res.firstFree = 0;
+
+        res.GrowDepth();
+
+        res.hasCheck = Set.new(numCheckBuckets);
+
+        return res;
+    }
+
+    void OnDestroy() {
+        for (int i = 0; i < size; i++) {
+            heap[i].Destroy();
+        }
+    }
+
+    bool Has(Object other)
+    {
+        return hasCheck.has(other);
+    }
+
+    int Length() {
+        // for backwards compat's sake
+        return size;
+    }
+
+    void Swap(int a, int b) {
+        let temp = heap[a];
+        heap[a] = heap[b];
+        heap[b] = temp;
+    }
+
+    int Depth(int which) {
+        return floor(log(which + 1) / log(2));
+    }
+
+    bool ShouldSwap(int a, int b) {
+        // NOTE: Depth(a) must be strictly smaller than Depth(b).
+
+        bool has_a = heap[a].has(), has_b = heap[b].has();
+
+        if (!has_b) {
+            return false;
+        }
+
+        if (!has_a) {
+            return true;
+        }
+
+        double cost_a = heap[a].cost;
+        double cost_b = heap[b].cost;
+
+        return cost_a < cost_b;
+    }
+
+    bool CheckSwap(int a, int b) {
+        if (a > b /* otherwise no need to try Depth */ && Depth(a) > Depth(b)) {
+            return CheckSwap(b, a);
+        }
+
+        if (!ShouldSwap(a, b)) {
+            return false;
+        }
+
+        Swap(a, b);
+        return true;
+    }
+
+    int Parent(int which) {
+        which = which - 1; // because we start counting at 0
+        return (which - which % 2 /* for floored division */) / 2;
+    }
+
+    void Children(int which, out int left, out int right) {
+        left = which * 2 + 1;
+        right = left + 1;
+    }
+
+    void GrowOne() {
+        heap.Append(QueueItem.empty());
+    }
+
+    void GrowDepth() {
+        depth++;
+        int layerSize = 1 << depth; // 2 ** depth
+        
+        for (int i = 0; i < layerSize; i++) {
+            GrowOne();
+        }
+
+        firstFree = size;
+        size += layerSize;
+        numFree = layerSize;
+    }
+
+    void UpdateFree() {
+        numFree--;
+
+        if (numFree <= 0) {
+            Grow();
+            return;
+        }
+
+        do {
+            firstFree++;
+        } while (heap[firstFree].has());
+    }
+
+    void SetAt(int which, Object item, double cost) {
+        hasCheck.put(item);
+        heap[which].set(item, cost);
+    }
+
+    void UnsetAt(int which) {
+        hasCheck.remove(heap[which].item);
+        heap[which].unset();
+    }
+
+    int SetFree(Object item, double cost) {
+        int which = firstFree;
+
+        UpdateFree();
+        SetAt(which, item, cost);
+
+        return which;
+    }
+
+    void SiftUp(int which) {
+        while (CheckSwap(Parent(which), which)) {
+            if (parent == 0) {
+                return;
+            }
+
+            which = Parent(which);
+        }
+    }
+
+    void SiftDown(int which) {
+        int child1, child2, childSwap = -1;
+
+        do {
+            if (childSwap != -1) {
+                which = childSwap;
+            }
+
+            Children(which, child1, child2);
+
+            if (heap[child1].cost < heap[child2].cost) {
+                childSwap = child1;
+            }
+
+            else {
+                childSwap = child2;
+            }
+
+        } while (CheckSwap(which, childSwap));
+    }
+
+    void Add(Object item, double cost) {
+        if (Has(item)) {
+            
+        }
+        
+        SetFree(item, cost);
+        SiftUp()
+    }
+
+    void Poll(out Object item, out Double cost) {
+        Peak(item, cost);
+
+        heap[0].unset();
+
+        SiftDown(0);
+    }
+
+    void Peek(out Object item, out Double cost) {
+        item = heap[0].item;
+        cost = heap[0].cost;
+    }
+}
+
+class OldPriorityQueue
 {
     Array<QueueItem> queue;
     
