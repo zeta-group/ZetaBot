@@ -228,7 +228,7 @@ class NumberDict {
 
     void Remove(Object key)
     {
-        return buckets[Hash(key)].Remove(key);
+        buckets[Hash(key)].Remove(key);
     }
 }
 
