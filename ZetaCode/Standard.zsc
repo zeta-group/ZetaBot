@@ -216,9 +216,9 @@ class NumberDict {
         return hasher.Hash(key);
     }
 
-    Object Get(Object key)
+    Object Get(Object key, double default)
     {
-        return buckets[Hash(key)].Get(key);
+        return buckets[Hash(key)].Get(key, default);
     }
 
     int Set(Object key, double val)
@@ -450,11 +450,11 @@ class PriorityQueue {
 
     void SiftUp(int which) {
         while (CheckSwap(Parent(which), which)) {
-            if (parent == 0) {
+            which = Parent(which);
+
+            if (which == 0) {
                 return;
             }
-
-            which = Parent(which);
         }
     }
 
