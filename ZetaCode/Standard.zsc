@@ -307,7 +307,7 @@ class PriorityQueue {
     NumberDict index;
     int firstFree;
     int numFree;
-    int size, height;
+    int numItems, size, height;
 
     static PriorityQueue Make(String hasherType, int numBuckets = 32) {
         PriorityQueue res = PriorityQueue(new("PriorityQueue"));
@@ -429,11 +429,20 @@ class PriorityQueue {
     }
 
     void UnsetAt(int which) {
+        if (!heap[which].Has()) {
+            return;
+        }
+
         let item = heap[which].item;
 
         hasCheck.Remove(item);
         index.Remove(item);
         heap[which].unSet();
+
+        SiftDown(which);
+        SiftUp(which);
+
+        numItems--;
     }
 
     int SetFree(Object item, double cost) {
@@ -504,13 +513,19 @@ class PriorityQueue {
         }
         
         SetFree(item, cost);
+        numItems++;
     }
 
     Object, double Poll() {
+        if (!heap[0].Has()) {
+            return null, 0;
+        }
+
         Object item = heap[0].item;
         double cost = heap[0].cost;
 
-        heap[0].unSet();
+        heap[0].Unset();
+        numItems--;
 
         SiftDown(0);
 
@@ -518,6 +533,10 @@ class PriorityQueue {
     }
 
     Object, double Peek() {
+        if (!heap[0].Has()) {
+            return null, 0;
+        }
+
         return heap[0].item, heap[0].cost;
     }
 }
