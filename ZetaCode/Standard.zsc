@@ -83,7 +83,7 @@ class Dict {
         return res;
     }
 
-    void OnDestroy() {
+    override void OnDestroy() {
         for (int i = 0; i < numBuckets; i++) {
             buckets[i].Destroy();
         }
@@ -190,7 +190,7 @@ class NumberDict {
         return res;
     }
 
-    void OnDestroy() {
+    override void OnDestroy() {
         for (int i = 0; i < numBuckets; i++) {
             buckets[i].Destroy();
         }
@@ -223,7 +223,7 @@ class Set {
         return res;
     }
 
-    void OnDestroy() {
+    override void OnDestroy() {
         selfMap.Destroy();
     }
 
@@ -303,7 +303,7 @@ class PriorityQueue {
         return res;
     }
 
-    void OnDestroy() {
+    override void OnDestroy() {
         for (int i = 0; i < size; i++) {
             heap[i].Destroy();
         }
