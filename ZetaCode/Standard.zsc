@@ -238,7 +238,7 @@ class Set {
     static Set Make(int numBuckets) {
         Set res = Set(new("Set"));
 
-        res.selfMap = Dict.new(numBuckets);
+        res.selfMap = Dict.Make(numBuckets);
 
         return res;
     }
@@ -317,8 +317,8 @@ class PriorityQueue {
 
         res.GrowHeight();
 
-        res.hasCheck = Set.new(numBuckets);
-        res.index = NumberDict.new(numBuckets);
+        res.hasCheck = Set.Make(numBuckets);
+        res.index = NumberDict.Make(numBuckets);
 
         return res;
     }
