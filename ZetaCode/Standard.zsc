@@ -493,7 +493,7 @@ class PriorityQueue {
         }
 
         else {
-            SiftDown(whcih);
+            SiftDown(which);
         }
     }
 
