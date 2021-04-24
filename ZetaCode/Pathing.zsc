@@ -573,7 +573,7 @@ class ZTPathNode : ZTPositionMarker
 	    nb.Destroy(); // clean actorlists after use
     }
 
-    ActorList findPathTo(ZTPathNode goal, Actor traveller = null)
+    ActorList findPathTo(ZTPathNode goal, Actor traveller = null, int numBuckets = 32)
     {
 	    let res = ActorList.Empty();
 		int itersLeft = 1000; // safety limit
@@ -584,9 +584,9 @@ class ZTPathNode : ZTPositionMarker
 		    return res;
 	    }
 
-	    NumberDict icosts = new("NumberDict");
-	    Dict cameFrom = new("Dict");
-	    PriorityQueue openSet = new("PriorityQueue");
+	    NumberDict icosts = NumberDict.new(numBuckets);
+	    Dict cameFrom = Dict.new(numBuckets);
+	    PriorityQueue openSet = PriorityQueue.new(numBuckets);
 	    ActorList closedSet = new("ActorList");
 	
 	    bool foundGoal = false;
