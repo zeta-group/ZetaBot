@@ -67,14 +67,22 @@ class DictBucket
     }
 }
 
+class Hasher abstract {
+    virtual int Hash(Object key) {
+        return -1;
+    }
+}
+
 class Dict {
     int numBuckets;
     Array<DictBucket> buckets;
+    Hasher hasher;
 
-    static Dict Make(int numBuckets = 16) {
+    static Dict Make(String hasherType, int numBuckets = 16) {
         Dict res = Dict(new("Dict"));
 
         res.numBuckets = numBuckets;
+        res.hasher = Hasher(new(hasherType));
 
         for (int i = 0 ; i < numBuckets; i++) {
             res.buckets.Push(new("DictBucket"));
@@ -87,21 +95,27 @@ class Dict {
         for (int i = 0; i < numBuckets; i++) {
             buckets[i].Destroy();
         }
+
+        hasher.Destroy();
+    }
+
+    int Hash(Object key) {
+        return hasher.Hash(key);
     }
 
     Object get(Object _key)
     {
-        return buckets[_key % numBuckets].get(_key);
+        return buckets[Hash(_key) % numBuckets].get(_key);
     }
 
     int set(Object _key, Object _val)
     {
-        return buckets[_key % numBuckets].get(_key, _val);
+        return buckets[Hash(_key) % numBuckets].get(_key, _val);
     }
 
     void remove(Object _key)
     {
-        return buckets[_key % numBuckets].remove(_key);
+        return buckets[Hash(_key) % numBuckets].remove(_key);
     }
 }
 

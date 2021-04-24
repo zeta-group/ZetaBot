@@ -124,6 +124,12 @@ class NumNodes : Thinker {
 	}
 }
 
+class ZTPathNodeHasher : Hasher {
+	override int Hash(Object key) {
+		return key.id;
+	}
+}
+
 class ZTPathNode : ZTPositionMarker
 {
     enum NavigationType
@@ -584,7 +590,7 @@ class ZTPathNode : ZTPositionMarker
 		    return res;
 	    }
 
-	    NumberDict icosts = NumberDict.Make(numBuckets);
+	    NumberDict icosts = NumberDict.Make("ZTPathNodeHasher", numBuckets);
 	    Dict cameFrom = Dict.Make(numBuckets);
 	    PriorityQueue openSet = PriorityQueue.Make(numBuckets);
 	    ActorList closedSet = new("ActorList");
