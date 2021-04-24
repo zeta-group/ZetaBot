@@ -584,9 +584,9 @@ class ZTPathNode : ZTPositionMarker
 		    return res;
 	    }
 
-	    NumberDict icosts = NumberDict.new(numBuckets);
-	    Dict cameFrom = Dict.new(numBuckets);
-	    PriorityQueue openSet = PriorityQueue.new(numBuckets);
+	    NumberDict icosts = NumberDict.Make(numBuckets);
+	    Dict cameFrom = Dict.Make(numBuckets);
+	    PriorityQueue openSet = PriorityQueue.Make(numBuckets);
 	    ActorList closedSet = new("ActorList");
 	
 	    bool foundGoal = false;

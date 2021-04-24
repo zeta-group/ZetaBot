@@ -71,12 +71,12 @@ class Dict {
     int numBuckets;
     Array<DictBucket> buckets;
 
-    static Dict new(int numBuckets) {
-        Dict res = new("Dict");
+    static Dict Make(int numBuckets = 16) {
+        Dict res = Dict(new("Dict"));
 
         res.numBuckets = numBuckets;
 
-        for (int i =0 ; i < numBuckets; i++) {
+        for (int i = 0 ; i < numBuckets; i++) {
             buckets.append(new("DictBucket"));
         }
 
@@ -178,8 +178,8 @@ class NumberDict {
     int numBuckets;
     Array<NumberDictBucket> buckets;
 
-    static NumberDict new(int numBuckets) {
-        NumberDict res = new("NumberDict");
+    static NumberDict Make(int numBuckets = 16) {
+        NumberDict res = NumberDict(new("NumberDict"));
 
         res.numBuckets = numBuckets;
 
@@ -215,8 +215,8 @@ class NumberDict {
 class Set {
     Dict selfMap;
 
-    static Set new(int numBuckets) {
-        Set res = new("Set");
+    static Set Make(int numBuckets) {
+        Set res = Set(new("Set"));
 
         res.selfMap = Dict.new(numBuckets);
 
@@ -287,8 +287,8 @@ class PriorityQueue {
     int numFree;
     int size, height;
 
-    static PriorityQueue new(int numBuckets = 32) {
-        PriorityQueue res = new("PriorityQueue");
+    static PriorityQueue Make(int numBuckets = 32) {
+        PriorityQueue res = PriorityQueue(new("PriorityQueue"));
 
         res.size = 0;
         res.height = 0;
@@ -396,7 +396,7 @@ class PriorityQueue {
         numFree--;
 
         if (numFree <= 0) {
-            Grow();
+            GrowHeight();
             return;
         }
 
@@ -638,7 +638,7 @@ class ActorList
     
     static ActorList empty()
     {
-        ActorList res = new("ActorList");
+        ActorList res = ActorList(new("ActorList"));
         res.bHas = false;
         return res;
     }

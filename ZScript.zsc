@@ -1640,7 +1640,7 @@ class ZTBotController : Actor {
         ActorList mon = VisibleEnemies(possessed);
     
         if (mon.length() > 0) {
-            PriorityQueue targets = PriorityQueue.new(64);
+            PriorityQueue targets = PriorityQueue.Make(64);
         
             for (uint i = 0; i < mon.length(); i++)
                 targets.add(mon.get(i), TargetPriority(mon.get(i)));
