@@ -248,7 +248,7 @@ class Set {
     }
 
     bool Has(Object key) {
-        return selfMap.Has(key) == key;
+        return selfMap.Get(key) == key;
     }
 
     void Put(Object key) {
