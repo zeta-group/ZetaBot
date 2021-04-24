@@ -597,7 +597,7 @@ class ZTPathNode : ZTPositionMarker
 	    NumberDict icosts = NumberDict.Make("ZTPathNodeHasher", numBuckets);
 	    Dict cameFrom = Dict.Make("ZTPathNodeHasher", numBuckets);
 	    PriorityQueue openSet = PriorityQueue.Make("ZTPathNodeHasher", numBuckets);
-	    ActorList closedSet = new("ActorList");
+	    ActorList closedSet = Set.make("ZTPathNodeHasher", numBuckets);
 	
 	    bool foundGoal = false;
 	
@@ -606,7 +606,7 @@ class ZTPathNode : ZTPositionMarker
 	
 	    DebugLog(LT_VERBOSE, String.Format("> Pathfinding from %s to %s", NodeName(), goal.NodeName()));
 
-	    while ( openSet.length() > 0 && --itersLeft )
+	    while ( openSet.numItems > 0 && --itersLeft )
 	    {
 		    ZTPathNode current = ZTPathNode(openSet.poll());
 		     
@@ -638,7 +638,7 @@ class ZTPathNode : ZTPositionMarker
 			    }
 		    }
 			
-		    closedSet.push(current);
+		    closedSet.put(current);
 		    nb.Destroy(); // clean actorlists after use
 	    }
 	
