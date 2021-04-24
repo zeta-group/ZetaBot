@@ -73,6 +73,20 @@ class Hasher abstract {
     }
 }
 
+class ActorHasher : Hasher {
+    override int Hash(Object other) {
+        if (!Actor(Other)) {
+            return 0;
+        }
+
+        Actor A = Actor(Other);
+        int x = A.pos.x * 16;
+        int y = A.pos.y * 16;
+
+        return (x << 3 | (x & 0x70) >> 4) ^ (y << 2) - (y & 0x1F ^ 0x1F);
+    }
+}
+
 class Dict {
     int numBuckets;
     Array<DictBucket> buckets;
@@ -235,10 +249,10 @@ class NumberDict {
 class Set {
     Dict selfMap;
 
-    static Set Make(int numBuckets) {
+    static Set Make(String hasherType, int numBuckets) {
         Set res = Set(new("Set"));
 
-        res.selfMap = Dict.Make(numBuckets);
+        res.selfMap = Dict.Make(hasherType, numBuckets);
 
         return res;
     }
@@ -307,7 +321,7 @@ class PriorityQueue {
     int numFree;
     int size, height;
 
-    static PriorityQueue Make(int numBuckets = 32) {
+    static PriorityQueue Make(String hasherType, int numBuckets = 32) {
         PriorityQueue res = PriorityQueue(new("PriorityQueue"));
 
         res.size = 0;
@@ -317,8 +331,8 @@ class PriorityQueue {
 
         res.GrowHeight();
 
-        res.hasCheck = Set.Make(numBuckets);
-        res.index = NumberDict.Make(numBuckets);
+        res.hasCheck = Set.Make(hasherType, numBuckets);
+        res.index = NumberDict.Make(hasherType, numBuckets);
 
         return res;
     }

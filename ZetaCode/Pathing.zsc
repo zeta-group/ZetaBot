@@ -596,7 +596,7 @@ class ZTPathNode : ZTPositionMarker
 
 	    NumberDict icosts = NumberDict.Make("ZTPathNodeHasher", numBuckets);
 	    Dict cameFrom = Dict.Make("ZTPathNodeHasher", numBuckets);
-	    PriorityQueue openSet = PriorityQueue.Make(numBuckets);
+	    PriorityQueue openSet = PriorityQueue.Make("ZTPathNodeHasher", numBuckets);
 	    ActorList closedSet = new("ActorList");
 	
 	    bool foundGoal = false;
