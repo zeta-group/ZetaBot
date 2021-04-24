@@ -3,13 +3,13 @@ class DictBucket
     Array<Object> keys;
     Array<Object> values;
     
-    Object get(Object _key)
+    Object Get(Object key)
     {
         int index = -1;
         uint i;
                 
         for ( i = 0; i < keys.Size(); i++ )
-            if ( keys[i] == _key )
+            if ( keys[i] == key )
             {
                 index = i;
                 break;
@@ -21,14 +21,14 @@ class DictBucket
         return values[index];
     }
     
-    int set(Object _key, Object _val)
+    int Set(Object key, Object val)
     {
         int index = -1;
         uint i = 0;
         
         for ( i = 0; i < keys.Size(); i++ )
         {
-            if ( keys[i] == _key )
+            if ( keys[i] == key )
                 break;
                 
             if ( Object(keys[i]) == null )
@@ -40,25 +40,25 @@ class DictBucket
         
         if ( index == -1 )
         {
-            keys.Push(_key);
-            values.Push(_val);
+            keys.Push(key);
+            values.Push(val);
         }    
     
         else
         {
-            keys[i] = _key;
-            values[i] = _val;
+            keys[i] = key;
+            values[i] = val;
         }
         
         return i;
     }
 
-    void remove(Object _key) {
+    void Remove(Object key) {
         uint i = 0;
         
         for ( i = 0; i < keys.Size(); i++ )
         {
-            if ( keys[i] == _key )
+            if ( keys[i] == key )
                 break;
         }
         
@@ -103,19 +103,19 @@ class Dict {
         return hasher.Hash(key);
     }
 
-    Object get(Object _key)
+    Object Get(Object key)
     {
-        return buckets[Hash(_key) % numBuckets].get(_key);
+        return buckets[Hash(key) % numBuckets].Get(key);
     }
 
-    int set(Object _key, Object _val)
+    int Set(Object key, Object val)
     {
-        return buckets[Hash(_key) % numBuckets].get(_key, _val);
+        return buckets[Hash(key) % numBuckets].Set(key, val);
     }
 
-    void remove(Object _key)
+    void Remove(Object key)
     {
-        return buckets[Hash(_key) % numBuckets].remove(_key);
+        return buckets[Hash(key) % numBuckets].Remove(key);
     }
 }
 
@@ -125,13 +125,13 @@ class NumberDictBucket
     Array<double> values;
     Array<bool> taken;
     
-    double get(Object _key, double default)
+    double Get(Object key, double default)
     {
         int index = -1;
         uint i;
                 
         for ( i = 0; i < keys.Size(); i++ )
-            if ( keys[i] == _key )
+            if ( keys[i] == key )
             {
                 index = i;
                 break;
@@ -143,13 +143,13 @@ class NumberDictBucket
         return values[index];
     }
     
-    int set(Object _key, double _val)
+    int Set(Object key, double val)
     {
         int index = -1;
         int i;
         
         for ( i = 0; i < keys.Size(); i++ )
-            if ( keys[i] == _key || !taken[i] )
+            if ( keys[i] == key || !taken[i] )
             {
                 index = i;
                 break;
@@ -157,27 +157,27 @@ class NumberDictBucket
         
         if ( index == -1 )
         {
-            keys.Push(_key);
-            values.Push(_val);
+            keys.Push(key);
+            values.Push(val);
             taken.Push(true);
         }    
     
         else
         {
-            keys[i] = _key;
-            values[i] = _val;
+            keys[i] = key;
+            values[i] = val;
             taken[i] = true;
         }
         
         return i;
     }
 
-    void remove(Object _key) {
+    void Remove(Object key) {
         uint i = 0;
         
         for ( i = 0; i < keys.Size(); i++ )
         {
-            if ( keys[i] == _key )
+            if ( keys[i] == key )
                 break;
         }
         
@@ -191,11 +191,13 @@ class NumberDictBucket
 class NumberDict {
     int numBuckets;
     Array<NumberDictBucket> buckets;
+    Hasher hasher;
 
-    static NumberDict Make(int numBuckets = 16) {
+    static NumberDict Make(String hasherType, int numBuckets = 16) {
         NumberDict res = NumberDict(new("NumberDict"));
 
         res.numBuckets = numBuckets;
+        res.hasher = Hasher(new(hasherType));
 
         for (int i =0 ; i < numBuckets; i++) {
             res.buckets.Push(new("NumberDictBucket"));
@@ -210,19 +212,23 @@ class NumberDict {
         }
     }
 
-    Object get(int _key)
-    {
-        return buckets[_key % numBuckets].get(_key);
+    int Hash(Object key) {
+        return hasher.Hash(key);
     }
 
-    int set(int _key, Object _val)
+    Object Get(Object key)
     {
-        return buckets[_key % numBuckets].get(_key, _val);
+        return buckets[Hash(key)].Get(key);
     }
 
-    void remove(Object _key)
+    int Set(Object key, double val)
     {
-        return buckets[_key % numBuckets].remove(_key);
+        return buckets[Hash(key)].Set(key, val);
+    }
+
+    void Remove(Object key)
+    {
+        return buckets[Hash(key)].Remove(key);
     }
 }
 
@@ -241,16 +247,16 @@ class Set {
         selfMap.Destroy();
     }
 
-    bool has(Object _key) {
-        return selfMap.has(_key) == _key;
+    bool Has(Object key) {
+        return selfMap.Has(key) == key;
     }
 
-    void put(Object _key) {
-        selfMap.set(_key, _key);
+    void Put(Object key) {
+        selfMap.Set(key, key);
     }
 
-    void remove(Object _key) {
-        selfMap.remove(_key);
+    void Remove(Object key) {
+        selfMap.Remove(key);
     }
 }
 
@@ -278,17 +284,17 @@ class QueueItem
         return r;
     }
 
-    void set(Object item, double cost) {
+    void Set(Object item, double cost) {
         self.item = item;
         self.cost = cost;
     }
     
-    void unset() {
+    void Unset() {
         self.item = null;
         self.cost = 0.0;
     }
 
-    bool has() {
+    bool Has() {
         return self.item != null;
     }
 }
@@ -325,11 +331,11 @@ class PriorityQueue {
 
     bool Has(Object other)
     {
-        return hasCheck.has(other);
+        return hasCheck.Has(other);
     }
 
     int Find(Object other) {
-        return index.get(other, -1.0);
+        return index.Get(other, -1.0);
     }
 
     int Length() {
@@ -350,7 +356,7 @@ class PriorityQueue {
     bool ShouldSwap(int a, int b) {
         // NOTE: Depth(a) must be strictly smaller than Depth(b).
 
-        bool has_a = heap[a].has(), has_b = heap[b].has();
+        bool has_a = heap[a].Has(), has_b = heap[b].Has();
 
         if (!has_b) {
             return false;
@@ -416,21 +422,21 @@ class PriorityQueue {
 
         do {
             firstFree++;
-        } while (heap[firstFree].has());
+        } while (heap[firstFree].Has());
     }
 
     void SetAt(int which, Object item, double cost) {
-        hasCheck.put(item);
-        index.set(item, which);
-        heap[which].set(item, cost);
+        hasCheck.Put(item);
+        index.Set(item, which);
+        heap[which].Set(item, cost);
     }
 
     void UnsetAt(int which) {
         let item = heap[which].item;
 
-        hasCheck.remove(item);
-        index.remove(item);
-        heap[which].unset();
+        hasCheck.Remove(item);
+        index.Remove(item);
+        heap[which].unSet();
     }
 
     int SetFree(Object item, double cost) {
@@ -507,7 +513,7 @@ class PriorityQueue {
         Object item = heap[0].item;
         double cost = heap[0].cost;
 
-        heap[0].unset();
+        heap[0].unSet();
 
         SiftDown(0);
 
@@ -536,7 +542,7 @@ class OldPriorityQueue
         queue.Insert(i, QueueItem.of(item, cost));
     }
     
-    bool has(Object other)
+    bool Has(Object other)
     {
         uint i = 0;
 
@@ -580,10 +586,10 @@ class ActorList
     
     void BeginPlay()
     {
-        iReset();
+        iReSet();
     }
     
-    void iReset()
+    void iReSet()
     {
         iterIndex = 0;
     }
@@ -602,7 +608,7 @@ class ActorList
         iterIndex = i;
     }
     
-    Actor get(int i)
+    Actor Get(int i)
     {
         if ( i < 0 )
             i += all.Size();
@@ -616,7 +622,7 @@ class ActorList
         return all[i];
     }
     
-    bool remove(int i)
+    bool Remove(int i)
     {
         if ( i < 0 )
             i += all.Size();
@@ -656,12 +662,12 @@ class ActorList
         all.Insert(ind, node);
     } 
     
-    bool has(Object other)
+    bool Has(Object other)
     {
         uint i;
 
         for ( i = 0; i < length(); i++ )
-            if ( get(i) == other )
+            if ( Get(i) == other )
                 return true;
                 
         return false;
