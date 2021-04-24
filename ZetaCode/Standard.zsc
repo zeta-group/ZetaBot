@@ -489,31 +489,19 @@ class PriorityQueue {
         SetFree(item, cost);
     }
 
-    void PollFull(out Object item, out Double cost) {
-        Peak(item, cost);
-
-        heap[0].unset();
-
-        SiftDown(0);
-    }
-
-    Object Poll() {
-        Object res = heap[0].item;
+    Object, double Poll() {
+        Object item = heap[0].item;
+        double cost = heap[0].cost;
 
         heap[0].unset();
 
         SiftDown(0);
 
-        return res;
+        return item, cost;
     }
 
-    void PeekFull(out Object item, out Double cost) {
-        item = heap[0].item;
-        cost = heap[0].cost;
-    }
-
-    Object Peek() {
-        return heap[0].item;
+    Object, double Peek() {
+        return heap[0].item, heap[0].cost;
     }
 }
 
