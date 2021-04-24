@@ -216,7 +216,7 @@ class NumberDict {
         return hasher.Hash(key);
     }
 
-    Object Get(Object key, double default)
+    double Get(Object key, double default)
     {
         return buckets[Hash(key)].Get(key, default);
     }
