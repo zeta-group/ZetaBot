@@ -24,15 +24,11 @@ class DictBucket
                 values[i] = val;
                 return i;
             }
-                
-            if ( Object(keys[i]) == null ) {
-                keys.Push(key);
-                values.Push(val);
-                return i;
-            }
         } 
         
-        return -1;
+        keys.Push(key);
+        values.Push(val);
+        return i;
     }
 
     void Remove(Object key) {
