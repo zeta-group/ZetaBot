@@ -28,7 +28,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get version
-        run: source ./version.sh
+        run: |
+          source ./version.sh
+          echo ::set-env name=VERSION::$VERSION
 
       - name: Create release
         uses: ncipollo/release-action@v1
@@ -39,8 +41,6 @@ jobs:
           artifacts: "Built/ZetaBot_v${{ env.VERSION }}.pk3"
           prerelease: contains(github.ref, '-rc')
           token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          VERSION: $VERSION
 
       - name: Archive release log
         run: |
