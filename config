@@ -1,5 +1,5 @@
 #!/bin/bash
-NAME=ZetaBot
+NAME=zetabot
 VERSION=0.11.0
 
 ADDFOLDER ZetaCode
