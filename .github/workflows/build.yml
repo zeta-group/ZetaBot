@@ -16,6 +16,11 @@ jobs:
       - name: Package ZetaBot
         run: ./build
       
+      - name: Get version
+        run: |
+          source ./version.sh
+          echo "VERSION=$VERSION" >>$GITHUB_ENV
+      
       - name: Upload as artifact
         uses: actions/upload-artifact@v2
         with:
