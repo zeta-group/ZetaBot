@@ -180,12 +180,15 @@ class ZTPathNode : ZTPositionMarker
 
 		if (navType == NT_CANDY)
 			return "F01090";
+		
+		if (navType == NT_CANDY_ONCE)
+			return "F04090";
 
 		if (navType == NT_TARGET)
 			return "101028";
 
 		if (navType == NT_BLOCK)
-		    return "901000";
+		    return "301000";
 
         if (navType == NT_TELEPORT_SOURCE)
             return "1030D0";
@@ -453,7 +456,7 @@ class ZTPathNode : ZTPositionMarker
 		    node.useDirection = ud;
 			node.angle = ud;
             node.assoc_id = as;
-		
+
 			if (node.nodeType == NT_CANDY_ONCE) {
 				node.MakeCandied();
 			}
