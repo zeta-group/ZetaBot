@@ -2034,7 +2034,7 @@ class ZTBotController : Actor {
             
         GiveCommands();
 
-        if (currNode.nodeType == ZTPathNode.NT_TELEPORT_SOURCE) {
+        if (currNode != null && currNode.nodeType == ZTPathNode.NT_TELEPORT_SOURCE) {
             // always go to a teleport if going to it
             MoveToward(currNode, 0.35);
         }
