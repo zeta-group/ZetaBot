@@ -441,7 +441,7 @@ class ZTBotController : Actor {
         
         navDest = null;
         bstate = BS_WANDERING;
-        let ptype = ZetaBotPawn.GetSomeType(self);
+        let ptype = ZetaBotPawn.GetSomeType();
         
         if (ptype == "") {
             DebugLog(LT_ERROR, "No plausible pawn type found!");

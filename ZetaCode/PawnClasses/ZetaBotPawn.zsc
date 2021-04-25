@@ -59,7 +59,7 @@ class ZetaBotPawn : Actor {
 		*/
 	}
 
-	static String GetSomeType(Actor anchor = null) {
+	static String GetSomeType() {
         Array<String> rset;
 		Array<String> types;
 		Array<String> parms;
@@ -82,7 +82,7 @@ class ZetaBotPawn : Actor {
                 rset.Push(parms[0]);
         }
         
-        if ( anchor != null ) anchor.A_Log('Plausible types: '..rset.Size());
+        //if ( anchor != null ) anchor.A_Log('Plausible types: '..rset.Size());
 		
 		if ( rset.Size() > 0 )
             return rset[Random(0, rset.Size() - 1)];
