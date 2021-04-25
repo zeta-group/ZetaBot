@@ -454,6 +454,10 @@ class ZTPathNode : ZTPositionMarker
 			node.angle = ud;
             node.assoc_id = as;
 		
+			if (node.nodeType == NT_CANDY_ONCE) {
+				node.MakeCandied();
+			}
+		
 		    res.totalNodes++;
 	    }
 	
