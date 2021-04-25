@@ -32,8 +32,8 @@ jobs:
       - name: Upload as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: my-artifact
-          path: Built/ZetaBot_v${VERSION}.pk3
+          name: "zetabot_v${VERSION}.pk3"
+          path: "Built/zetabot_v${VERSION}.pk3"
 
   release:
     name: Release
@@ -50,13 +50,14 @@ jobs:
         run: source ./config
 
       - name: Create release
-        draft: true
-        prerelease: contains(github.ref, '-rc')
-        release_name: v$VERSION
-        tag_name: ${{ github.ref }}
-        body_path: changelog/latest.md
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        uses: ncipollo/release-action@v1
+        with:
+          name: v$VERSION
+          draft: true
+          bodyFile: changelog/latest.md
+          artifacts: "zetabot_v${VERSION}.pk3"
+          prerelease: contains(github.ref, '-rc')
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Archive release log
         run: |
