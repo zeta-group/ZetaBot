@@ -16,25 +16,6 @@ jobs:
       - name: Package ZetaBot
         run: ./build
 
-  upload:
-    name: Artifact
-    runs-on: ubuntu-latest
-
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Get version
-        run: source ./version.sh
-
-      - name: Upload as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: "zetabot_v${VERSION}.pk3"
-          path: "Built/zetabot_v${VERSION}.pk3"
-
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -52,10 +33,10 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          name: v$VERSION
+          name: v${VERSION}
           draft: true
           bodyFile: changelog/latest.md
-          artifacts: "zetabot_v${VERSION}.pk3"
+          artifacts: "Built/ZetaBot_v${VERSION}.pk3"
           prerelease: contains(github.ref, '-rc')
           token: ${{ secrets.GITHUB_TOKEN }}
 
