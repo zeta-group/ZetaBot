@@ -413,11 +413,13 @@ class PriorityQueue {
             return;
         }
 
-        if (firstFree == which) {
+        if (firstFree <= which) {
             do {
                 firstFree++;
             } while (firstFree < size && heap[firstFree].Has());
         }
+
+        numItems++;
     }
 
     void SetAt(int which, Object item, double cost) {
@@ -511,7 +513,6 @@ class PriorityQueue {
         }
         
         SetFree(item, cost);
-        numItems++;
     }
 
     void ReplaceRoot() {
@@ -522,9 +523,11 @@ class PriorityQueue {
             firstFree = lastUsed;
         }
 
-        do {
-            lastUsed--;
-        } while (lastUsed >= 0 && !heap[lastUsed].has());
+        if (lastUsed > 0) {
+            do {
+                lastUsed--;
+            } while (lastUsed >= 0 && !heap[lastUsed].has());
+        }
 
         SiftDown(0);
 
@@ -533,6 +536,7 @@ class PriorityQueue {
 
     Object, double Poll() {
         if (!heap[0].Has()) {
+            numItems = 0;
             return null, 0;
         }
 

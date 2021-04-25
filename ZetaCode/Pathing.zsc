@@ -586,7 +586,7 @@ class ZTPathNode : ZTPositionMarker
     ActorList findPathTo(ZTPathNode goal, Actor traveller = null, int numBuckets = 32)
     {
 	    let res = ActorList.Empty();
-		int itersLeft = 1000; // safety limit
+		int itersLeft = 5000; // safety limit
 
 	    if ( goal == null || goal == self )
 	    {
@@ -606,12 +606,23 @@ class ZTPathNode : ZTPositionMarker
 	
 	    DebugLog(LT_VERBOSE, String.Format("> Pathfinding from %s to %s", NodeName(), goal.NodeName()));
 
-	    while ( openSet.numItems > 0 && --itersLeft )
+	    while (openSet.numItems > 0 && itersLeft)
 	    {
 		    ZTPathNode current = ZTPathNode(openSet.poll());
+			itersLeft--;
 		     
-		    if (closedSet.has(current)) continue;
-		
+			if (current == null) {
+				DebugLog(LT_WARNING, String.Format(
+					"Open set has no root node but numItems is non-zero! (firstFree %i lastUsed %i numFree %i numItems %i size %i height %i)",
+					openSet.firstFree, openSet.lastUsed, openSet.numFree, openSet.numItems, openSet.size, openSet.height
+				));
+				break;
+			}
+
+		    if (closedSet.has(current)) {
+				continue;
+			}
+
 		    DebugLog(LT_VERBOSE, String.Format("+-- Iterating pathfinding for node: %s", current.NodeName()));
 		    ActorList nb = current.NeighborsInward();
 	
@@ -619,7 +630,7 @@ class ZTPathNode : ZTPositionMarker
 			    ZTPathNode neigh = ZTPathNode(nb.get(i));
 			    DebugLog(LT_VERBOSE, String.Format("+-+-- Considering #%i's neighbor: %s", current.id, neigh.NodeName()));
 
-			    if (!(openSet.has(neigh) || closedSet.has(neigh)))
+			    if (neigh != current && !(openSet.has(neigh) || closedSet.has(neigh)))
 			    {
 				    cameFrom.set(current, neigh);
 
@@ -643,7 +654,7 @@ class ZTPathNode : ZTPositionMarker
 	    }
 	
 	    if ( !foundGoal ) {
-			if (!itersLeft)
+			if (itersLeft == 0)
 				DebugLog(LT_WARNING, String.Format("Infinite recursion attempting to find a path betwen %s and %s", NodeName(), goal.NodeName()));
 
 		    return null;
