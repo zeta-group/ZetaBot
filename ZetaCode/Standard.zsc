@@ -55,11 +55,7 @@ class Hasher abstract {
     }
     
     int _Hash(Object key, uint numBuckets) {
-        int res = Hash(key);
-
-        if (res < 0) {
-            res = -res - numBuckets;
-        }
+        int res = abs(Hash(key));
 
         return res % numBuckets;
     }
@@ -199,7 +195,7 @@ class NumberDict {
         res.numBuckets = numBuckets;
         res.hasher = Hasher(new(hasherType));
 
-        for (int i =0 ; i < numBuckets; i++) {
+        for (int i = 0 ; i < numBuckets; i++) {
             res.buckets.Push(new("NumberDictBucket"));
         }
 
