@@ -15,6 +15,12 @@ jobs:
 
       - name: Package ZetaBot
         run: ./build
+      
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ZetaBot_v${{ env.VERSION }}.pk3
+          path: Built/ZetaBot_v${{ env.VERSION }}.pk3
 
   release:
     name: Release
@@ -32,11 +38,10 @@ jobs:
           source ./version.sh
           echo "VERSION=$VERSION" >>$GITHUB_ENV
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
+      - name: Download artifact
+        uses: actions/download-artifact@v2
         with:
           name: ZetaBot_v${{ env.VERSION }}.pk3
-          path: Built/ZetaBot_v${{ env.VERSION }}.pk3
 
       - name: Create release
         uses: ncipollo/release-action@v1
