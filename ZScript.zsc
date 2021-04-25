@@ -527,17 +527,20 @@ class ZTBotController : Actor {
 
         while ((pn = ZTPathNode(iter.Next())) != null) {
             if (pn.nodeType == ZTPathNode.NT_RESPAWN || (CVar.FindCVar("zb_anynoderespawn").GetBool() && pn.nodeType != ZTPathNode.NT_USE && pn.nodeType != ZTPathNode.NT_AVOID)) {
-                pn.A_SetSize(possessed.Radius, possessed.Height);
+                if (possessed != null) {
+                    pn.A_SetSize(possessed.Radius, possessed.Height);
 
-                if (pn.CheckBlock()) {
-                    pn.A_SetSize(pn.default.Radius, pn.default.Height);
-                    continue;
+                    if (pn.CheckBlock()) {
+                        pn.A_SetSize(pn.default.Radius, pn.default.Height);
+                        continue;
+                    }
                 }
 
                 double prob = FRandom(0, chanceDenom);
 
-                if (prob <= 1.0)
+                if (prob <= 1.0) {
                     chosen = pn;
+                }
 
                 // DebugLog(LT_VERBOSE, String.format("Node %i at x=%f,y=%f has luck value %f/%f.", ++found, pn.pos.x, pn.pos.y, 0 - prob, chanceDenom));
             
