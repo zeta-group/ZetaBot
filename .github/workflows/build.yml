@@ -40,7 +40,7 @@ jobs:
           prerelease: contains(github.ref, '-rc')
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
-          VERSION: ${{ env.VERSION }}
+          VERSION: $VERSION
 
       - name: Archive release log
         run: |
