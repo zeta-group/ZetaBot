@@ -4,7 +4,7 @@ Another big update that took a while to come out! This time,
 this one packs a larger number of features.
 
 ## General
- * Initial stub of the [Doom II pathnoding project](../nodes/Doom2_MAP01.txt) (currently only MAP01 is supported)
+ * Initial stub of the [Doom II pathnoding project](../nodes/ZetaNodes_doom2.wad) (currently only MAP01 is supported)
  * Cleaner logs, with reduced printing to the console
  * Changed ACS code to use named scripts to avoid conflicts
  * Automatic releases and an actual changelog file
