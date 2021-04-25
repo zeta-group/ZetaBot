@@ -957,8 +957,12 @@ class ZTBotController : Actor {
     }
     
     void SetCurrentNode(ZTPathNode pn) {
-        if (pn == null)
+        pastNode = currNode;
+
+        if (pn == null) {
+            currNode = null;
             return;
+        }
 
         if (pn != currNode) {
             DebugLog(LT_VERBOSE, String.Format("%s is now at the %s node: \ck%s", myName, ZTPathNode.ZTNavTypeNames[pn.nodeType], pn.NodeName()));
@@ -966,6 +970,10 @@ class ZTBotController : Actor {
          
         pastNode = currNode;
         currNode = pn;
+
+        if (currNode) {
+            currNode.BecomesCurrent(self, possessed);
+        }
     }
     
     bool isEnemy(Actor from, Actor other) {

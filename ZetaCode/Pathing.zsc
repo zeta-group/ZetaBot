@@ -145,6 +145,7 @@ class ZTPathNode : ZTPositionMarker
 	    NT_JUMP,
 	    NT_AVOID,
 	    NT_CANDY,
+		NT_CANDY_ONCE,
 	    NT_SHOOT,
 	    NT_RESPAWN,
 	    NT_TARGET,
@@ -209,6 +210,7 @@ class ZTPathNode : ZTPositionMarker
         "Jump",
         "Avoid",
         "Candy",
+		"Candy Once",
         "Shoot",
         "Respawn",
         "Target",
@@ -258,6 +260,11 @@ class ZTPathNode : ZTPositionMarker
     bool bPlopped;
     uint id;
     uint assoc_id;
+	Set candied;
+
+	void MakeCandied() {
+		candied = Set.Make("ActorHasher", 32);
+	}
 
     override void BeginPlay()
     {
@@ -453,12 +460,18 @@ class ZTPathNode : ZTPositionMarker
 	    return res;
     }
 
+	void BecomesCurrent(ZTBotController cont, Actor other) {
+		if (nodeType == NT_CANDY_ONCE) {
+			candied.put(other);
+		}
+	}
+
     double SpecialCost(ZTPathNode from, ZTPathNode goal, actor Other) // mimicks UT99's NavigationPoint.SpecialCost(Pawn Other)
     {
 	    if ( nodeType == NT_AVOID )
 		    return 512;
 
-		else if ( nodeType == NT_CANDY )
+		else if ( nodeType == NT_CANDY || (nodeType == NT_CANDY_ONCE && candied.has(Other)) )
 			return -128;
 
 		else if ( nodeType == NT_TELEPORT_SOURCE && from )
@@ -939,6 +952,19 @@ class ZTCandyNode : Actor
 	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_CANDY;
 	    node.angle = angle;
+	
+	    Destroy();
+    }
+}
+
+class ZTCandyOnceNode : Actor
+{
+    override void PostBeginPlay()
+    {
+	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
+	    node.nodeType = ZTPathNode.NT_CANDY_ONCE;
+	    node.angle = angle;
+		node.MakeCandied();
 	
 	    Destroy();
     }
