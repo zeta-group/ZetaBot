@@ -65,6 +65,6 @@ jobs:
       - name: Commit archived log
         uses: EndBug/add-and-commit@v7.2.0
         with:
-          add: changelog/archived/${VERSION}.md
+          add: changelog/archived/${{ env.VERSION }}.md
           push: true
           message: "(CI) Archived changelog for v$VERSION"
