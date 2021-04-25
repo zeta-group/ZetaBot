@@ -1,14 +1,23 @@
 # ZetaBot
+
+<center>
+
+![(icon)](ZetaBot-icon.svg)
+
+</center>
+
 **The modern ZScript bot made for GZDoom**, made *by ZDoomers for ZDoomers*.
 
+* An **easy** way to replace the ZCajun with a bot that musters **actual intelligence**, competent in **both coop and deathmatch**
 * **Five** possible bot states (Wandering, Following, Attacking, Hunting and Fleeing)
-* Flexible **PK3 mod build script** solution (`build.sh`)
-* Multiple _sets_ of **voices**
-* Pathnode system with **A\* pathfinding**
+* **Multiple voice sets** to spice regular gameplay with the original hilarious DecoBot taunts and blurts
+* **Advanced** pathing system, with a repertoire of over **thirteen path node types**
+  * Ability to **edit paths while playing**, alongside conveniences like **showing all paths** (`zt_showpaths`), **saving and loading** the entire path network, and even **map-specific node lumps** to include in your mapset!
 * Supports **any weapons and player classes** _(given there are modules for them, supplied by their respective modders)_
 * Constraints akin to **real** players _(max speed, max firing rate, etc etc)_
-* Weapon **rating** system
-* Has the **attention of official ZDoom developers**
+* Includes full support for Doom, Heretic, and Strife
+  * Can pick up and use **any vanilla weapon and player class**
+  * **High extensibility at the ZScript level** to add support for _modded weapons and player classes_
 * **Extensive debugging** (set by CVar `zb_debug`)
 
 ---
