@@ -1,0 +1,70 @@
+name: Build & Deploy
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install dependencies
+        run: sudo apt install zip
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Package ZetaBot
+        run: ./build
+
+  upload:
+    name: Artifact
+    runs-on: ubuntu-latest
+
+    depends: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get version
+        run: source ./config
+
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact
+          path: Built/ZetaBot_v${VERSION}.pk3
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get version
+        run: source ./config
+
+      - name: Create release
+        draft: true
+        prerelease: contains(github.ref, '-rc')
+        release_name: v$VERSION
+        tag_name: ${{ github.ref }}
+        body_path: changelog/latest.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Archive release log
+        run: |
+          cp changelog/latest.md changelog/archived/$VERSION.md
+
+      - name: Commit archived log
+        uses: EndBug/add-and-commit@v7.2.0
+        with:
+          add: changelog/archived/${VERSION}.md
+          push: true
+          message: "(CI) Archived changelog for v$VERSION"
