@@ -637,7 +637,7 @@ class ZTPathNode : ZTPositionMarker
 				    openSet.add(neigh, cost);
 			    }
 		    }
-			
+
 		    closedSet.put(current);
 		    nb.Destroy(); // clean actorlists after use
 	    }
@@ -1076,7 +1076,7 @@ class ZTBackspaceNode : Actor {
 class ZTPromptNodes : Actor
 {
 	bool CheckLumpName(int lump, string name) {
-		A_Log(String.Format("%i -> %s = %i", lump, name, Wads.FindLump(name, lump, 1)));
+		//A_Log(String.Format("%i -> %s = %i", lump, name, Wads.FindLump(name, lump, 1)));
 		return Wads.FindLump(name, lump, 1) == lump;
 	}
 
