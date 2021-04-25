@@ -1,6 +1,6 @@
 #!/bin/bash
 NAME=zetabot
-VERSION=0.11.0
+source version.sh
 
 ADDFOLDER ZetaCode
 ADDFOLDER sprites
