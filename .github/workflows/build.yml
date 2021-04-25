@@ -30,7 +30,7 @@ jobs:
       - name: Get version
         run: |
           source ./version.sh
-          echo ::set-env name=VERSION::$VERSION
+          echo "VERSION=$VERSION" >>$GITHUB_ENV
 
       - name: Create release
         uses: ncipollo/release-action@v1
