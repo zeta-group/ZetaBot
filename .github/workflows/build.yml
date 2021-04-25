@@ -33,12 +33,14 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          name: v${VERSION}
+          name: "v${{ env.VERSION }}"
           draft: true
           bodyFile: changelog/latest.md
-          artifacts: "Built/ZetaBot_v${VERSION}.pk3"
+          artifacts: "Built/ZetaBot_v${{ env.VERSION }}.pk3"
           prerelease: contains(github.ref, '-rc')
           token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          VERSION: ${{ env.VERSION }}
 
       - name: Archive release log
         run: |
