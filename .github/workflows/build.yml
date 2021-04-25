@@ -32,13 +32,19 @@ jobs:
           source ./version.sh
           echo "VERSION=$VERSION" >>$GITHUB_ENV
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ZetaBot_v${{ env.VERSION }}.pk3
+          path: Built/ZetaBot_v${{ env.VERSION }}.pk3
+
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
           name: "v${{ env.VERSION }}"
           draft: true
           bodyFile: changelog/latest.md
-          artifacts: "Built/ZetaBot_v${{ env.VERSION }}.pk3"
+          artifacts: ZetaBot_v${{ env.VERSION }}.pk3
           prerelease: contains(github.ref, '-rc')
           token: ${{ secrets.GITHUB_TOKEN }}
 
