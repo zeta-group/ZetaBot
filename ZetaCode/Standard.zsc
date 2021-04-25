@@ -453,6 +453,10 @@ class PriorityQueue {
     }
 
     void SiftUp(int which) {
+        if (which == 0) {
+            return;
+        }
+
         while (CheckSwap(Parent(which), which)) {
             which = Parent(which);
 
@@ -464,6 +468,10 @@ class PriorityQueue {
 
     void SiftDown(int which) {
         int child1, child2, childSwap = -1;
+
+        if (which * 2 + 1 > size /* already bottom layer */) {
+            return;
+        }
 
         do {
             if (childSwap != -1) {
