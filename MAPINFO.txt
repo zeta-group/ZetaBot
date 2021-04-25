@@ -4,4 +4,14 @@ SpawnNums
     83003 = ZTUseNode
     83004 = ZTJumpNode
     83005 = ZTAvoidNode
+    83006 = ZTSlowNode
+    83007 = ZTCrouchNode
+    83008 = ZTShootNode
+    83009 = ZTAvoidNode
+    83010 = ZTBlockNode
+    83011 = ZTTeleportToNextNode
+    83012 = ZTTeleportToPrevNode
+    83013 = ZTCandyNode
+    83014 = ZTCandyOnceNode
+    83015 = ZTRespawnNode
 }
