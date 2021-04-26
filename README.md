@@ -14,7 +14,6 @@
 * **Advanced** pathing system, with a repertoire of over **thirteen path node types**
   * Ability to **edit paths while playing**, alongside conveniences like **showing all paths** (`zt_showpaths`), **saving and loading** the entire path network, and even **map-specific node lumps** to include in your mapset!
 * Supports **any weapons and player classes** _(given there are modules for them, supplied by their respective modders)_
-* Constraints akin to **real** players _(max speed, max firing rate, etc etc)_
 * Includes full support for Doom, Heretic, and Strife
   * Can pick up and use **any vanilla weapon and player class**
   * **High extensibility at the ZScript level** to add support for _modded weapons and player classes_
