@@ -1,24 +1,12 @@
-# ZetaBot v0.11.0
+# ZetaBot v0.11.1-rc1
 
-Another big update that took a while to come out! This time,
-this one packs a larger number of features.
+A small update with quality-of-life improvements for
+path authors.
 
-## General
- * Initial stub of the [Doom II pathnoding project](../nodes/ZetaNodes_doom2.wad) (currently only MAP01 is supported)
- * Cleaner logs, with reduced printing to the console
- * Changed ACS code to use named scripts to avoid conflicts
- * Automatic releases and an actual changelog file
+Here's what's new:
 
-## Pathing
- * Added many additional _node types_; see the controls menu for details!
- * Greatly optimized the path finding code
+* Pathnodes created will begin __at__ the player,
+  instead of __in front of__.
 
-## AI
- * Added an experimental version of _orders_
-
-## Bugfixes
- * Fixed some rare fatal errors when a bot respawns after the corpse is despawned fully
-
-And more! ~~(that I probably just can't recall off the top of my head)~~
-
-You will be able to experience the changes by loading the files below, as usual.
+* Some internal refactoring for the way pathnode
+  types are plopped.

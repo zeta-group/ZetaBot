@@ -61,10 +61,11 @@ jobs:
       - name: Archive release log
         run: |
           cp changelog/latest.md changelog/archived/$VERSION.md
-
       - name: Commit archived log
         uses: EndBug/add-and-commit@v7.2.0
         with:
           add: changelog/archived/${{ env.VERSION }}.md
-          push: true
-          message: "(CI) Archived changelog for v$VERSION"
+          push: "-u origin changelog-archivals"
+          pull_strategy: "NO-PULL"
+          branch: changelog-archivals
+          message: "(CI) Archived changelog for v${{ env.VERSION }}"
