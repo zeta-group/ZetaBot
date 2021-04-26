@@ -840,158 +840,132 @@ class ZTPathNode : ZTPositionMarker
     }
 }
 
-class ZTUseNode : Actor
+class ZTNodeSpawner : Actor abstract {
+	const summonDist = 64;
+
+	abstract void ConfigNode(ZTPathNode node);
+
+	override void PostBeginPlay() {
+		let node = ZTPathNode(Spawn("ZTPathNode", Vec3Angle(-summonDist, angle)));
+		node.angle = angle;
+
+		ConfigNode(node);
+		Destroy();
+	}
+}	
+
+class ZTNormalNode : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
+	    node.nodeType = ZTPathNode.NT_NORMAL;
+    }
+}
+
+class ZTUseNode : ZTNodeSpawner
+{
+    override void ConfigNode(ZTPathNode node)
+    {
 	    node.nodeType = ZTPathNode.NT_USE;
 	    node.useDirection = angle;
-	    node.angle = angle;
-	
-	    Destroy();
     }
 }
 
-class ZTJumpNode : Actor
+class ZTJumpNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_JUMP;
-	    node.angle = angle;
-	
-	    Destroy();
     }
 }
 
-class ZTSlowNode : Actor
+class ZTSlowNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_SLOW;
-	    node.angle = angle;
-	
-	    Destroy();
     }
 }
 
-class ZTCrouchNode : Actor
+class ZTCrouchNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_CROUCH;
-	    node.angle = angle;
-	
-	    Destroy();
     }
 }
 
-class ZTShootNode : Actor
+class ZTShootNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_SHOOT;
-	    node.angle = angle;
-	
-	    Destroy();
     }
 }
 
 
-class ZTAvoidNode : Actor
+class ZTAvoidNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_AVOID;
-	    node.angle = angle;
-	
-	    Destroy();
     }
 }
 
-class ZTBlockNode : Actor
+class ZTBlockNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_BLOCK;
-	    node.angle = angle;
-	
-	    Destroy();
     }
 }
 
-class ZTTeleportToNextNode : Actor
+class ZTTeleportToNextNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_TELEPORT_SOURCE;
-	    node.angle = angle;
 	    node.assoc_id = node.id + 1; // next node
-	
-	    Destroy();
     }
 }
 
-class ZTTeleportToPrevNode : Actor
+class ZTTeleportToPrevNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_TELEPORT_SOURCE;
-	    node.angle = angle;
 	    node.assoc_id = node.id - 1; // previous node
-	
-	    Destroy();
     }
 }
 
-class ZTCandyNode : Actor
+class ZTCandyNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_CANDY;
-	    node.angle = angle;
-	
-	    Destroy();
     }
 }
 
-class ZTCandyOnceNode : Actor
+class ZTCandyOnceNode  : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_CANDY_ONCE;
-	    node.angle = angle;
 		node.MakeCandied();
-	
-	    Destroy();
     }
 }
 
-class ZTRespawnNode : Actor
+class ZTRespawnNode : ZTNodeSpawner
 {
-    override void PostBeginPlay()
+    override void ConfigNode(ZTPathNode node)
     {
-	    let node = ZTPathNode(Spawn("ZTPathNode", pos));
 	    node.nodeType = ZTPathNode.NT_RESPAWN;
-	    node.angle = angle;
-	
-	    Destroy();
     }
 }
 
 class ZTUploadNodes : Actor
 {
-	    enum LogType
+	enum LogType
     {
 	    LT_ERROR = 0,
 	    LT_WARNING,
