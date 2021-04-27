@@ -2239,6 +2239,7 @@ class ZetaBot : Actor {
         if (cont == null)
             return;
 
+        cont.angle = angle;
         cont.possessed.angle = angle;
 
         if (zb_autonoderespawn) {
