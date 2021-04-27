@@ -3,7 +3,7 @@
 A small update with enhancements to bot behaviour, as well
 as quality-of-life improvements for path authors.
 
-Here's what's new:
+Here's what's new since v0.11.0:
 
 * Bots can now activate cross lines (W1 and WR)!
 
