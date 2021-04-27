@@ -21,6 +21,17 @@ version "2.5"
 #include "ZetaCode/PawnClasses/ZetaSMushes.zsc"
 
 
+class LineCrossTracer : LineTracer {
+    Array<Line> crossLines;
+
+    override ETraceStatus TraceCallback() {
+        if (results.HitType == TRACE_HitWall && results.HitLine.sidedef[1] != null && results.HitLine.activation & (SPAC_Cross | SPAC_AnyCross)) {
+            crossLines.push(results.HitLine);
+        }
+
+        return TRACE_Skip;
+    }
+}
 
 class ZTBotOrder : Actor {
     Actor orderer;
@@ -343,7 +354,7 @@ class ZTBotController : Actor {
             possessed.angle + angle,
             possessed.radius + 64,
             0,
-            flags: TRF_THRUBLOCK | TRF_THRUHITSCAN | TRF_THRUACTORS,
+            flags: TRF_THRUBLOCK | TRF_THRUHITSCAN | TRF_THRUACTORS | TRF_BLOCKUSE,
             offsetz: possessed.height - 24,
             data: td
         );
@@ -1586,7 +1597,7 @@ class ZTBotController : Actor {
                 possessed.angle,
                 possessed.radius + 64,
                 0, // possessed.pitch,
-                flags: TRF_THRUBLOCK | TRF_THRUHITSCAN | TRF_THRUACTORS,
+                flags: TRF_THRUBLOCK | TRF_THRUHITSCAN | TRF_THRUACTORS | TRF_BLOCKUSE,
                 offsetz: possessed.height - 24, // offsetz: possessed.height - 12,
                 data: useData
             );
@@ -1943,8 +1954,49 @@ class ZTBotController : Actor {
 
     int thinkTimer;
 
+    void CrossActivate() {
+        // activate p-cross line actions
+
+        FLineTraceData useData;
+
+        let tracer = new("LineCrossTracer");
+
+        tracer.Trace(
+            possessed.pos,
+            possessed.CurSector,
+            (possessed.vel.xy, 0),
+            possessed.vel.xy.Length(),
+            0
+        );
+
+        if (tracer.crossLines.Size() > 0) {
+            DebugLog(LT_VERBOSE, "["..myName.." CROSS LOGS] Can cross "..tracer.crossLines.Size().." lines!");
+
+            for (int i = 0; i < tracer.crossLines.Size(); i++) {
+                let l = tracer.crossLines[i];
+
+                DebugLog(LT_VERBOSE, "["..myName.." CROSS LOGS] Activating cross line! Line special: "..l.Special);
+                l.Activate(possessed, 0, SPAC_Cross);
+
+                Level.ExecuteSpecial(
+                    l.Special,
+                    possessed,
+                    l, 0,
+
+                    l.Args[0],
+                    l.Args[1],
+                    l.Args[2],
+                    l.Args[3],
+                    l.Args[4]
+                );
+            }
+        }
+    }
+
     void A_ZetaTick() {
 		StatusDoubleCheck();
+
+		CrossActivate();
 
         if (TelefragTimer > 0) TelefragTimer--;
 
