@@ -1,11 +1,13 @@
 # ZetaBot
 
-<div align="center">
+<div align="center" style="background-color: #DDAA0020; border-bottom: 5px solid #DDAA0038;">
 
 ![icon](ZetaBot-icon.svg)
 
 **The modern ZScript bot made for GZDoom**, made *by ZDoomers for ZDoomers*.
  
+ <div align="left" style="margin: auto 0;">
+  
 * An **easy** way to replace the ZCajun with a bot that musters **actual intelligence**, competent in **both coop and deathmatch**
 * **Five** possible bot states (Wandering, Following, Attacking, Hunting and Fleeing)
 * **Multiple voice sets** to spice regular gameplay with the original hilarious DecoBot taunts and blurts
@@ -16,6 +18,8 @@
   * Can pick up and use **any vanilla weapon and player class**
   * **High extensibility at the ZScript level** to add support for _modded weapons and player classes_
 * **Extensive debugging** (set by CVar `zb_debug`)
+  
+ </div>
  
 </div>
 
