@@ -1,7 +1,9 @@
 # ZetaBot
 
 <p align="center">
-![(icon)](ZetaBot-icon.svg)
+
+![icon](ZetaBot-icon.svg)
+
 </p>
 
 **The modern ZScript bot made for GZDoom**, made *by ZDoomers for ZDoomers*.
