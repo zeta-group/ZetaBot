@@ -1,6 +1,6 @@
 # ZetaBot
 
-<div style="margin: auto 0">
+<div align="center">
 
 ![icon](ZetaBot-icon.svg)
 
