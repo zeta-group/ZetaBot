@@ -1,13 +1,13 @@
-#include "ZetaCode/WeaponSupport/Strife/ZetaAssaultGun.zsc"
-#include "ZetaCode/WeaponSupport/Strife/ZetaCrossbow1.zsc"
-#include "ZetaCode/WeaponSupport/Strife/ZetaCrossbow2.zsc"
-#include "ZetaCode/WeaponSupport/Strife/ZetaDagger.zsc"
-#include "ZetaCode/WeaponSupport/Strife/ZetaFlameThrower.zsc"
-#include "ZetaCode/WeaponSupport/Strife/ZetaGrenade1.zsc"
-#include "ZetaCode/WeaponSupport/Strife/ZetaGrenade2.zsc"
-#include "ZetaCode/WeaponSupport/Strife/ZetaMauler1.zsc"
-#include "ZetaCode/WeaponSupport/Strife/ZetaMauler2.zsc"
-#include "ZetaCode/WeaponSupport/Strife/ZetaMiniMissile.zsc"
+#include "ZetaCode/WeaponSupport/Strife/ZetaAssaultGun.zs"
+#include "ZetaCode/WeaponSupport/Strife/ZetaCrossbow1.zs"
+#include "ZetaCode/WeaponSupport/Strife/ZetaCrossbow2.zs"
+#include "ZetaCode/WeaponSupport/Strife/ZetaDagger.zs"
+#include "ZetaCode/WeaponSupport/Strife/ZetaFlameThrower.zs"
+#include "ZetaCode/WeaponSupport/Strife/ZetaGrenade1.zs"
+#include "ZetaCode/WeaponSupport/Strife/ZetaGrenade2.zs"
+#include "ZetaCode/WeaponSupport/Strife/ZetaMauler1.zs"
+#include "ZetaCode/WeaponSupport/Strife/ZetaMauler2.zs"
+#include "ZetaCode/WeaponSupport/Strife/ZetaMiniMissile.zs"
 
 class ZetaStrifeWeapons : ZetaWeaponModule
 {

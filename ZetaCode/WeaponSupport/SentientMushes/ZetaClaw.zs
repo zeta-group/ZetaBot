@@ -1,4 +1,4 @@
-#include "ZetaCode/WeaponSupport/SentientMushes/ClawAttack.zsc"
+#include "ZetaCode/WeaponSupport/SentientMushes/ClawAttack.zs"
 
 class ZetaClaw : ZetaWeapon
 {

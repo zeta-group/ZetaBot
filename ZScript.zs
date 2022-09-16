@@ -1,24 +1,24 @@
 version "2.5"
 
-#include "ZetaCode/Standard.zsc"
-#include "ZetaCode/Pathing.zsc"
-#include "ZetaCode/Appearance.zsc"
+#include "ZetaCode/Standard.zs"
+#include "ZetaCode/Pathing.zs"
+#include "ZetaCode/Appearance.zs"
 
 // Weapon Modules
-#include "ZetaCode/WeaponSupport/ZetaWeapon.zsc"
-#include "ZetaCode/WeaponSupport/ZetaBullet.zsc"
-#include "ZetaCode/WeaponSupport/ZetaWeaponModule.zsc"
-#include "ZetaCode/WeaponSupport/ZetaDoomWeapons.zsc"
-#include "ZetaCode/WeaponSupport/ZetaStrifeWeapons.zsc"
-#include "ZetaCode/WeaponSupport/ZetaHereticWeapons.zsc"
-#include "ZetaCode/WeaponSupport/ZetaSMWeapons.zsc"
+#include "ZetaCode/WeaponSupport/ZetaWeapon.zs"
+#include "ZetaCode/WeaponSupport/ZetaBullet.zs"
+#include "ZetaCode/WeaponSupport/ZetaWeaponModule.zs"
+#include "ZetaCode/WeaponSupport/ZetaDoomWeapons.zs"
+#include "ZetaCode/WeaponSupport/ZetaStrifeWeapons.zs"
+#include "ZetaCode/WeaponSupport/ZetaHereticWeapons.zs"
+#include "ZetaCode/WeaponSupport/ZetaSMWeapons.zs"
 
 // Pawn Modules
-#include "ZetaCode/PawnClasses/ZetaBotPawn.zsc"
-#include "ZetaCode/PawnClasses/ZetaDoom.zsc"
-#include "ZetaCode/PawnClasses/ZetaHeretic.zsc"
-#include "ZetaCode/PawnClasses/ZetaStrife.zsc"
-#include "ZetaCode/PawnClasses/ZetaSMushes.zsc"
+#include "ZetaCode/PawnClasses/ZetaBotPawn.zs"
+#include "ZetaCode/PawnClasses/ZetaDoom.zs"
+#include "ZetaCode/PawnClasses/ZetaHeretic.zs"
+#include "ZetaCode/PawnClasses/ZetaStrife.zs"
+#include "ZetaCode/PawnClasses/ZetaSMushes.zs"
 
 
 class LineCrossTracer : LineTracer {

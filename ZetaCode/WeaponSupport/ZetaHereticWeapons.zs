@@ -1,11 +1,11 @@
-#include "ZetaCode/WeaponSupport/Heretic/ZetaBlaster.zsc"
-#include "ZetaCode/WeaponSupport/Heretic/ZetaHereticCrossbow.zsc"
-#include "ZetaCode/WeaponSupport/Heretic/ZetaGoldWand.zsc"
-#include "ZetaCode/WeaponSupport/Heretic/ZetaSkullRod.zsc"
-#include "ZetaCode/WeaponSupport/Heretic/ZetaMace.zsc"
-#include "ZetaCode/WeaponSupport/Heretic/ZetaStaff.zsc"
-#include "ZetaCode/WeaponSupport/Heretic/ZetaPhoenixRod.zsc"
-#include "ZetaCode/WeaponSupport/Heretic/ZetaGauntlets.zsc"
+#include "ZetaCode/WeaponSupport/Heretic/ZetaBlaster.zs"
+#include "ZetaCode/WeaponSupport/Heretic/ZetaHereticCrossbow.zs"
+#include "ZetaCode/WeaponSupport/Heretic/ZetaGoldWand.zs"
+#include "ZetaCode/WeaponSupport/Heretic/ZetaSkullRod.zs"
+#include "ZetaCode/WeaponSupport/Heretic/ZetaMace.zs"
+#include "ZetaCode/WeaponSupport/Heretic/ZetaStaff.zs"
+#include "ZetaCode/WeaponSupport/Heretic/ZetaPhoenixRod.zs"
+#include "ZetaCode/WeaponSupport/Heretic/ZetaGauntlets.zs"
 
 class ZetaHereticWeapons : ZetaWeaponModule
 {

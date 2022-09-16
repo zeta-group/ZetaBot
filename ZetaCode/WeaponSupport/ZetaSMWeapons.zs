@@ -1,12 +1,12 @@
-#include "ZetaCode/WeaponSupport/SentientMushes/ZetaClaw.zsc"
-#include "ZetaCode/WeaponSupport/SentientMushes/ZetaColt.zsc"
-#include "ZetaCode/WeaponSupport/SentientMushes/ZetaSMShotgun.zsc"
-#include "ZetaCode/WeaponSupport/SentientMushes/ZetaAK64.zsc"
-#include "ZetaCode/WeaponSupport/SentientMushes/ZetaMinigun.zsc"
-#include "ZetaCode/WeaponSupport/SentientMushes/ZetaRockox.zsc"
-#include "ZetaCode/WeaponSupport/SentientMushes/ZetaRocketeer.zsc"
-#include "ZetaCode/WeaponSupport/SentientMushes/ZetaKnife.zsc"
-#include "ZetaCode/WeaponSupport/SentientMushes/ZetaHeavyMinigun.zsc"
+#include "ZetaCode/WeaponSupport/SentientMushes/ZetaClaw.zs"
+#include "ZetaCode/WeaponSupport/SentientMushes/ZetaColt.zs"
+#include "ZetaCode/WeaponSupport/SentientMushes/ZetaSMShotgun.zs"
+#include "ZetaCode/WeaponSupport/SentientMushes/ZetaAK64.zs"
+#include "ZetaCode/WeaponSupport/SentientMushes/ZetaMinigun.zs"
+#include "ZetaCode/WeaponSupport/SentientMushes/ZetaRockox.zs"
+#include "ZetaCode/WeaponSupport/SentientMushes/ZetaRocketeer.zs"
+#include "ZetaCode/WeaponSupport/SentientMushes/ZetaKnife.zs"
+#include "ZetaCode/WeaponSupport/SentientMushes/ZetaHeavyMinigun.zs"
 
 class ZetaSentientMushesWeapons : ZetaWeaponModule
 {
