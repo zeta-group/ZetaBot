@@ -22,14 +22,13 @@ class PathMarker : Actor {
 	    Spawn:
 		    MISL C 200 Bright;
 		    MISL C 15;
-			TNT1 A 0 ScaleToRemove();
-		    
+
 		End:
-		    MISL CDE 5;
+		    MISL CCCDDDEEE 9 A_ScaleToRemove;
 		    Stop;
 		    
 	    EndFast:
-   		    MISL CCDDEE 3 A_ScaleToRemove;
+   		    MISL CCCDDDEEE 3 A_ScaleToRemove;
    		    Stop;
     }
 
@@ -691,7 +690,12 @@ class ZTPathNode : ZTPositionMarker
 		    res.insert(0, cur);
 			pcur = cur;
 		    cur = ZTPathNode(cameFrom.get(Object(cur)));
+
 			// DebugLog(LT_VERBOSE, String.Format("%i -> %i", (cur == null ? -1 : cur.id), (pcur == null ? -1 : pcur.id)));
+
+		        if (pcur != null && CVar.FindCVar("zb_debug").GetInt() > 1) {
+				cur.ShowPath(pcur);
+			}
 
 			if (pcur == cur) {
 				break;
