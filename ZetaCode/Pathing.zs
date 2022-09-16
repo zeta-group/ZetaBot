@@ -29,7 +29,7 @@ class PathMarker : Actor {
 		    Stop;
 		    
 	    EndFast:
-   		    MISL CDE 3;
+   		    MISL CCDDEE 3 A_ScaleToRemove;
    		    Stop;
     }
 
@@ -39,13 +39,12 @@ class PathMarker : Actor {
 		ChangeStatNum(92);
 	}
 
-	void ScaleToRemove() {
-		scale *= 2;
-		alpha /= 2;
+	void A_ScaleToRemove() {
+		scale *= 1.2;
+		alpha /= 1.4;
 	}
 
     void RemoveEarly() {
-    	ScaleToRemove();
     	SetStateLabel("EndFast");
     }
 }
