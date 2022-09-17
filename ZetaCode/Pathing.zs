@@ -606,9 +606,10 @@ class ZTPathNode : ZTPositionMarker
 		let res = ActorList.Empty();
 		int itersLeft = 5000; // safety limit
 
+		res.push(self);
+
 		if ( goal == null || goal == self )
 		{
-			res.push(self);
 			return res;
 		}
 
