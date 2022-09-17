@@ -688,8 +688,7 @@ class ZTPathNode : ZTPositionMarker
 		ZTPathNode cur = goal;
 		ZTPathNode pcur;
 	
-		while (cur != self)
-		{
+		do {
 			if (cur == null) {
 				break;
 			}
@@ -700,14 +699,11 @@ class ZTPathNode : ZTPositionMarker
 
 			// DebugLog(LT_VERBOSE, String.Format("%i -> %i", (cur == null ? -1 : cur.id), (pcur == null ? -1 : pcur.id)));
 
-			if (cur != null && pcur != null && CVar.FindCVar("zb_debug").GetInt() > 2) {
-				cur.ShowPath(pcur);
-			}
-
 			if (pcur == cur) {
 				break;
 			}
-		}
+		} while (cur != self);
+
 	
 		if (CVar.FindCVar("zb_debug").GetInt() > 0) {
 			string nodepath = "";
@@ -720,6 +716,19 @@ class ZTPathNode : ZTPositionMarker
 			res.iReset();
 
 			DebugLog(LT_INFO, String.format("Found a %i-node path: %s", (res.Length()), nodepath));
+		}
+
+		if (CVar.FindCVar("zb_debug").GetInt() > 2) {
+			ZTPathNode node, prev = null;
+
+			res.iReset();
+			while (node = ZTPathNode(res.iNext())) {
+				if (prev != null) {
+					prev.ShowPath(node);
+				}
+				prev = node;
+			}
+			res.iReset();
 		}
 
 		cameFrom.Destroy();
