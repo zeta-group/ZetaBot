@@ -646,7 +646,7 @@ class ZTPathNode : ZTPositionMarker
 	
 		    for ( uint i = 0; i < nb.Length(); i++ ) {
 			    ZTPathNode neigh = ZTPathNode(nb.get(i));
-			    DebugLog(LT_VERBOSE, String.Format("+-+-- Considering #%i's neighbor: %s", current.id, neigh.NodeName()));
+			    //DebugLog(LT_VERBOSE, String.Format("+-+-- Considering #%i's neighbor: %s", current.id, neigh.NodeName()));
 
 			    if (neigh != current && !(openSet.has(neigh) || closedSet.has(neigh)))
 			    {
