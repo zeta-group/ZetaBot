@@ -6,6 +6,7 @@ server string zb_extraweap = "";
 server float zb_autouseinterval = 9;
 server bool zb_autouse = true;
 server bool zb_autonodes = true;
+server bool zb_autonodeuse = false;
 server bool zb_talk = true;
 server bool zb_alsocooprespawn = false;
 server bool zb_respawn = true;
