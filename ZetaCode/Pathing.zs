@@ -20,7 +20,7 @@ class PathMarker : Actor {
 
     States {
 	    Spawn:
-		    MISL C 200 Bright;
+		    MISL C 95 Bright;
 		    MISL C 15;
 
 		End:
