@@ -1073,7 +1073,7 @@ class ZTUploadNodes : Actor
 			while ( true ) {
 				c = ZTPathNode.split(code, ";;", i++);
 		
-				if ( ZTPathNode.split(c, "::", 0) == level.mapName.MakeUpper()) {
+				if ( ZTPathNode.split(c, "::", 0).MakeUpper() == level.mapName.MakeUpper()) {
 					break;
 				}
 				
