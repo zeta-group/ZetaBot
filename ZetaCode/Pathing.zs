@@ -7,7 +7,7 @@ class PlopResult : Thinker {
 
 class PathMarker : Actor {
 	Default {
-		Scale 0.15;
+		Scale 0.1;
 		RenderStyle "AddStencil";
 		StencilColor "10A8EC";
 		Alpha 0.6;
@@ -554,7 +554,7 @@ class ZTPathNode : ZTPositionMarker
 		uint segRes = 24; // constant
 		uint numSegs = ceil(Distance3D(otherNode) / segRes);
 		uint fringeSegs = 4;
-		double fringeSize = 28;
+		double fringeSize = 9;
 		double fringeAngle = 45;
 		double fringeDotScale = 0.8;
 
