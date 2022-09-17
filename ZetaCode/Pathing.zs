@@ -702,7 +702,18 @@ class ZTPathNode : ZTPositionMarker
 			}
 	    }
 	
-	    DebugLog(LT_INFO, String.format("Found a %i-node path between %s and %s!", (res.Length() + 1), NodeName(), goal.NodeName()));
+	    if (CVar.FindCVar("zb_debug").GetInt() > 0) {
+	    	string nodepath = "";
+		ZTPathNode node;
+
+		res.iReset();
+		while (node = ZTPathNode(res.iNext())) {
+			nodepath = nodepath..(nodepath == "" ? "" : " -> ")..node.NodeName();
+		}
+		res.iReset();
+
+	    	DebugLog(LT_INFO, String.format("Found a %i-node path: %s", (res.Length() + 1), nodepath));
+	    }
 
 	    cameFrom.Destroy();
 	    openSet.Destroy();
