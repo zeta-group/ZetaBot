@@ -719,13 +719,15 @@ class ZTPathNode : ZTPositionMarker
 			}
 			res.iReset();
 
-			DebugLog(LT_INFO, String.format("Found a %i-node path: %s", (res.Length() + 1), nodepath));
+			DebugLog(LT_INFO, String.format("Found a %i-node path: %s", (res.Length()), nodepath));
 		}
 
 		cameFrom.Destroy();
 		openSet.Destroy();
 		closedSet.Destroy();
 		icosts.Destroy();
+
+		res.Remove(0);
 	
 		return res;
 	}
