@@ -17,7 +17,7 @@ class ZetaFist : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-		if (shooter.CheckInventory("PowerStrength") && shooter.Distance2D(target) < 256) {
+		if (shooter.CheckInventory("PowerStrength", 1) && shooter.Distance2D(target) < 256) {
 			return shooter.Health * 5;
 		}
 
@@ -26,7 +26,7 @@ class ZetaFist : ZetaWeapon
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-		shooter.LineAttack(shooter.angle, 32, 0, (shooter.CheckInventory("PowerStrength") ? 20 : 2) * Random(1, 10), "Punch", "BulletPuff", 0);
+		shooter.LineAttack(shooter.angle, 32, 0, (shooter.CheckInventory("PowerStrength", 1) ? 20 : 2) * Random(1, 10), "Punch", "BulletPuff", 0);
 	}
 	
 	override bool IsMelee()

@@ -1739,7 +1739,7 @@ class ZTBotController : Actor {
 					if (possessed.Distance3D(enemy) > 256 + enemy.radius || w.IsMelee()) {
 						MoveToward(enemy, 0.282);
 
-						if (enemy.bShadow || enemy.CheckInventory("PowerInvisibility")) {
+						if (enemy.bShadow || enemy.CheckInventory("PowerInvisibility", 1)) {
 							angleMomentum += FRandom(-5, 5);
 						}
 					}
