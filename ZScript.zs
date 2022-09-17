@@ -1058,9 +1058,6 @@ class ZTBotController : Actor {
 		ZTPathNode cur = null;
 
 		while (cur = ZTPathNode(iter.Next())) {
-			if (cur == null)
-				break;
-
 			if (!other.CheckSight(cur))
 				continue;
 
@@ -1072,29 +1069,10 @@ class ZTBotController : Actor {
 	}
 
 	ZTPathNode ClosestVisibleNodeAt(Vector3 location) {
-		ThinkerIterator iter = ThinkerIterator.Create("ZTPathNode", 91);
-		ZTPathNode best = null;
-		ZTPathNode cur = null;
-
-		while (cur = ZTPathNode(iter.Next())) {
-			if (cur == null)
-				break;
-
-			Actor dummy = Spawn("Candle", pos);
-
-			if (!dummy.CheckSight(cur)) {
-				dummy.Destroy();
-				continue;
-			}
-
-			if (best == null || dummy.Distance3D(cur) < dummy.Distance3D(best)) {
-				best = cur;
-			}
-
-			dummy.Destroy();
-		}
-
-		return best;
+		Actor dummy = Spawn("Candle", pos);
+		let res = ClosestVisibleNode(dummy);
+		dummy.Destroy();
+		return res;
 	}
 
 	void RandomStrafe() {
@@ -2034,7 +2012,9 @@ class ZTBotController : Actor {
 		if (age - lastShot > 0.7 && possessed.bShooting)
 			possessed.EndShoot();
 
-		SetCurrentNode(ClosestVisibleNode(possessed));
+		if (currNode == null || possessed.Distance2D(currNode) > 200 || !possessed.CheckSight(currNode)) {
+			SetCurrentNode(ClosestVisibleNode(possessed));
+		}
 
 		if (thinkTimer > 0) {
 			thinkTimer--;
@@ -2159,7 +2139,7 @@ class ZTBotController : Actor {
 			SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL, possessed.angle));
 		}
 
-		else if (currNode != null)
+		if (currNode != null)
 			FireAtBarrels();
 
 		if (angleMomentum > 1)
