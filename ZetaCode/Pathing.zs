@@ -693,7 +693,7 @@ class ZTPathNode : ZTPositionMarker
 
 			// DebugLog(LT_VERBOSE, String.Format("%i -> %i", (cur == null ? -1 : cur.id), (pcur == null ? -1 : pcur.id)));
 
-		        if (pcur != null && CVar.FindCVar("zb_debug").GetInt() > 1) {
+		        if (cur != null && pcur != null && CVar.FindCVar("zb_debug").GetInt() > 2) {
 				cur.ShowPath(pcur);
 			}
 
