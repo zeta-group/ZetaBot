@@ -20,7 +20,7 @@ class ZetaBFG : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-		return 300 * target.Health / (shooter.Distance2D(target));
+		return 5000 / (1 + shooter.Distance2D(target) * 4);
 	}
 	
 	override void Fire(Actor shooter, Actor target)

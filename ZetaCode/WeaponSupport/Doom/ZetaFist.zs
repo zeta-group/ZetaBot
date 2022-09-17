@@ -3,6 +3,7 @@ class ZetaFist : ZetaWeapon
 	default
 	{
 		ZetaWeapon.FireInterval 5142857;
+		ZetaWeapon.AmmoUse 0;
 	}
 
 	override bool IsPickupOf(Weapon other)
@@ -17,6 +18,10 @@ class ZetaFist : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
+		if (shooter.Health < 30) {
+			return -50;
+		}
+
 		if (shooter.CheckInventory("PowerStrength", 1) && shooter.Distance2D(target) < 256) {
 			return shooter.Health * 5;
 		}

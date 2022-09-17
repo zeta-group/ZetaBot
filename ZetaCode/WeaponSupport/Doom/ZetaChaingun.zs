@@ -18,7 +18,7 @@ class ZetaChaingun : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-		return sqrt(shooter.Distance2D(target)) * 1.3;
+		return 700 / (sqrt(shooter.Distance2D(target)) * 1.5);
 	}
 	
 	override void Fire(Actor shooter, Actor target)

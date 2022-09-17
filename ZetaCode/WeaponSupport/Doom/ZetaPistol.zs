@@ -18,7 +18,7 @@ class ZetaPistol : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-		return sqrt(shooter.Distance3D(target)) / 5;
+		return 200 / (1 + sqrt(shooter.Distance3D(target)));
 	}
 	
 	override void Fire(Actor shooter, Actor target)

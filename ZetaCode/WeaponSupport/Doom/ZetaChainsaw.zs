@@ -3,6 +3,7 @@ class ZetaChainsaw : ZetaWeapon
 	default
 	{
 		ZetaWeapon.FireInterval 2285714;
+		ZetaWeapon.AmmoUse 0;
 	}
 
 	override bool IsPickupOf(Weapon other)
@@ -17,7 +18,15 @@ class ZetaChainsaw : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-		return ((shooter.Distance2D(target) < shooter.Radius + target.Radius + 32) ? 800 : 0);
+		if (shooter.Health < 30) {
+			return -50;
+		}
+
+		if (shooter.Distance2D(target) < shooter.Radius + target.Radius + 50) {
+			return 600;
+		}
+
+		return 0;
 	}
 	
 	override void Fire(Actor shooter, Actor target)
