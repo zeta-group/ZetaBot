@@ -693,6 +693,7 @@ class ActorList
 	void insert(int ind, Actor node)
 	{
 		all.Insert(ind, node);
+		bHas = true;
 	} 
 	
 	bool Has(Object other)
