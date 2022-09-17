@@ -694,7 +694,12 @@ class ActorList
 	{
 		all.Insert(ind, node);
 		bHas = true;
-	} 
+	}
+
+	void clear() {
+		all.Clear();
+		bHas = false;
+	}
 	
 	bool Has(Object other)
 	{

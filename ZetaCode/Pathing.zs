@@ -656,31 +656,39 @@ class ZTPathNode : ZTPositionMarker
 					double icost = thisICost + current.Distance3D(neigh);
 					double cost = neigh.Distance3D(goal) + icost + current.specialCost(neigh, goal, traveller);
 
-					if (neigh == goal)
-					{
-						DebugLog(LT_VERBOSE, String.Format("  '-- # Goal node #%i found!", neigh.id));
-						foundGoal = true;
-						break;
-					}
-
 					if (openSet.has(neigh) && openSet.GetCost(neigh) <= cost) {
-							continue;
+						continue;
 					}
 
 					cameFrom.set(neigh, current);
 			
 					icosts.set(neigh, icost);
 					openSet.add(neigh, cost);
+
+					if (neigh == goal)
+					{
+						DebugLog(LT_VERBOSE, String.Format("  '-- # Goal node #%i found!", neigh.id));
+						foundGoal = true;
+						break;
+					}
 				}
 			}
 
+			nb.Destroy(); // clean actor lists after use
+
+			if (foundGoal) {
+				break;
+			}
+
 			closedSet.put(current);
-			nb.Destroy(); // clean actorlists after use
 		}
 	
 		if ( !foundGoal ) {
 			if (itersLeft == 0)
 				DebugLog(LT_WARNING, String.Format("Infinite recursion attempting to find a path betwen %s and %s", NodeName(), goal.NodeName()));
+
+			else
+				DebugLog(LT_INFO, String.Format("Failed to find a valid path between %s and %s.", NodeName(), goal.NodeName()));
 
 			return null;
 		}
@@ -688,6 +696,8 @@ class ZTPathNode : ZTPositionMarker
 		ZTPathNode cur = goal;
 		ZTPathNode pcur;
 	
+		res.clear();
+
 		do {
 			if (cur == null) {
 				break;
@@ -704,6 +714,7 @@ class ZTPathNode : ZTPositionMarker
 			}
 		} while (cur != self);
 
+		res.insert(0, self);
 	
 		if (CVar.FindCVar("zb_debug").GetInt() > 0) {
 			string nodepath = "";
