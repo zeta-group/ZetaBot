@@ -662,7 +662,7 @@ class ZTPathNode : ZTPositionMarker
 						break;
 					}
 
-					if (openSet.has(neigh) && openSet.GetCost(neigh) <= cost)
+					if (openSet.has(neigh) && openSet.GetCost(neigh) <= cost) {
 							continue;
 					}
 
