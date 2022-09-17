@@ -24,11 +24,11 @@ class ZetaFlameThrower : ZetaWeapon
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-        shooter.angle += Random2[Flamethrower]() * (5.625/256.);
+		shooter.angle += Random2[Flamethrower]() * (5.625/256.);
 		
 		FlameMissile f = FlameMissile(shooter.SpawnMissile(target, "FlameMissile", shooter));
 		
 		if ( f != null )
-            f.vel.z += 5; // based on gzdoom.pk3 ZScript
+			f.vel.z += 5; // based on gzdoom.pk3 ZScript
 	}
 }

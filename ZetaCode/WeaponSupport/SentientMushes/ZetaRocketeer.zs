@@ -6,7 +6,7 @@ class ZetaRocketeer : ZetaWeapon
 		ZetaWeapon.AltFireInterval 5714285;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AltMinAmmo 1;
-        ZetaWeapon.AltAmmoUse 0;
+		ZetaWeapon.AltAmmoUse 0;
 		ZetaWeapon.AmmoType "RocketAmmo";
 		ZetaWeapon.AltAmmoType "RocketAmmo";
 	}
@@ -20,7 +20,7 @@ class ZetaRocketeer : ZetaWeapon
 	{
 		return true;
 	}
-    
+	
 	override double RateSelf(Actor shooter, Actor target) // Rocketeer grenade
 	{
 		return sqrt(shooter.Distance2D(target)) * 2 - 150;
@@ -36,25 +36,25 @@ class ZetaRocketeer : ZetaWeapon
 	
 	override void Fire(Actor shooter, Actor target)
 	{
-        let ggs = "RRGrenade";
-        Class<Actor> gg = ggs;
-        
-        if ( gg )
-            shooter.SpawnMissileAngle(gg, shooter.angle, target == null ? 0 : ((target.pos.z - shooter.pos.z) * 25 / target.Distance2D(shooter)));
+		let ggs = "RRGrenade";
+		Class<Actor> gg = ggs;
+		
+		if ( gg )
+			shooter.SpawnMissileAngle(gg, shooter.angle, target == null ? 0 : ((target.pos.z - shooter.pos.z) * 25 / target.Distance2D(shooter)));
 	}
-    
-    override void AltFire(Actor shooter, Actor target)
-    {
-        let cbs = "RRClusterBomb";
-        let rfs = "RocketFog";
-        
-        Class<Actor> cb = cbs;
-        Class<Actor> rf = rfs;
-    
-        if ( cb && rf )
-        {
-            shooter.SpawnMissileAngle(cb, shooter.angle, target == null ? 0 : ((target.pos.z - shooter.pos.z) * 19 / target.Distance2D(shooter)));
-            shooter.SpawnMissileAngle(rf, shooter.angle, shooter.pitch);
-        }
-    }
+	
+	override void AltFire(Actor shooter, Actor target)
+	{
+		let cbs = "RRClusterBomb";
+		let rfs = "RocketFog";
+		
+		Class<Actor> cb = cbs;
+		Class<Actor> rf = rfs;
+	
+		if ( cb && rf )
+		{
+			shooter.SpawnMissileAngle(cb, shooter.angle, target == null ? 0 : ((target.pos.z - shooter.pos.z) * 19 / target.Distance2D(shooter)));
+			shooter.SpawnMissileAngle(rf, shooter.angle, shooter.pitch);
+		}
+	}
 }

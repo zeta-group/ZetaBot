@@ -73,7 +73,7 @@ class ZetaSMushes : ZetaBotPawn
 			Stop;
 			
 		Pain:
-            DRGN I 0 A_PlaySound("player/dragon/pain");
+			DRGN I 0 A_PlaySound("player/dragon/pain");
 			DRGN I 4 A_JumpIf(moveType == MM_CROUCH, "CrouchPain");
 			DRGN I 4 A_BotPain;
 			PLAY A 0 A_SpeedCheck;
@@ -107,6 +107,6 @@ class ZetaSMushes : ZetaBotPawn
 			BDPL A 0 A_NoBlocking;
 			BDPL A 0;
 			BDPL A -1;
-            Stop;
+			Stop;
 	}
 }

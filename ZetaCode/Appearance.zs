@@ -22,7 +22,7 @@ class ZetaCape : Actor
 		ZetaCape cape = ZetaCape(Spawn("ZetaCape", other.pos));
 		
 		if ( cape == null )
-            return;
+			return;
 		
 		cape.attached = other;
 		cape.lastAngle = other.angle;

@@ -9,11 +9,11 @@ class ZetaCrossbow1 : ZetaWeapon
 	
 	double pow(double a, uint b)
 	{
-        if ( b == 0 )
-            return 1;
-            
-        else
-            return a * pow(a, b - 1);
+		if ( b == 0 )
+			return 1;
+			
+		else
+			return a * pow(a, b - 1);
 	}
 
 	override bool IsPickupOf(Weapon other)
@@ -28,10 +28,10 @@ class ZetaCrossbow1 : ZetaWeapon
 	
 	override double RateSelf(Actor shooter, Actor target)
 	{
-        if ( target.bNOBLOOD )
-            return 800 / sqrt(shooter.Distance3D(target) / 2);
-            
-        return 300 / sqrt(shooter.Distance3D(target) / 2);
+		if ( target.bNOBLOOD )
+			return 800 / sqrt(shooter.Distance3D(target) / 2);
+			
+		return 300 / sqrt(shooter.Distance3D(target) / 2);
 	}
 	
 	override void Fire(Actor shooter, Actor target)

@@ -28,11 +28,11 @@ class ZetaGrenade2 : ZetaWeapon
 		
 		if ( gr != null )
 		{
-            uint angoffs = (Random(0, 1) * 2 - 1) * 90;
+			uint angoffs = (Random(0, 1) * 2 - 1) * 90;
 		
-            gr.vel.z = (-clamp(tan(shooter.pitch), -5, 5)) * gr.Speed + 8;
-            
-            Vector2 offset = shooter.AngleToVector(shooter.angle, shooter.radius + gr.radius);
+			gr.vel.z = (-clamp(tan(shooter.pitch), -5, 5)) * gr.Speed + 8;
+			
+			Vector2 offset = shooter.AngleToVector(shooter.angle, shooter.radius + gr.radius);
 			double an = shooter.angle + angoffs;
 			offset += shooter.AngleToVector(an, 15);
 			gr.SetOrigin(gr.Vec3Offset(offset.X, offset.Y, 0.), false);

@@ -60,7 +60,7 @@ class ZetaBotPawn : Actor {
 	}
 
 	static String GetSomeType() {
-        Array<String> rset;
+		Array<String> rset;
 		Array<String> types;
 		Array<String> parms;
 		
@@ -68,27 +68,27 @@ class ZetaBotPawn : Actor {
 		btypes.Split(types, ';');
 		
 		for ( uint i = 0; i < types.Size(); i++ ) {
-            parms.Clear();
-            types[i].Split(parms, ':');
-            
-            if ( parms.Size() < 2 )
-                continue;
+			parms.Clear();
+			types[i].Split(parms, ':');
+			
+			if ( parms.Size() < 2 )
+				continue;
 		
-            let iter = ThinkerIterator.Create(parms[1]);
-            
-            // if ( anchor != null ) anchor.A_Log(parms[0]..': '..parms[1]);
-            
-            if ( iter.Next() )
-                rset.Push(parms[0]);
-        }
-        
-        //if ( anchor != null ) anchor.A_Log('Plausible types: '..rset.Size());
+			let iter = ThinkerIterator.Create(parms[1]);
+			
+			// if ( anchor != null ) anchor.A_Log(parms[0]..': '..parms[1]);
+			
+			if ( iter.Next() )
+				rset.Push(parms[0]);
+		}
+		
+		//if ( anchor != null ) anchor.A_Log('Plausible types: '..rset.Size());
 		
 		if ( rset.Size() > 0 )
-            return rset[Random(0, rset.Size() - 1)];
-            
-        else
-            return "";
+			return rset[Random(0, rset.Size() - 1)];
+			
+		else
+			return "";
 	}
 	
 	enum MovementModifier {
@@ -281,8 +281,8 @@ class ZetaBotPawn : Actor {
 				
 				if ( w != null ) {
 					w.vel.x = vel.x + FRandom(-5, 5);
-                    w.vel.y = vel.y + FRandom(-5, 5);
-                    w.vel.z = vel.z + FRandom(2, 7);
+					w.vel.y = vel.y + FRandom(-5, 5);
+					w.vel.z = vel.z + FRandom(2, 7);
 					
 					Inventory ammo1 = FindInventory(w.AmmoType1);
 					Inventory ammo2 = FindInventory(w.AmmoType2);

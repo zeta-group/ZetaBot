@@ -26,6 +26,6 @@ class ZetaHeavyMinigun : ZetaWeapon
 	{
 		ZetaBullet.FireABullet(shooter, "Gold", target, frandom(12, 20), 5, 3);
 		shooter.A_PlaySound("ak64/shoot", CHAN_WEAPON);
-        shooter.A_Recoil(0.6);
+		shooter.A_Recoil(0.6);
 	}
 }

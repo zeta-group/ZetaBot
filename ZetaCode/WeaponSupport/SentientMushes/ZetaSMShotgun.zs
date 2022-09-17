@@ -4,7 +4,7 @@ class ZetaSMShotgun : ZetaWeapon
 	{
 		ZetaWeapon.FireInterval 12000000;
 		ZetaWeapon.MinAmmo 1;
-        ZetaWeapon.AmmoType "ShotRifleShellClip";
+		ZetaWeapon.AmmoType "ShotRifleShellClip";
 	}
 
 	override bool IsPickupOf(Weapon other)
@@ -26,6 +26,6 @@ class ZetaSMShotgun : ZetaWeapon
 	{
 		ZetaBullet.FireBullets(shooter, "Gold", target, random(2, 4), 20, 12, 10, "SMPuff");
 		shooter.A_PlaySound("weapons/sr/shoot", CHAN_WEAPON);
-        shooter.A_PlaySound("weapons/sr/reload", CHAN_WEAPON);
+		shooter.A_PlaySound("weapons/sr/reload", CHAN_WEAPON);
 	}
 }

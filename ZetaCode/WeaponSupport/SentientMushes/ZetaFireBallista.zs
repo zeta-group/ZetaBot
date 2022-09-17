@@ -7,7 +7,7 @@ class Minigun : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "BallistaAmmo";
 		ZetaWeapon.AltMinAmmo 3;
-        ZetaWeapon.AltAmmoUse 3;
+		ZetaWeapon.AltAmmoUse 3;
 		ZetaWeapon.AltAmmoType "BallistaAmmo";
 	}
 
@@ -36,13 +36,13 @@ class Minigun : ZetaWeapon
 		shooter.SpawnMissileAngle("BallistaMissile", shooter.angle, target == null ? 0 : ((target.pos.z - shooter.pos.z) * 15 / target.Distance2D(shooter)));
 		shooter.A_PlaySound("fireballista/shoot");
 	}
-    
+	
 	override void AltFire(Actor shooter, Actor target)
 	{
-        for ( int _ = 0; _ < 11; _++ )
-            shooter.SpawnMissileAngle("DrunkBallistaMissile", shooter.angle + frandom(-3, 3), target == null ? 0 : ((target.pos.z - shooter.pos.z) * 15 / target.Distance2D(shooter)));
-            
+		for ( int _ = 0; _ < 11; _++ )
+			shooter.SpawnMissileAngle("DrunkBallistaMissile", shooter.angle + frandom(-3, 3), target == null ? 0 : ((target.pos.z - shooter.pos.z) * 15 / target.Distance2D(shooter)));
+			
 		shooter.A_PlaySound("fireballista/shoot");
 	}
-    
+	
 }

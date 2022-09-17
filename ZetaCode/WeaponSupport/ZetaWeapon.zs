@@ -6,8 +6,8 @@ class ZetaWeapon : Actor
 	property AmmoType: ammotype;
 	property AltMinAmmo: altminammo;
 	property AltAmmoType: altammotype;
-    property AmmoUse: ammouse;
-    property AltAmmoUse: altammouse;        
+	property AmmoUse: ammouse;
+	property AltAmmoUse: altammouse;		
 	
 	int interval;
 	int altinterval;
@@ -15,8 +15,8 @@ class ZetaWeapon : Actor
 	string ammotype;
 	int altminammo;
 	string altammotype;
-    int ammouse;
-    int altammouse;
+	int ammouse;
+	int altammouse;
 	
 	default
 	{
@@ -24,15 +24,15 @@ class ZetaWeapon : Actor
 		ZetaWeapon.AltFireInterval 10000000;
 		ZetaWeapon.MinAmmo 0;
 		ZetaWeapon.AltMinAmmo 0;
-        ZetaWeapon.AmmoUse 1;
-        ZetaWeapon.AltAmmoUse 1;
+		ZetaWeapon.AmmoUse 1;
+		ZetaWeapon.AltAmmoUse 1;
 		ZetaWeapon.AmmoType "Clip";
 		ZetaWeapon.AltAmmoType "Clip";
 	}
 	
 	static double RandomAngle(double range, double pivot = 0)
 	{
-        return FRandom(-range, range) + pivot;
+		return FRandom(-range, range) + pivot;
 	}
 
 	virtual bool IsPickupOf(Weapon other)
@@ -97,9 +97,9 @@ class ZetaWeapon : Actor
 	
 	virtual bool CanAltFire(Actor shooter, bool bUseAmmo = false)
 	{
-        if ( !bHasAltFire(shooter) )
-            return false;
-    
+		if ( !bHasAltFire(shooter) )
+			return false;
+	
 		Inventory inv = shooter.FindInventory(altammotype);
 		
 		if ( inv == null )
