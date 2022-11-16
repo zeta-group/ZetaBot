@@ -1870,17 +1870,20 @@ class ZTBotController : Actor {
 			}
 		}
 
-		if (commander == null && bstate != BS_HUNTING) { // wander around
-			if (currNode == null)
-				SetCurrentNode(ClosestVisibleNode(possessed));
+		if (currNode == null) {
+			SetCurrentNode(ClosestVisibleNode(possessed));
+		}
 
+		if (commander == null) { // wander around
 			DodgeAndUse();
 
-			if (currNode != null)
+			if (currNode != null) {
 				navDest = currNode.RandomNeighbor();
+			}
 
-			else
+			else {
 				navDest = null;
+			}
 
 			if (currNode != null && possessed.Distance2D(currNode) < 100 && navDest != null) {
 				MoveToward(navDest, 10); // wander to this random 'neighboring' node
@@ -2032,6 +2035,10 @@ class ZTBotController : Actor {
 
 		if (currNode == null || possessed.Distance2D(currNode) > 200 || !possessed.CheckSight(currNode)) {
 			SetCurrentNode(ClosestVisibleNode(possessed));
+
+			if ((currNode == null || possessed.Distance2D(currNode) > 400 || (!possessed.CheckSight(currNode) && possessed.Distance2D(currNode) > 64)) && CVar.FindCVar('zb_autonodes').GetBool()) {
+				SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL, possessed.angle));
+			}
 		}
 
 		if (thinkTimer > 0) {
@@ -2100,62 +2107,28 @@ class ZTBotController : Actor {
 			MoveToward(currNode, 0.35);
 		}
 
-		if (bstate != BS_ATTACKING) {
-			if (bstate == BS_HUNTING)
+		switch (bstate) {
+			case BS_HUNTING:
 				Subroutine_Hunt();
+				break;
 
+			case BS_FLEEING:
+				Subroutine_Flee();
+				break;
+
+			case BS_ATTACKING:
+				Subroutine_Attack();
+				break;
+
+			case BS_WANDERING:
+				Subroutine_Wander();
+				break;
+		}
+
+		if (bstate != BS_ATTACKING) {
 			if (bstate != BS_FLEEING)
 				RefreshEnemy();
-
-			if (navDest != null) {
-				if (bstate == BS_WANDERING || bstate == BS_FOLLOWING)
-					BotChat("IDLE", 2.25 / 85); // talk
-
-				if (currNode != null && possessed.Distance2D(currNode) > 160 && possessed.Distance2D(navDest) > navDest.Distance2D(currNode) && bstate != BS_WANDERING)
-					SmartMove(currNode); // move to current node if too far
-
-				else if (possessed.Distance3D(navDest) > 100) {
-					if (bstate != BS_WANDERING || possessed.Distance3D(navDest) < 350)
-						SmartMove(navDest); // move to destination node if not close enough
-
-					else
-						navDest = null;
-				}
-
-				else {
-					if (bstate == BS_FOLLOWING || currNode == navDest)
-						navDest = null; // reset destination node
-
-					else
-						RandomMove();
-
-					SetOrder(null);
-				}
-			}
-
-			else {
-				if (currNode != null) {
-					if (bstate != BS_WANDERING) navDest = currNode.RandomNeighbor();
-
-					if (navDest == null || bstate == BS_WANDERING) RandomMove();
-				}
-
-				if (bstate == BS_FOLLOWING)
-					Subroutine_Follow();
-
-				else if (bstate == BS_FLEEING)
-					Subroutine_Flee();
-
-				else if (bstate == BS_WANDERING)
-					Subroutine_Wander();
-			}
-		}
-
-		else Subroutine_Attack();
-
-		if ((currNode == null || possessed.Distance2D(currNode) > 300) && CVar.FindCVar('zb_autonodes').GetBool()) {
-			SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL, possessed.angle));
-		}
+		}	
 
 		if (currNode != null)
 			FireAtBarrels();
