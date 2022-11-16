@@ -1708,81 +1708,7 @@ class ZTBotController : Actor {
 			currEnemyPos = pos;
 		}
 
-		if (enemy != null && enemy.Health >= 1) { // health is integer
-			if (bstate != BS_HUNTING && !LineOfSight(enemy)) {
-				possessed.EndShoot();
-
-				if (lastEnemyPos != null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
-
-				let node = ClosestVisibleNodeAt(currEnemyPos);
-
-				if (node == null) {
-					lastEnemyPos = ZTPathNode.plopNode(currEnemyPos, ZTPathNode.NT_TARGET);
-				}
-
-				else {
-					lastEnemyPos = node;
-				}
-
-				navDest = null;
-				ConsiderSetBotState(BS_HUNTING);
-			}
-
-			else {
-				currEnemyPos = enemy.pos;
-
-				if (FRandom(0, 1) < 0.06)
-					possessed.Jump();
-
-				BotChat("ACTV", 0.05);
-
-				ZetaWeapon w = BestWeaponAllTic();
-
-				if (w == null) {
-					enemy = null;
-					goingAfter = null;
-
-					possessed.EndShoot();
-					ConsiderSetBotState(BS_WANDERING);
-				}
-
-				else {
-					if (possessed.Distance3D(enemy) > 256 + enemy.radius || w.IsMelee()) {
-						MoveToward(enemy, 0.282);
-
-						if (enemy.bShadow || enemy.CheckInventory("PowerInvisibility", 1)) {
-							angleMomentum += FRandom(-5, 5);
-						}
-					}
-
-					else if (possessed.Distance3D(enemy) < 128 + enemy.radius)
-						StepBackFrom(enemy);
-
-					RandomStrafe();
-					AimToward(enemy, 0.27, 30);
-
-					if (!LineOfSight(enemy))
-						possessed.EndShoot();
-
-					else {
-						let off = possessed.Vec2To(enemy) / possessed.Distance2D(enemy);
-						let dir = AngleToVector(possessed.angle);
-						double ddot = (off.x * dir.x) + (off.y * dir.y);
-
-						if (dDot <= 0)
-							possessed.EndShoot();
-
-						else if (FireBestWeapon())
-							possessed.BeginShoot();
-
-						else
-							possessed.EndShoot();
-					}
-				}
-			}
-		}
-
-		else {
+		if (enemy == null || enemy.Health < 1) {
 			SetOrder(null);
 			BotChat("ELIM", 0.75);
 
@@ -1790,6 +1716,82 @@ class ZTBotController : Actor {
 
 			possessed.EndShoot();
 			ConsiderSetBotState(BS_WANDERING);
+		}
+
+		if (!LineOfSight(enemy)) {
+			possessed.endshoot();
+
+			if (lastenemypos != null && lastenemypos.nodetype == ztpathnode.nt_target) lastenemypos.destroy();
+
+			let node = closestvisiblenodeat(currenemypos);
+
+			if (node == null || node.Distance3D(enemy) > 100) {
+				lastenemypos = ztpathnode.plopnode(currenemypos, ztpathnode.nt_target);
+			}
+
+			else {
+				lastenemypos = node;
+			}
+
+			navdest = null;
+			ConsiderSetBotState(BS_HUNTING);
+
+			return;
+		}
+
+		currEnemyPos = enemy.pos;
+
+		if (FRandom(0, 1) < 0.06)
+			possessed.Jump();
+
+		BotChat("ACTV", 0.05);
+
+		ZetaWeapon w = BestWeaponAllTic();
+
+		if (w == null) {
+			enemy = null;
+			goingAfter = null;
+
+			possessed.EndShoot();
+			ConsiderSetBotState(BS_WANDERING);
+
+			return;
+		}
+
+		if (possessed.Distance3D(enemy) > 256 + enemy.radius || w.IsMelee()) {
+			MoveToward(enemy, 0.282);
+
+			if (enemy.bShadow || enemy.CheckInventory("PowerInvisibility", 1)) {
+				angleMomentum += FRandom(-5, 5);
+			}
+		}
+
+		else if (possessed.Distance3D(enemy) < 128 + enemy.radius) {
+			StepBackFrom(enemy);
+		}
+
+		RandomStrafe();
+		AimToward(enemy, 0.27, 30);
+
+		if (!LineOfSight(enemy)) {
+			possessed.EndShoot();
+			return;
+		}
+
+		let off = possessed.Vec2To(enemy) / possessed.Distance2D(enemy);
+		let dir = AngleToVector(possessed.angle);
+		double ddot = (off.x * dir.x) + (off.y * dir.y);
+
+		if (dDot <= 0) {
+			possessed.EndShoot();
+		}
+
+		else if (FireBestWeapon()) {
+			possessed.BeginShoot();
+		}
+
+		else {
+			possessed.EndShoot();
 		}
 	}
 
