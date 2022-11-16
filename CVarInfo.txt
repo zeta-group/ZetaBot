@@ -14,6 +14,7 @@ server bool zb_alsocooprespawn = false;
 server bool zb_respawn = true;
 server bool zb_autonoderespawn = true;
 server bool zb_anynoderespawn = true;
+server bool zb_balanceteams = true;
 server float zb_talkfrequency = 1;
 server string zb_nodevar = "nodelist";
 server bool zb_noidletalk = false;

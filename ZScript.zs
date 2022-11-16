@@ -628,21 +628,18 @@ class ZTBotController : Actor {
 		navDest = null;
 	}
 
-	const numTeams = 11;
+	const numTeams = 8;
 
 	static const String teamNames[/* 11 */] = {
 		// for deathmatch or teamplay
-		"Red",
 		"Blue",
+		"Red",
 		"Green",
 		"Gold", // yellow
 		"Black",
 		"White"
 		"Orange",
-		"Purple",
-		"Cyan",
-		"Gray",
-		"Brown"
+		"Purple"
 	};
 
 	bool IsSameTeam(Actor Other) {
@@ -703,7 +700,56 @@ class ZTBotController : Actor {
 		}
 	}
 
+	int PickBalancedTeams(bool bCVarCap) {
+		int upperCap = bCVarCap ? (CVar.FindCVar("zb_maxteams").GetInt()) : numTeams;
+
+		Array<int> teamCounts;
+
+		for (uint i = 0; i < numteams; i++) {
+			teamCounts.Push(0);
+		}
+
+		ThinkerIterator iter   = ThinkerIterator.Create("ZetaBotPawn", STAT_DEFAULT);
+		ThinkerIterator iter2  = ThinkerIterator.Create("PlayerPawn", STAT_PLAYER);
+
+		ZetaBotPawn zbp;
+		PlayerPawn pp;
+
+		while (zbp = ZetaBotPawn(iter.Next())) {
+			if (zbp.cont) {
+				teamCounts[zbp.cont.myTeam]++;
+			}
+		}
+
+		while (pp = PlayerPawn(iter2.Next())) {
+			if (pp.player) {
+				teamCounts[pp.player.GetTeam() - 1]++;
+			}
+		}
+
+		int lowest = -1;
+
+		Array<int> needyTeams;
+
+		for (int i = 0; i < teamCounts.Size(); i++) {
+			if (lowest == -1 || teamCounts[i] < lowest) {
+				needyTeams.Clear();
+				lowest = teamCounts[i];
+			}
+
+			if (teamCounts[i] == lowest) {
+				needyTeams.Push(i);
+			}
+		}
+
+		return needyTeams[Random(0, needyTeams.Size() - 1)];
+	}
+
 	int PickTeam(bool bCVarCap) {
+		if (CVar.FindCVar("zb_balanceteams").GetBool()) {
+			return PickBalancedTeams(bCVarCap);
+		}
+
 		return Random(0, bCVarCap ? (CVar.FindCVar("zb_maxteams").GetInt() - 1) : numTeams - 1);
 	}
 
