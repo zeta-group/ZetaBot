@@ -598,7 +598,7 @@ class ZTPathNode : ZTPositionMarker
 			return res;
 		}
 
-		Array<double> icosts;
+		Array<double> icosts, totcosts;
 		Array<ZTPathNode> cameFrom;
 		PriorityQueue openSet = PriorityQueue.Make("ZTPathNodeHasher", numBuckets);
 		Array<bool> closedSet;
@@ -643,33 +643,44 @@ class ZTPathNode : ZTPositionMarker
 				ZTPathNode neigh = ZTPathNode(nb.get(i));
 				//DebugLog(LT_VERBOSE, String.Format("+-+-- Considering #%i's neighbor: %s", current.id, neigh.NodeName()));
 
-				if (neigh != current && (closedSet.Size() <= neigh.id || !closedSet[neigh.id]))
+				if (neigh == current) {
+					continue;
+				}
+
+				if (closedSet.Size() > neigh.id && closedSet[neigh.id]) {
+					continue;
+				}
+
+				double icost = thisICost + current.Distance3D(neigh) + current.specialCost(neigh, goal, traveller, controller);
+				double cost = neigh.Distance3D(goal) + icost;
+
+				if (neigh.id < totCosts.Size() && totCosts[neigh.id] != -1.0 && totCosts[neigh.id] <= cost) {
+					continue;
+				}
+
+				while (cameFrom.Size() <= neigh.id) {
+					cameFrom.push(null);
+				}
+
+				cameFrom[neigh.id] = current;
+		
+				while (icosts.Size() <= neigh.id) {
+					icosts.Push(-1.0);
+				}
+
+				while (totcosts.Size() <= neigh.id) {
+					totcosts.Push(-1.0);
+				}
+
+				icosts[neigh.id] = icost;
+				totcosts[neigh.id] = cost;
+				openSet.add(neigh, cost);
+
+				if (neigh == goal)
 				{
-					double icost = thisICost + current.Distance3D(neigh);
-					double cost = neigh.Distance3D(goal) + icost + current.specialCost(neigh, goal, traveller, controller);
-
-					if (openSet.has(neigh) && openSet.GetCost(neigh) <= cost) {
-						continue;
-					}
-
-					while (cameFrom.Size() <= neigh.id) {
-						cameFrom.push(null);
-					}
-					cameFrom[neigh.id] = current;
-			
-					while (icosts.Size() <= neigh.id) {
-						icosts.Push(0.0);
-					}
-
-					icosts[neigh.id] = icost;
-					openSet.add(neigh, cost);
-
-					if (neigh == goal)
-					{
-						DebugLog(LT_VERBOSE, String.Format("  '-- # Goal node #%i found!", neigh.id));
-						foundGoal = true;
-						break;
-					}
+					DebugLog(LT_VERBOSE, String.Format("  '-- # Goal node #%i found!", neigh.id));
+					foundGoal = true;
+					break;
 				}
 			}
 
