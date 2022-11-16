@@ -1488,7 +1488,10 @@ class ZTBotController : Actor {
 			if (bstate == BS_HUNTING) {
 				if (lastEnemyPos == null) {
 					ConsiderSetBotState(BS_WANDERING);
-					return;
+
+					if (bstate != BS_HUNTING) {
+						return;
+					}
 				}
 
 				double lastPosSqDist = ((possessed.pos.x - lastEnemyPos.pos.x) * (possessed.pos.x - lastEnemyPos.pos.x))
