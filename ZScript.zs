@@ -832,12 +832,29 @@ class ZTBotController : Actor {
 				if (!(cur = Actor(iter2.Next())))
 					break;
 
-			if (cur == null || cur == from)													continue;
-			if (!(cur.bISMONSTER || cur.CheckClass("PlayerPawn", match_superclass: true)))	continue;
-			if (cur.Health <= 0)															continue;
-			if (cur.bInvisible)																continue;
-			if (!(from.CheckSight(cur) && LineOfSight(cur, from)))							continue;
-			if (!IsEnemy(from, cur))														continue;
+			if (cur == null || cur == from) {
+				continue;
+			}
+
+			if (!(cur.bISMONSTER || cur.CheckClass("PlayerPawn", match_superclass: true))) {
+				continue;
+			}
+
+			if (cur.Health <= 0) {
+				continue;
+			}
+
+			if (cur.bInvisible) {
+				continue;
+			}
+
+			if (!(from.CheckSight(cur) && LineOfSight(cur, from))) {
+				continue;
+			}
+
+			if (!IsEnemy(from, cur)){
+				continue;
+			}
 
 			res.Push(cur);
 		}
