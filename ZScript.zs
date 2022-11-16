@@ -33,7 +33,7 @@ class LineCrossTracer : LineTracer {
 	}
 }
 
-class ZTBotOrder : Actor {
+class ZTBotOrder {
 	Actor orderer;
 	Actor lookedAt;
 	String v_imperative, v_past, v_continuous;
@@ -62,16 +62,6 @@ class ZTBotOrder : Actor {
 		"following",
 		"chickening"
 	};
-
-	override void BeginPlay() {
-		lookedAt = null;
-
-		v_imperative = "do";
-		v_past = "did";
-		v_continuous = "doing";
-
-		orderType = ZTBotController.BS_WANDERING;
-	}
 
 	void Apply(ZTBotController bot) {
 		if (lookedAt == null && orderType != ZTBotController.BS_WANDERING) {
@@ -110,13 +100,49 @@ class ZTBotOrder : Actor {
 	}
 }
 
-class ZTBotOrderCode : Actor {
+class ZTBotOrderCode: Actor {
 	// Sets all bots in a 512 units radius
 	// to be of an order of a specific type.
 
+	enum SubjectType {
+		ST_LOOKED,
+		ST_SELF
+	};
+
+	SubjectType mySubject;
 	uint orderType;
 
 	property OrderType: orderType;
+	property SubjectType: mySubject;
+
+	default {
+		SubjectType ST_LOOKED;
+	}
+
+	Actor FindLookedAt() {
+		FLineTraceData td;
+
+		Owner.LineTrace(
+			Owner.angle,
+			Owner.radius + 512,
+			0,
+			flags: TRF_THRUBLOCK | TRF_THRUHITSCAN,
+			offsetz: Owner.height - 24,
+			data: td
+		);
+
+		return td.hitActor;
+	}
+
+	Actor FindSubject() {
+		switch (mySubject) {
+			case ST_LOOKED:
+				return FindLookedAt();
+
+			case ST_SELF:
+				return Owner;
+		}
+	}
 
 	override void PostBeginPlay() {
 		// Find owner
@@ -135,25 +161,15 @@ class ZTBotOrderCode : Actor {
 			return;
 		}
 
-		// Find object looked at by owner
-		FLineTraceData td;
-		Actor lookedAt = null;
+		// Find subject of the order
+		let subject = FindSubject();
 
-		Owner.LineTrace(
-			Owner.angle,
-			Owner.radius + 512,
-			0,
-			flags: TRF_THRUBLOCK | TRF_THRUHITSCAN,
-			offsetz: Owner.height - 24,
-			data: td
-		);
-
-		if (td.hitActor) {
-			lookedAt = td.hitActor;
+		if (subject == null && orderType != ZTBotController.BS_WANDERING) {
+			return;
 		}
 
-		// Mke order and give it to all bots in radius
-		ZTBotOrder order = ZTBotOrder.Make(Owner, lookedAt, orderType);
+		// Make order and give it to all bots in radius
+		ZTBotOrder order = ZTBotOrder.Make(Owner, subject, orderType);
 
 		ThinkerIterator botIter = ThinkerIterator.Create("ZetaBotPawn", STAT_DEFAULT);
 		ZetaBotPawn zbp;
@@ -195,6 +211,12 @@ class ZTBotFleeOrder : ZTBotOrderCode {
 class ZTBotFollowOrder : ZTBotOrderCode {
 	Default {
 		ZTBotOrderCode.OrderType 3; // ZetaBotPawn.BS_FOLLOWING;
+	}
+}
+
+class ZTBotFollowMeOrder : ZTBotFollowOrder {
+	Default {
+		ZTBotOrderCode.SubjectType 1; // ZTBotOrderCode.ST_SELF
 	}
 }
 
