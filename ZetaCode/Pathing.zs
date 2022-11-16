@@ -883,7 +883,7 @@ class ZTPathNode : ZTPositionMarker
 }
 
 class ZTNodeSpawner : Actor abstract {
-	const summonDist = 50;
+	const summonDist = 56;
 
 	abstract void ConfigNode(ZTPathNode node);
 
