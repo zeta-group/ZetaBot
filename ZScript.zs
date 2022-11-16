@@ -33,6 +33,41 @@ class LineCrossTracer : LineTracer {
 	}
 }
 
+mixin class DebugLog {
+	enum LogType {
+		LT_ERROR = 0,
+		LT_WARNING,
+		LT_INFO,
+		LT_VERBOSE
+	};
+
+	void DebugLog(LogType kind, String msg) {
+		if (CVar.FindCVar("zb_debug").GetInt() > 0) {
+			String logHeader = "";
+
+			if (kind == LT_ERROR)
+				logHeader = "\cr[ERROR]";
+
+			else if (kind == LT_WARNING)
+				logHeader = "\cf[WARNING]";
+
+			else if (kind == LT_INFO)
+				logHeader = "\ch[INFO]";
+
+			else if (kind == LT_VERBOSE) {
+				if (CVar.FindCVar("zb_debug").GetInt() > 1)
+					logHeader =	"\cd[VERBOSE]";
+
+				else
+					return;
+			}
+
+			A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
+		}
+	}
+
+}
+
 class ZTBotOrder play {
 	Actor orderer;
 	Actor lookedAt;
@@ -313,37 +348,7 @@ class ZTBotController : Actor {
 		BS_FLEEING
 	};
 
-	enum LogType {
-		LT_ERROR = 0,
-		LT_WARNING,
-		LT_INFO,
-		LT_VERBOSE
-	};
-
-	void DebugLog(LogType kind, String msg) {
-		if (CVar.FindCVar("zb_debug").GetInt() > 0) {
-			String logHeader = "";
-
-			if (kind == LT_ERROR)
-				logHeader = "\cr[ERROR]";
-
-			else if (kind == LT_WARNING)
-				logHeader = "\cf[WARNING]";
-
-			else if (kind == LT_INFO)
-				logHeader = "\ch[INFO]";
-
-			else if (kind == LT_VERBOSE) {
-				if (CVar.FindCVar("zb_debug").GetInt() > 1)
-					logHeader =	"\cd[VERBOSE]";
-
-				else
-					return;
-			}
-
-			//A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
-		}
-	}
+	mixin DebugLog;
 
 	int frags;
 	ZetaBotPawn possessed;
@@ -2471,37 +2476,7 @@ class ZTBotController : Actor {
 }
 
 class ZetaBot : Actor {
-	enum LogType {
-		LT_ERROR = 0,
-		LT_WARNING,
-		LT_INFO,
-		LT_VERBOSE
-	};
-
-	void DebugLog(LogType kind, String msg) {
-		if (CVar.FindCVar("zb_debug").GetInt() > 0) {
-			String logHeader = "";
-
-			if (kind == LT_ERROR)
-				logHeader = "\cr[ERROR]";
-
-			else if (kind == LT_WARNING)
-				logHeader = "\cf[WARNING]";
-
-			else if (kind == LT_INFO)
-				logHeader = "\ch[INFO]";
-
-			else if (kind == LT_VERBOSE) {
-				if (CVar.FindCVar("zb_debug").GetInt() > 1)
-					logHeader =	"\cd[VERBOSE]";
-
-				else
-					return;
-			}
-
-			A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
-		}
-	}
+	mixin DebugLog;
 
 	override void PostBeginPlay() {
 		Super.PostBeginPlay();
@@ -2548,37 +2523,7 @@ class ZetaBot : Actor {
 }
 
 class ZetaSpirit : Actor {
-	enum LogType {
-		LT_ERROR = 0,
-		LT_WARNING,
-		LT_INFO,
-		LT_VERBOSE
-	};
-
-	void DebugLog(LogType kind, String msg) {
-		if (CVar.FindCVar("zb_debug").GetInt() > 0) {
-			String logHeader = "";
-
-			if (kind == LT_ERROR)
-				logHeader = "\cr[ERROR]";
-
-			else if (kind == LT_WARNING)
-				logHeader = "\cf[WARNING]";
-
-			else if (kind == LT_INFO)
-				logHeader = "\ch[INFO]";
-
-			else if (kind == LT_VERBOSE) {
-				if (CVar.FindCVar("zb_debug").GetInt() > 1)
-					logHeader =	"\cd[VERBOSE]";
-
-				else
-					return;
-			}
-
-			A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
-		}
-	}
+	mixin DebugLog;
 
 	override void PostBeginPlay() {
 		Super.PostBeginPlay();
@@ -2673,37 +2618,7 @@ class BotName : Inventory {
 	bool stopped;
 	Actor lastShown;
 
-	enum LogType {
-		LT_ERROR = 0,
-		LT_WARNING,
-		LT_INFO,
-		LT_VERBOSE
-	};
-
-	void DebugLog(LogType kind, String msg) {
-		if (CVar.FindCVar("zb_debug").GetInt() > 0) {
-			String logHeader = "";
-
-			if (kind == LT_ERROR)
-				logHeader = "\cr[ERROR]";
-
-			else if (kind == LT_WARNING)
-				logHeader = "\cf[WARNING]";
-
-			else if (kind == LT_INFO)
-				logHeader = "\ch[INFO]";
-
-			else if (kind == LT_VERBOSE) {
-				if (CVar.FindCVar("zb_debug").GetInt() > 1)
-					logHeader =	"\cd[VERBOSE]";
-
-				else
-					return;
-			}
-
-			A_Log("\cq[ZetaBot] "..logHeader.." "..msg);
-		}
-	}
+	mixin DebugLog;
 
 	override void BeginPlay() {
 		super.BeginPlay();
