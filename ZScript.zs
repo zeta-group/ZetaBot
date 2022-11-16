@@ -630,7 +630,7 @@ class ZTBotController : Actor {
 
 	const numTeams = 8;
 
-	static const String teamNames[/* 11 */] = {
+	static const String teamNames[/* 8 */] = {
 		// for deathmatch or teamplay
 		"Blue",
 		"Red",
@@ -658,32 +658,26 @@ class ZTBotController : Actor {
 	}
 
 	// 3 per team
-	static const float teamColors[/* 33 */] = {
-		1.0, 0.1, 0.1,
+	static const float teamColors[/* 24 */] = {
 		0.1, 0.1, 1.0,
+		1.0, 0.1, 0.1,
 		0.1, 1.0, 0.1,
 		0.9, 0.8, 0.1,
 		0.2, 0.2, 0.25,
 		0.95, 0.95, 0.9,
 		0.9, 0.4, 0.1,
-		0.7, 0.1, 0.8,
-		0.2, 0.7, 0.85,
-		0.5, 0.45, 0.4,
-		0.5, 0.4, 0.1
+		0.7, 0.1, 0.8
 	};
 
-	static const String teamColorsHex[/* 11 */] = {
-		"F00804",
+	static const String teamColorsHex[/* 8 */] = {
 		"0804F0",
+		"F00804",
 		"08F004",
 		"F0E004",
 		"101016",
 		"F4F4EC",
 		"E87018",
-		"C820E8",
-		"30A0C8",
-		"807060",
-		"806810"
+		"C820E8"
 	};
 
 	int myTeam;
@@ -723,7 +717,7 @@ class ZTBotController : Actor {
 
 		while (pp = PlayerPawn(iter2.Next())) {
 			if (pp.player) {
-				teamCounts[pp.player.GetTeam() - 1]++;
+				teamCounts[pp.player.GetTeam()]++;
 			}
 		}
 
@@ -731,7 +725,7 @@ class ZTBotController : Actor {
 
 		Array<int> needyTeams;
 
-		for (int i = 0; i < teamCounts.Size(); i++) {
+		for (int i = 0; i < upperCap; i++) {
 			if (lowest == -1 || teamCounts[i] < lowest) {
 				needyTeams.Clear();
 				lowest = teamCounts[i];
