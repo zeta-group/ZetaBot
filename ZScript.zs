@@ -2411,6 +2411,62 @@ class BotName : Inventory {
 		return "a "..Other.GetClassName();
 	}
 
+	String DescribeCommander(ZTBotController cont) {
+		if (cont.commander == null) {
+			return "\crNo commander";
+		}
+
+		return "\cyCommander: \cw"..ActorName(cont.commander);
+	}
+
+	String DescribeTeam(ZTBotController cont) {
+		if (CVar.FindCVar("teamplay").GetInt() < 1) {
+			return "";
+		}
+
+		return "\crTeam: "..ZTBotController.teamNames[cont.myTeam];
+	}
+
+	String DescribeDebug(ZTBotController cont) {
+		if (CVar.FindCVar("zb_debug").GetInt() < 2) {
+			return "";
+		}
+
+		return String.Format("\coCurrently at node \cw#%i\co%s",
+			cont.currNode != null ? cont.currNode.id : 0,
+			cont.navDest == null ? "" : " and moving towards #"..cont.navDest.id
+		);
+	}
+
+	String DescribeTask(ZTBotController cont) {
+		if (cont.bstate == ZTBotController.BS_ATTACKING && cont.enemy != null) {
+			ZetaWeapon bestWeap;
+			bool _bAltFire;
+
+			[ bestWeap, _bAltFire ] = cont.BestWeaponAllTic();
+
+			return String.Format("\crAttacking \cw%s\cr!",
+				ActorName(cont.enemy)
+			);
+		}
+
+		else {
+			return "\cc"..ZTBotController.BStateNames[cont.bstate];
+		}
+	}
+
+	String DescribeOrders(ZTBotController cont) {
+		// Skips the order target stuff - usually redundant with the task (aka bot state), anyways.
+
+		if (cont.currentOrder == null) {
+			return "\ccNo orders\cr";
+		}
+
+		else {
+			return String.format("\cr Ordered by \cw%s", cont.currentOrder.orderer);
+		}
+	}
+
 	override void Tick() {
 		bool showing = false;
 
@@ -2437,28 +2493,14 @@ class BotName : Inventory {
 
 				countDown = 2;
 
-				Owner.A_Print("\ci"..closest.cont.myName.."\n\cg"..closest.Health.." HP"..(
-						( (CVar.FindCVar("teamplay").GetInt() >= 1) )
-						? "\n\crTeam: \cg"..ZTBotController.teamNames[closest.cont.myTeam]
-						: ""
-					)..(
-						(
-							(closest.cont.bstate != ZTBotController.BS_ATTACKING || closest.cont.enemy == null)
-							? "\n\cc"..ZTBotController.BStateNames[closest.cont.bstate]
-							: "\n\n\crAttacking "..ActorName(closest.cont.enemy).." with "..closest.cont.enemy.health.." HP!"
-						).."\n\n"..(
-							closest.cont.currentOrder == null ? "\ccNo orders\cr"
-							: (
-								String.format("\crOrdered by %s; currently \cc", ActorName(closest.cont.currentOrder.orderer))
-								..(closest.cont.currentOrder.v_continuous)..(!(closest.cont.currentOrder.lookedAt != null && closest.cont.currentOrder.orderType != ZTBotController.BS_WANDERING)
-								? ""
-								: String.Format(" %s with %d HP", ActorName(closest.cont.currentOrder.lookedAt), closest.cont.enemy.health)
-							).."...\cr"
-						).."\n"..(
-							closest.cont.commander == null ? "\crNo commander"
-							: "Commander: "..ActorName(closest.cont.commander)
-						)
-					)
+				Owner.A_Print(String.Format("\ci%s\n\cg\%i HP\n\cr%s\n%s\n\n%s\n\n%s\n\n%s",
+					closest.cont.myName,
+					closest.Health,
+					DescribeTeam(closest.cont),
+					DescribeTask(closest.cont),
+					DescribeOrders(closest.cont),
+					DescribeCommander(closest.cont),
+					DescribeDebug(closest.cont)
 				));
 
 				lastShown = closest;
