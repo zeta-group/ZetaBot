@@ -242,11 +242,16 @@ class WeaponRating : Actor {
 
 class NumBots : Thinker {
 	uint value;
+	uint counter;
 
 	NumBots Init() {
 		ChangeStatNum(STAT_INFO);
 		value = 0;
 		return self;
+	}
+
+	static uint Count() {
+		return Get().counter++;
 	}
 
 	static NumBots Get() {
@@ -261,18 +266,6 @@ class NumBots : Thinker {
 }
 
 class ZTBotController : Actor {
-	static uint MaxID() {
-		ThinkerIterator it = ThinkerIterator.Create("ZTBotController", STAT_DEFAULT);
-		uint resMax = 0;
-		ZTBotController p;
-
-		while (p = ZTBotController(it.Next()))
-			if (p.BotID > resMax)
-				resMax = p.BotID;
-
-		return resMax;
-	}
-
 	enum BotState {
 		BS_WANDERING = 0,
 		BS_HUNTING,
@@ -432,7 +425,7 @@ class ZTBotController : Actor {
 		debugCount = 0;
 		retargetCount = 8;
 		NumBots.Get().value++;
-		BotID = MaxID();
+		BotID = NumBots.Count();
 		age = 0;
 		lastShot = -9999;
 		numShoots = 0;
