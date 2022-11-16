@@ -868,21 +868,27 @@ class ZTBotController : Actor {
 		Actor cur			  = null;
 
 		while (cur = Actor(iter.Next())) {
-			Vector2 off = possessed.Vec2To(cur);
-
-			double pdot = 1;
-
-			if (possessed.Distance2D(cur) > 0) {
-				off.x /= possessed.Distance2D(cur);
-				off.y /= possessed.Distance2D(cur);
-
-				Vector2 avec = AngleToVector(possessed.angle);
-
-				double pdot = off.x * avec.x + off.y * avec.y;
+			if (!cur) {
+				continue;
 			}
 
-			if (cur && cur != from && cur.Health > 0 && from.CheckSight(cur) && (((ZetaBotPawn(cur) || PlayerPawn(cur)) && !isEnemy(from, cur))) && pdot > 0.3)
-				res.Push(cur);
+			if (cur == from) {
+				continue;
+			}
+
+			if (cur.Health <= 0) {
+				continue;
+			}
+
+			if (!(from.CheckSight(cur) && LineOfSight(cur))) {
+				continue;
+			}
+
+			if (IsEnemy(from, cur)) {
+				continue;
+			}
+
+			res.Push(cur);
 		}
 
 		return res;
