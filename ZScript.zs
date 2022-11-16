@@ -183,7 +183,7 @@ class ZTBotOrderCode: Actor {
 	}
 
 	override void PostBeginPlay() {
-		pos += Vec3Angle(-56, angle);
+		SetXYZ(pos + Vec3Angle(-56, angle));
 
 		FindOwner();
 
@@ -1990,6 +1990,25 @@ class ZTBotController : Actor {
 
 	int thinkTimer;
 
+	bool PlopTeleportNodes(Vector3 lastPos, double lastAngle = 0.0) {
+		if (!CVar.FindCVar("zb_autonodes").GetBool() || !CVar.FindCVar("zb_autonodetele").GetBool()) {
+			return false;
+		}
+
+		if (currnode != null && currnode.nodeType == ZTPathNode.NT_TELEPORT_SOURCE && (currNode.pos.xy - lastPos.xy).Length() < 200) {
+			return false;
+		}
+
+		let nodefrom = ZTPathNode.plopNode(lastPos, ZTPathNode.NT_TELEPORT_SOURCE, lastAngle);
+		let nodeinto = ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL, possessed.angle);
+
+		nodefrom.assoc_id = nodeinto.id;
+
+		SetCurrentNode(nodeinto);
+
+		return true;
+	}
+
 	void CrossActivate() {
 		// activate p-cross line actions
 
@@ -2011,6 +2030,9 @@ class ZTBotController : Actor {
 			for (int i = 0; i < tracer.crossLines.Size(); i++) {
 				let l = tracer.crossLines[i];
 
+				Vector3 lastPos = possessed.pos;
+				double lastAngle = possessed.angle;
+
 				DebugLog(LT_VERBOSE, "["..myName.." CROSS LOGS] Activating cross line! Line special: "..l.Special);
 				l.Activate(possessed, 0, SPAC_Cross);
 
@@ -2025,6 +2047,11 @@ class ZTBotController : Actor {
 					l.Args[3],
 					l.Args[4]
 				);
+
+				if ((possessed.pos.xy - lastPos.xy).Length() > 256) {
+					PlopTeleportNodes(lastPos, lastAngle);
+					return;
+				}
 			}
 		}
 	}
@@ -2073,7 +2100,7 @@ class ZTBotController : Actor {
 		if (currNode == null || possessed.Distance2D(currNode) > 200 || !possessed.CheckSight(currNode)) {
 			SetCurrentNode(ClosestVisibleNode(possessed));
 
-			if ((currNode == null || possessed.Distance2D(currNode) > 400 || (!possessed.CheckSight(currNode) && possessed.Distance2D(currNode) > 64)) && CVar.FindCVar('zb_autonodes').GetBool()) {
+			if ((currNode == null || possessed.Distance2D(currNode) > 400 || (!possessed.CheckSight(currNode) && possessed.Distance2D(currNode) > 64)) && CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar("zb_autonodenormal").GetBool()) {
 				SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_NORMAL, possessed.angle));
 			}
 		}
