@@ -1911,7 +1911,7 @@ class ZTBotController : Actor {
 		if (bclosest != null) {
 			AimToward(bclosest, 15);
 
-			if (possessed.Distance2D(currNode) > 100 && CVar.FindCVar('zb_autonodes').GetBool()) {
+			if ((currNode.nodeType != ZTPathnode.NT_SHOOT || possessed.Distance2D(currNode) > 40) && CVar.FindCVar('zb_autonodes').GetBool()) {
 				SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_SHOOT, possessed.AngleTo(bclosest)));
 
 				if (currNode != null)
