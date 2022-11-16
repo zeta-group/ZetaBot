@@ -715,7 +715,7 @@ class ZTBotController : Actor {
 		PlayerPawn pp;
 
 		while (zbp = ZetaBotPawn(iter.Next())) {
-			if (zbp.cont) {
+			if (zbp.cont && zbp.cont != self) {
 				teamCounts[zbp.cont.myTeam]++;
 			}
 		}
@@ -740,6 +740,14 @@ class ZTBotController : Actor {
 				needyTeams.Push(i);
 			}
 		}
+
+		String needyTeamsLog = "Needy teams: ";
+
+		for (int i = 0; i < needyTeams.Size(); i++) {
+			needyTeamsLog.AppendFormat("%s%s", teamNames[needyTeams[i]], i < (needyTeams.size() - 1) ? ", " : "");
+		}
+
+		DebugLog(LT_VERBOSE, needyTeamsLog);
 
 		return needyTeams[Random(0, needyTeams.Size() - 1)];
 	}
