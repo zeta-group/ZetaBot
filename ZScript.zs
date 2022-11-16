@@ -542,11 +542,9 @@ class ZTBotController : Actor {
 		aimAtAngle(possessed.AngleTo(other), speed, threshold);
 	}
 
-	void aimAtAngle(double angle, double speed, double threshold = 5) {
-		possessed.angle += DeltaAngle(possessed.angle, angle) * speed / 100;
-
-		if (absangle(angle, possessed.angle) <= threshold)
-			possessed.angle = angle;
+	void aimAtAngle(double angle, double speed, double randRange = 3, double threshold = 5) {
+		possessed.angle += DeltaAngle(possessed.angle, angle) * speed / 35.0 + FRandom(-randRange, randRange) / (35.0 + AbsAngle(possessed.angle, angle) / 15);
+		angleMomentum += (angle - possessed.angle) / 3.0;
 	}
 
 	void AimAwayFrom(Actor other, double speed, double threshold = 5) {
@@ -980,8 +978,9 @@ class ZTBotController : Actor {
 				MoveToward(toward, 20);
 		}
 
-		else
+		else {
 			angleMomentum += FRandom(-0.01, 0.01);
+		}
 
 			if (FRandom(0, 99.9) < 10)
 				RandomStrafe();
