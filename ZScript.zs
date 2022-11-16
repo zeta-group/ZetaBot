@@ -2537,7 +2537,10 @@ class BotName : Inventory {
 		}
 
 		else {
-			return String.format("\cr Ordered by \cw%s", cont.currentOrder.orderer);
+			return String.format("\cr Ordered by \cw%s\cr to \cw%s \co%s",
+				ActorName(cont.currentOrder.orderer),
+				cont.currentOrder.v_imperative,
+				ActorName(cont.currentOrder.lookedAt));
 		}
 	}
 
