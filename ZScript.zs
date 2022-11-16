@@ -1536,7 +1536,7 @@ class ZTBotController : Actor {
 						if (navDest == null) {
 							DebugLog(LT_INFO, "No path found to last enemy pos! Going back to wandering.");
 
-							if (lastEnemyPos == null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) {
+							if (lastEnemyPos != null && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) {
 								lastEnemyPos.Destroy();
 							}
 
