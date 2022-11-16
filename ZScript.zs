@@ -1419,7 +1419,7 @@ class ZTBotController : Actor {
 					}
 
 					else if (pathCountdown <= 0) {
-						ActorList path = navDest.findPathTo(ClosestNode(goingAfter), possessed);
+						ActorList path = navDest.findPathTo(ClosestVisibleNode(goingAfter), self);
 
 						if (path != null && path.Length() > 1) {
 							navDest = ZTPathNode(path.get(0));
