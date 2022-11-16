@@ -1859,7 +1859,7 @@ class ZTBotController : Actor {
 		ZTBotOrder myOrder = ZTBotOrder.Make(
 			possessed,
 			(bstate == BS_FOLLOWING) ? goingAfter : (!enemy ? Actor(possessed) : enemy),
-			(bstate == BS_ATTACKING) ? BS_HUNTING : (!enemy ? BS_FOLLOWING : bstate)
+			(!enemy) ? BS_FOLLOWING : ((bstate == BS_ATTACKING) ? BS_HUNTING : bstate)
 		);
 
 		ActorList friends = VisibleFriends(possessed);
