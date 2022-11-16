@@ -6,6 +6,7 @@ class ZetaMauler1 : ZetaWeapon
 		ZetaWeapon.MinAmmo 20;
 		ZetaWeapon.AmmoUse 20;
 		ZetaWeapon.AmmoType "EnergyPod1";
+		ZetaWeapon.WeaponName "Mauler";
 	}
 	
 	double pow(double a, uint b)

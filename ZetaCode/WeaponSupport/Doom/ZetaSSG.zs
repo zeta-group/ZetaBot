@@ -6,6 +6,7 @@ class ZetaSSG : ZetaWeapon
 		ZetaWeapon.MinAmmo 2;
 		ZetaWeapon.AmmoUse 2;
 		ZetaWeapon.AmmoType "Shell";
+		ZetaWeapon.WeaponName "Super Shotgun";
 	}
 
 	override bool IsPickupOf(Weapon other)

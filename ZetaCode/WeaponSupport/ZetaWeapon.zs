@@ -8,6 +8,7 @@ class ZetaWeapon : Actor
 	property AltAmmoType: altammotype;
 	property AmmoUse: ammouse;
 	property AltAmmoUse: altammouse;		
+	property WeaponName: weapname;
 	
 	int interval;
 	int altinterval;
@@ -17,6 +18,7 @@ class ZetaWeapon : Actor
 	string altammotype;
 	int ammouse;
 	int altammouse;
+	string weapname;
 	
 	default
 	{

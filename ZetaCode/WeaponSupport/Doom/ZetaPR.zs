@@ -5,6 +5,7 @@ class ZetaPR : ZetaWeapon
 		ZetaWeapon.FireInterval 857142;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "Cell";
+		ZetaWeapon.WeaponName "Plasma Rifle";
 	}
 
 	override bool IsPickupOf(Weapon other)

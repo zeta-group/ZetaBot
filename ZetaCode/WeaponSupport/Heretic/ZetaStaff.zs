@@ -10,6 +10,7 @@ class ZetaStaff : ZTMyWeapon {
 		ZetaWeapon.FireInterval 4000000;
 		ZetaWeapon.MinAmmo 0;
 		ZetaWeapon.AmmoUse 0;
+		ZetaWeapon.WeaponName "Staff";
 	}
 
 	override int CustomMeleeDamage() {

@@ -5,6 +5,7 @@ class ZetaFlameThrower : ZetaWeapon
 		ZetaWeapon.FireInterval 571428;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "EnergyPod";
+		ZetaWeapon.WeaponName "Flamethrower";
 	}
 
 	override bool IsPickupOf(Weapon other)

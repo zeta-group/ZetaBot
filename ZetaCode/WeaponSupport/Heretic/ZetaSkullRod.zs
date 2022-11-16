@@ -6,6 +6,7 @@ class ZetaSkullRod : ZTMyWeapon {
 
 		ZetaWeapon.FireInterval 2285714;
 		ZetaWeapon.AmmoType "SkullRodAmmo";
+		ZetaWeapon.WeaponName "Skull Rod";
 	}
 
 	override void Fire(Actor shooter, Actor target)

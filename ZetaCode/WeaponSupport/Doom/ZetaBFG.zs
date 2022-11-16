@@ -6,6 +6,7 @@ class ZetaBFG : ZetaWeapon
 		ZetaWeapon.MinAmmo 40;
 		ZetaWeapon.AmmoUse 40;
 		ZetaWeapon.AmmoType "Cell";
+		ZetaWeapon.WeaponName "BFG 9000";
 	}
 
 	override bool IsPickupOf(Weapon other)

@@ -11,6 +11,7 @@ class ZetaBlaster : ZTMyWeapon {
 		ZTMyWeapon.BulletSpreadH 5.625;
 		ZetaWeapon.FireInterval 1714285;
 		ZetaWeapon.AmmoType "BlasterAmmo";
+		ZetaWeapon.WeaponName "Blaster";
 	}
 
 	override int CustomHitscanDamage() {

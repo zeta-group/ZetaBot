@@ -5,6 +5,7 @@ class ZetaMiniMissile : ZetaWeapon
 		ZetaWeapon.FireInterval 5428571;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "MiniMissiles";
+		ZetaWeapon.WeaponName "Mini Missile Launcher";
 	}
 
 	override bool IsPickupOf(Weapon other)

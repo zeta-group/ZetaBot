@@ -3,6 +3,7 @@ class ZetaDagger : ZetaWeapon
 	default
 	{
 		ZetaWeapon.FireInterval 4857142;
+		ZetaWeapon.WeaponName "Dagger";
 	}
 
 	override bool IsPickupOf(Weapon other)

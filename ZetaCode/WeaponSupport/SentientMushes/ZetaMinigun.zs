@@ -8,6 +8,7 @@ class ZetaMinigun : ZetaWeapon
 		ZetaWeapon.AmmoType "ColtAmmo";
 		ZetaWeapon.AltMinAmmo 2;
 		ZetaWeapon.AltAmmoType "ColtAmmo";
+		ZetaWeapon.WeaponName "Minigun";
 	}
 
 	override bool IsPickupOf(Weapon other)

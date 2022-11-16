@@ -4,6 +4,8 @@ class ZetaChaingun : ZetaWeapon
 	{
 		ZetaWeapon.FireInterval 1142857;
 		ZetaWeapon.MinAmmo 1;
+		ZetaWeapon.AmmoType "Clip";
+		ZetaWeapon.WeaponName "Chaingun";
 	}
 
 	override bool IsPickupOf(Weapon other)

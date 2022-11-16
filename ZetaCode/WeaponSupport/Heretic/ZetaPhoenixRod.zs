@@ -12,6 +12,7 @@ class ZetaPhoenixRod : ZTMyWeapon {
 
 		ZetaWeapon.FireInterval 5714286;
 		ZetaWeapon.AmmoType "PhoenixRodAmmo";
+		ZetaWeapon.WeaponName "Phoenix Rod";
 	}
 
 	override void Fire(Actor shooter, Actor target)

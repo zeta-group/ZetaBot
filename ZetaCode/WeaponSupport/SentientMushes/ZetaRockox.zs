@@ -5,6 +5,7 @@ class ZetaRockox : ZetaWeapon
 		ZetaWeapon.FireInterval 3714285;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "RockoxClip";
+		ZetaWeapon.WeaponName "Rockox";
 	}
 
 	override bool IsPickupOf(Weapon other)

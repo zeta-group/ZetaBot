@@ -4,6 +4,8 @@ class ZetaPistol : ZetaWeapon
 	{
 		ZetaWeapon.FireInterval 4000000;
 		ZetaWeapon.MinAmmo 1;
+		ZetaWeapon.AmmoType "Clip";
+		ZetaWeapon.WeaponName "Pistol";
 	}
 
 	override bool IsPickupOf(Weapon other)

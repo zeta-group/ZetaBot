@@ -4,6 +4,7 @@ class ZetaChainsaw : ZetaWeapon
 	{
 		ZetaWeapon.FireInterval 2285714;
 		ZetaWeapon.AmmoUse 0;
+		ZetaWeapon.WeaponName "Chainsaw";
 	}
 
 	override bool IsPickupOf(Weapon other)

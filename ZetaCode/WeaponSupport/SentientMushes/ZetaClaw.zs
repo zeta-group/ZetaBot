@@ -6,6 +6,7 @@ class ZetaClaw : ZetaWeapon
 	{
 		ZetaWeapon.FireInterval 3142857;
 		ZetaWeapon.AltFireInterval 3142857;
+		ZetaWeapon.WeaponName "Claw";
 	}
 
 	override bool IsPickupOf(Weapon other)

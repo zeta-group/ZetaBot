@@ -6,6 +6,7 @@ class ZetaHereticCrossbow : ZTMyWeapon {
 
 		ZetaWeapon.FireInterval 6285714;
 		ZetaWeapon.AmmoType "CrossbowAmmo";
+		ZetaWeapon.WeaponName "Crossbow";
 	}
 
 	override void Fire(Actor shooter, Actor target)

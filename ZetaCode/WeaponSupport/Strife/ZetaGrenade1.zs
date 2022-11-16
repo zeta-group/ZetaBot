@@ -5,6 +5,7 @@ class ZetaGrenade1 : ZetaWeapon
 		ZetaWeapon.FireInterval 8571428;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "HEGrenadeRounds";
+		ZetaWeapon.WeaponName "Grenade Launcher (High-Explosive)";
 	}
 
 	override bool IsPickupOf(Weapon other)

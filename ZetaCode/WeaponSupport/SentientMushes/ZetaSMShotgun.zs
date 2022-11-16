@@ -5,6 +5,7 @@ class ZetaSMShotgun : ZetaWeapon
 		ZetaWeapon.FireInterval 12000000;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "ShotRifleShellClip";
+		ZetaWeapon.WeaponName "Shot Rifle";
 	}
 
 	override bool IsPickupOf(Weapon other)

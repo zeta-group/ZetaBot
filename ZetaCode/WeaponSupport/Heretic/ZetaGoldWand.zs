@@ -11,6 +11,7 @@ class ZetaGoldWand : ZTMyWeapon {
 		ZTMyWeapon.BulletSpreadH 5.625;
 		ZetaWeapon.FireInterval 3142857;
 		ZetaWeapon.AmmoType "GoldWandAmmo";
+		ZetaWeapon.WeaponName "Gold Wand";
 	}
 
 	override int CustomHitscanDamage() {

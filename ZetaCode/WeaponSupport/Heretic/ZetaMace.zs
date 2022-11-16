@@ -6,6 +6,7 @@ class ZetaFiremace : ZTMyWeapon {
 
 		ZetaWeapon.FireInterval 857143;
 		ZetaWeapon.AmmoType "MaceAmmo";
+		ZetaWeapon.WeaponName "Firemace";
 	}
 
 	override void Fire(Actor shooter, Actor target)

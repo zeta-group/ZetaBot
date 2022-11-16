@@ -5,6 +5,7 @@ class ZetaRL : ZetaWeapon
 		ZetaWeapon.FireInterval 5714285;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "RocketAmmo";
+		ZetaWeapon.WeaponName "Rocket Launcher";
 	}
 
 	override bool IsPickupOf(Weapon other)

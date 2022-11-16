@@ -5,6 +5,7 @@ class ZetaAK64 : ZetaWeapon
 		ZetaWeapon.FireInterval 5000000;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "ColtAmmo";
+		ZetaWeapon.WeaponName "AK-64";
 	}
 
 	override bool IsPickupOf(Weapon other)

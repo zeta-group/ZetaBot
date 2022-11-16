@@ -5,6 +5,7 @@ class ZetaCrossbow2 : ZetaWeapon
 		ZetaWeapon.FireInterval 9142857;
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "PoisonBolts";
+		ZetaWeapon.WeaponName "Crossbow  (Poison Bolts)";
 	}
 	
 	double pow(double a, uint b)

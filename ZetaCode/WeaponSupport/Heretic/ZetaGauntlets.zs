@@ -11,6 +11,7 @@ class ZetaGauntlets : ZTMyWeapon {
 		ZetaWeapon.FireInterval 1142857;
 		ZetaWeapon.MinAmmo 0;
 		ZetaWeapon.AmmoUse 0;
+		ZetaWeapon.WeaponName "Gauntlets";
 	}
 
 	override int CustomMeleeDamage() {

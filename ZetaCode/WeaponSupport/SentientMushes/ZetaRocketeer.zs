@@ -9,6 +9,7 @@ class ZetaRocketeer : ZetaWeapon
 		ZetaWeapon.AltAmmoUse 0;
 		ZetaWeapon.AmmoType "RocketAmmo";
 		ZetaWeapon.AltAmmoType "RocketAmmo";
+		ZetaWeapon.WeaponName "Rocketeer";
 	}
 
 	override bool IsPickupOf(Weapon other)
