@@ -183,6 +183,8 @@ class ZTBotOrderCode: Actor {
 	}
 
 	override void PostBeginPlay() {
+		pos += Vec3Angle(-56, angle);
+
 		FindOwner();
 
 		if (Owner == null) {
