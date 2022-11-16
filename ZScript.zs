@@ -984,7 +984,7 @@ class ZTBotController : Actor {
 	}
 
 	void ConsiderSetBotState(uint s) {
-		if (s == BS_WANDERING && currentOrder != null && currentOrder.orderType == BS_FOLLOWING)
+		if ((s == BS_WANDERING || s = BS_FOLLOWING || s = BS_FLEEING) && currentOrder != null && currentOrder.orderType == BS_FOLLOWING)
 			currentOrder.Apply(self);
 
 		else
