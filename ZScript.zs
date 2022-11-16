@@ -1012,9 +1012,13 @@ class ZTBotController : Actor {
 		ZTPathNode best = null;
 		ZTPathNode cur = null;
 
-		while (cur = ZTPathNode(iter.Next()))
-			if (best == null || other.Distance3D(cur) < other.Distance3D(best))
+		while (cur = ZTPathNode(iter.Next())) {
+			if (best == null || other.Distance3D(cur) < other.Distance3D(best)) {
 				best = cur;
+			}
+		}
+
+		DebugLog(LT_VERBOSE, "Closest node to "..other.GetClassName().." is "..(best == null ? "none" : ""..best.NodeName()));
 
 		return best;
 	}
@@ -1058,12 +1062,16 @@ class ZTBotController : Actor {
 		ZTPathNode cur = null;
 
 		while (cur = ZTPathNode(iter.Next())) {
-			if (!other.CheckSight(cur))
+			if (!other.CheckSight(cur)) {
 				continue;
+			}
 
-			if (best == null || other.Distance3D(cur) < other.Distance3D(best))
+			if (best == null || other.Distance3D(cur) < other.Distance3D(best)) {
 				best = cur;
+			}
 		}
+
+		DebugLog(LT_VERBOSE, "Closest visible node to "..other.GetClassName().." is "..(best == null ? "none" : ""..best.NodeName()));
 
 		return best;
 	}
