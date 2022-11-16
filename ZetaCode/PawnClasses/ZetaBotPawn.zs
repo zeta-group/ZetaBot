@@ -13,7 +13,6 @@ class ZetaBotPawn : Actor {
 	Default {
 		PainChance 100;
 		Speed 1;
-		Obituary "%o wound up smarted out by %NAME%!";
 		ZetaBotPawn.DefaultInv "";
 		Health 100;
 		Radius 16;
@@ -102,25 +101,6 @@ class ZetaBotPawn : Actor {
 	ZTBotController cont;
 	const speedMod = 1;
 	
-	override String GetObituary(Actor victim, Actor inflictor, Name mod, bool playerattack) {
-		if (mod == 'Telefrag')
-			return "$OB_MONTELEFRAG";
-		
-		string newObituary = Obituary;
-		
-		if ( cont != null ) {
-			newObituary.Replace("%ID%", ""..cont.BotID);
-			newObituary.Replace("%NAME%", cont.myName);
-		}
-			
-		else {
-			newObituary.Replace("%ID%", ""..-1);
-			newObituary.Replace("%NAME%", "a ghost ZetaBot");
-		}
-		
-		return newObituary;
-	}
-	
 	void BotThrust(double maxSpeed, double angle) {
 		Thrust(maxSpeed * speedMod, angle);
 	}
@@ -142,6 +122,8 @@ class ZetaBotPawn : Actor {
 	override void BeginPlay() {
 		Array<String> dweap;
 		defweap.split(dweap, ",");
+
+		ChangeStatNum(STAT_DEFAULT);
 		
 		for ( int i = 0; i < dweap.Size(); i++ )
 			GiveInventoryType(dweap[i]);
@@ -263,9 +245,33 @@ class ZetaBotPawn : Actor {
 			cont.PlayPain();
 	}
 	
-	void A_OnDeath() {
-		if ( cont != null )
-			cont.OnDeath();
+	override String GetObituary(Actor victim, Actor inflictor, Name mod, bool playerattack) {
+		if (!cont) {
+			return Super.GetObituary(victim, inflictor, mod, playerattack);
+		}
+
+		if (PlayerPawn(victim) && PlayerPawn(victim).player && cont.IsEnemy(PlayerPawn(victim), self)) {
+			cont.ScoreFrag();
+		}
+
+		ZetaWeapon bestWeap;
+		bool _bAltFire;
+
+		[ bestWeap, _bAltFire ] = cont.BestWeaponAllTic();
+
+		let obituary = (mod == 'Telefrag') ? "%k invaded %o's personal space." : Stringtable.Localize(bestWeap.GetObituary(victim, inflictor, mod, playerattack));
+		obituary.replace("%k", cont.myName);
+		obituary.replace("%w", bestWeap.weapName);
+
+		return obituary;
+	}
+
+	override void Die(Actor source, Actor inflictor, int dmgflags, Name MeansOfDeath) {
+		Super.Die(source, inflictor, dmgflags, MeansOfDeath);
+
+		if (cont != null) {
+			cont.OnDeath(source, inflictor, dmgflags, MeansOfDeath);
+		}
 			
 		A_DropWeapons();
 	}

@@ -6,6 +6,8 @@ class ZetaGrenade1 : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "HEGrenadeRounds";
 		ZetaWeapon.WeaponName "Grenade Launcher (High-Explosive)";
+
+		Obituary "%k blew %o to smithereens with the Grenade Launcher!";
 	}
 
 	override bool IsPickupOf(Weapon other)

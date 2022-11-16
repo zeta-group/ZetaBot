@@ -30,6 +30,11 @@ class ZetaWeapon : Actor
 		ZetaWeapon.AltAmmoUse 1;
 		ZetaWeapon.AmmoType "Clip";
 		ZetaWeapon.AltAmmoType "Clip";
+		Obituary "%o was outsmarted by %k's %w";
+	}
+
+	override String GetObituary(Actor victim, Actor inflictor, Name mod, bool playerattack) {
+		return obituary;
 	}
 	
 	static double RandomAngle(double range, double pivot = 0)

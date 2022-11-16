@@ -6,6 +6,8 @@ class ZetaRL : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "RocketAmmo";
 		ZetaWeapon.WeaponName "Rocket Launcher";
+
+		Obituary "%k smacked %o's dumb guts apart with the %w!";
 	}
 
 	override bool IsPickupOf(Weapon other)

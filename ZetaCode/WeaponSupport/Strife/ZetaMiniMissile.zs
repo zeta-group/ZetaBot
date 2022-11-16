@@ -6,6 +6,8 @@ class ZetaMiniMissile : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "MiniMissiles";
 		ZetaWeapon.WeaponName "Mini Missile Launcher";
+
+		Obituary "%k's %w made %o some new little friends.";
 	}
 
 	override bool IsPickupOf(Weapon other)

@@ -5,6 +5,8 @@ class ZetaChainsaw : ZetaWeapon
 		ZetaWeapon.FireInterval 2285714;
 		ZetaWeapon.AmmoUse 0;
 		ZetaWeapon.WeaponName "Chainsaw";
+
+		Obituary "%o was dismembered by %k's %w!";
 	}
 
 	override bool IsPickupOf(Weapon other)

@@ -52,7 +52,7 @@ class ZetaHeretic : ZetaBotPawn
 			Stop;
 			
 		Death:
-			PLAY I 0 A_OnDeath;
+			PLAY I 0;
 			PLAY I 6 A_PlaySound("ztmisc/heretic/die");
 			PLAY JK 6;
 			PLAY L 6 A_NoBlocking;
@@ -61,7 +61,7 @@ class ZetaHeretic : ZetaBotPawn
 			Stop;
 
 		Burn:
-			FDTH A 0 A_OnDeath;
+			FDTH A 0;
 			FDTH A 5 Bright A_PlaySound("ztmisc/heretic/burndie");
 			FDTH B 4 Bright;
 			FDTH C 5 Bright;
@@ -84,7 +84,7 @@ class ZetaHeretic : ZetaBotPawn
 			Stop;
 			
 		XDeath:
-			PLAY Q 0 A_OnDeath;
+			PLAY Q 0;
 			PLAY Q 5 A_PlaySound("ztmisc/heretic/xdie");
 			PLAY R 0 A_NoBlocking;
 			PLAY R 5 A_SkullPop;

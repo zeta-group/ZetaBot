@@ -6,6 +6,8 @@ class ZetaFlameThrower : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "EnergyPod";
 		ZetaWeapon.WeaponName "Flamethrower";
+
+		Obituary "%k set %o alight to ashes with the %w!";
 	}
 
 	override bool IsPickupOf(Weapon other)

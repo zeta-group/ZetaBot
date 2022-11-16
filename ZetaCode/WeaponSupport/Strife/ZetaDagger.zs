@@ -4,6 +4,8 @@ class ZetaDagger : ZetaWeapon
 	{
 		ZetaWeapon.FireInterval 4857142;
 		ZetaWeapon.WeaponName "Dagger";
+
+		Obituary "%o bled to death after being stabbed and jabbed by %k.";
 	}
 
 	override bool IsPickupOf(Weapon other)

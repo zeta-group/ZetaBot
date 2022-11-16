@@ -6,6 +6,8 @@ class ZetaAssaultGun : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "ClipOfBullets";
 		ZetaWeapon.WeaponName "Assault Gun";
+
+		Obituary "%o got thirty new holes from %k's %w.";
 	}
 
 	override bool IsPickupOf(Weapon other)

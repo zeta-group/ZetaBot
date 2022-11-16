@@ -6,6 +6,8 @@ class ZetaShotgun : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "Shell";
 		ZetaWeapon.WeaponName "Shotgun";
+
+		Obituary "%o bit %k's boomstick.";
 	}
 
 	override bool IsPickupOf(Weapon other)

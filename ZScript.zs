@@ -303,6 +303,8 @@ class NumBots : Thinker {
 }
 
 class ZTBotController : Actor {
+	bool frozen;
+
 	enum BotState {
 		BS_WANDERING = 0,
 		BS_HUNTING,
@@ -343,6 +345,7 @@ class ZTBotController : Actor {
 		}
 	}
 
+	int frags;
 	ZetaBotPawn possessed;
 	ZetaWeapon lastWeap;
 	BotState bstate;
@@ -458,6 +461,7 @@ class ZTBotController : Actor {
 		GruntInterval = 0;
 		TelefragTimer = 17;
 
+		frozen = false;
 
 		debugCount = 0;
 		retargetCount = 8;
@@ -1447,9 +1451,144 @@ class ZTBotController : Actor {
 		}
 	}
 
+	string ActorName(Actor Other) {
+		if (!Other) {
+			return "";
+		}
+
+		if (ZetaBotPawn(Other)) {
+			ZTBotController cont = ZetaBotPawn(Other).cont;
+
+			if (cont) return cont.myName;
+		}
+
+		if (PlayerPawn(Other) && playeringame[Other.PlayerNumber()]) {
+			return players[Other.PlayerNumber()].GetUserName();
+		}
+
+		return "a "..Other.GetClassName();
+	}
+
+	void ScoreFrag() {
+		if (CVar.FindCVar('deathmatch').GetInt() <= 0) {
+			return;
+		}
+
+		frags++;
+
+		int fragLimit = CVar.FindCVar("fraglimit").GetInt();
+
+		if (fragLimit <= 0) {
+			return;
+		}
+
+		int checkFrags = frags;
+
+		if (CVar.FindCVar("teamplay").GetInt() >= 1) {
+			checkFrags = 0;
+
+			let it_players = ThinkerIterator.create("PlayerPawn", STAT_PLAYER);
+			let it_bots = ThinkerIterator.create("ZetaBotPawn", STAT_DEFAULT);
+
+			PlayerPawn player;
+			ZetaBotPawn bot;
+
+			while (player = PlayerPawn(it_players.Next())) {
+				if (player.player) {
+					checkFrags += player.player.FragCount;
+				}
+			}
+
+			while (bot = ZetaBotPawn(it_bots.Next())) {
+				if (bot.cont) {
+					checkFrags += bot.cont.frags;
+				}
+			}
+		}
+
+		if (checkFrags >= fragLimit) {
+			EndGame('scorelimit');
+		}
+	}
+
+	void EndGame(Name reason) {
+		let it_players = ThinkerIterator.create("PlayerPawn", STAT_PLAYER);
+		let it_bots = ThinkerIterator.create("ZetaBotPawn", STAT_DEFAULT);
+		let it_botname = ThinkerIterator.create("BotName", STAT_DEFAULT);
+
+		PlayerPawn player;
+		ZetaBotPawn bot;
+		BotName bn;
+
+		while (bn = BotName(it_botname.Next())) {
+			bn.stopped = true;
+		}
+
+		while (player = PlayerPawn(it_players.Next())) {
+			if (player.player) {
+				player.player.cheats |= CF_TOTALLYFROZEN | CF_GODMODE2;
+			}
+		}
+
+		while (bot = ZetaBotPawn(it_bots.Next())) {
+			if (bot.cont && bot.health >= 0) {
+				bot.cont.frozen = true;
+				bot.SetStateLabel("Spawn");
+			}
+		}
+
+		ShowOffEndGame(reason);
+
+		EndGameTimer();
+	}
+
+	void DisplayScoreLimit() {
+		if (CVar.FindCVar("teamplay").GetInt() >= 1) {
+			possessed.A_Print(String.Format("\caTeam \cw%s\ca Won!", teamNames[myTeam]));
+		}
+
+		else {
+			possessed.A_Print(String.Format("\cw%s\ca Won!", myName));
+		}
+	}
+
+	void ShowOffEndGame(Name reason) {
+		if (reason == 'scorelimit') {
+			DisplayScoreLimit();
+			return;
+		}
+	}
+
+	void EndGameTimer() {
+		SetStateLabel("EndGameTimer");
+	}
+
 	// bot death listener
-	void OnDeath() {
-		A_PrintBold("\cg"..myName.." has just died!");
+	void OnDeath(Actor source, Actor inflictor, int dmgflags = 0, Name MeansOfDeath = 'none') {
+		//A_PrintBold("\cg"..myName.." has just died!");
+
+		String obituary = "";
+
+		if (source) {
+			obituary = Stringtable.Localize(source.GetObituary(possessed, inflictor, MeansOfDeath, false));
+		}
+
+		else {
+			obituary = "%o was looking nice and smart till they killed their dumb self.";
+			frags--;
+		}
+
+		if (ZetaBotPawn(source) && ZetaBotPawn(source).cont && ZetaBotPawn(source).cont.IsEnemy(source, possessed)) {
+			ZetaBotPawn(source).cont.ScoreFrag();
+		}
+
+		if (PlayerPawn(source) && PlayerPawn(source).player && IsEnemy(PlayerPawn(source), possessed)) {
+			PlayerPawn(source).player.FragCount++;
+		}
+
+		obituary.replace("%o", myName);
+		obituary.replace("%k", ActorName(source));
+		A_Log("\cf"..obituary);
 
 		let friends = VisibleFriends(possessed);
 		Object a = null;
@@ -2148,6 +2287,11 @@ class ZTBotController : Actor {
 		if (possessed.health <= 0)
 			return;
 
+		if (frozen) {
+			possessed.EndShoot();
+			return;
+		}
+
 		age += 1. / 35;
 		debugCount -= 1;
 
@@ -2198,7 +2342,8 @@ class ZTBotController : Actor {
 			blocked--;
 			RandomStrafe();
 			possessed.MoveBackward();
-			possessed.angle += 3;
+			angleMomentum += FRandom(-1, 1);
+			angleMomentum *= 1.6 * (blocked / 3 + 1);
 		}
 
 		let pickupIter = ThinkerIterator.Create("Weapon", STAT_INVENTORY);
@@ -2276,6 +2421,12 @@ class ZTBotController : Actor {
 		TickLoop:
 			TNT1 A 1 A_ZetaTick;
 			Loop;
+
+		EndGameTimer:
+			TNT1 A 0;
+			TNT1 A 175;
+			TNT1 A -1 Exit_Normal(0);
+			Stop;
 	}
 }
 
@@ -2479,6 +2630,7 @@ class ZetaSpiritEyes : Actor {
 class BotName : Inventory {
 	int countDown;
 	bool printing;
+	bool stopped;
 	Actor lastShown;
 
 	enum LogType {
@@ -2516,6 +2668,7 @@ class BotName : Inventory {
 	override void BeginPlay() {
 		super.BeginPlay();
 		countDown = 0;
+		stopped = false;
 	}
 
 	string ActorName(Actor Other) {
@@ -2595,23 +2748,40 @@ class BotName : Inventory {
 		}
 	}
 
+	String DescribeFrags(ZTBotController cont) {
+		if (CVar.FindCVar('deathmatch').GetInt() <= 0) {
+			return "";
+		}
+
+		else {
+			return String.Format("\cr and \cg%i frags", cont.frags);
+		}
+	}
+
 	override void Tick() {
+		if (stopped) {
+			return;
+		}
+
 		bool showing = false;
 
 		if (countDown < 1) {
 			let iter = ThinkerIterator.Create("ZetaBotPawn", STAT_DEFAULT);
 			ZetaBotPawn zb = null;
 			ZetaBotPawn closest = null;
-			double cdist = 0;
+			double cdist = 512;
 
 			while (zb = ZetaBotPawn(iter.Next())) {
 				Vector2 v1 = AngleToVector(Owner.angle);
 				Vector2 v2 = Owner.Vec2To(zb) / Owner.Distance2D(zb);
 
-				double vdot = (v1.x * v2.x + v1.y * v2.y);
+				double vdot = v1 dot v2;
 
-				if (vdot > 1 - 1 / (Owner.Distance2D(zb) / (zb.Radius + 4)) && Owner.CheckSight(zb) && zb.cont && zb.Health > 0 && (closest == null || Owner.Distance2D(zb) < cdist)) {
-					cdist = Owner.Distance2D(zb);
+				if (vdot > 1.0 - 1.0 / (Owner.Distance2D(zb) / (zb.Radius + 2)) && Owner.CheckSight(zb) && zb.cont && zb.Health > 0 && (closest == null || Owner.Distance2D(zb) < cdist)) {
+					if (cdist > Owner.Distance2D(zb)) {
+						cdist = Owner.Distance2D(zb);
+					}
+
 					closest = zb;
 				}
 			}
@@ -2619,11 +2789,12 @@ class BotName : Inventory {
 			if (closest && closest.cont) {
 				//DebugLog(LT_VERBOSE, "Printing status for bot "..closest.cont.myName.." in state "..ZTBotController.BStateNames[closest.cont.bstate]);
 
-				countDown = 2;
+				countDown = 3;
 
-				Owner.A_Print(String.Format("\ci%s\n\cg\%i HP\n\cr%s\n%s\n\n%s\n\n%s\n\n%s",
+				Owner.A_Print(String.Format("\ci%s\n\cg\%i HP%s\n\cr%s\n%s\n\n%s\n\n%s\n\n%s",
 					closest.cont.myName,
 					closest.Health,
+					DescribeFrags(closest.cont),
 					DescribeTeam(closest.cont),
 					DescribeTask(closest.cont),
 					DescribeOrders(closest.cont),
@@ -2640,16 +2811,19 @@ class BotName : Inventory {
 			if (closest == null && CVar.FindCVar("zb_debug").GetInt() >= 2) {
 				let nodeIter = ThinkerIterator.Create("ZTPathnode", 91);
 				ZTPathNode pn;
-				double pcdist;
+				double pcdist = 256;
 
 				while (pn = ZTPathNode(nodeIter.Next())) {
 					Vector2 v1 = AngleToVector(Owner.angle);
 					Vector2 v2 = Owner.Vec2To(pn) / Owner.Distance2D(pn);
 
-					double vdot = (v1.x * v2.x + v1.y * v2.y);
+					double vdot = v1 dot v2;
 
-					if (vdot > 1 - 1 / (Owner.Distance2D(pn) / (pn.Radius + 4)) && Owner.CheckSight(pn) && (pnClosest == null || Owner.Distance2D(pn) < pcdist)) {
-						pcdist = Owner.Distance2D(pn);
+					if (vdot > 1 - 1 / (Owner.Distance2D(pn) / (pn.Radius + 2)) && Owner.CheckSight(pn) && (pnClosest == null || Owner.Distance2D(pn) < pcdist)) {
+						if (Owner.Distance2D(pn) < pcdist) {
+							pcdist = Owner.Distance2D(pn);
+						}
+
 						pnClosest = pn;
 					}
 				}
@@ -2669,7 +2843,7 @@ class BotName : Inventory {
 
 				printing = false;
 				lastShown = null;
-				countDown = 6;
+				countDown = 2;
 			}
 		}
 

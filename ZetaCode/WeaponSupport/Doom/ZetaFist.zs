@@ -5,6 +5,8 @@ class ZetaFist : ZetaWeapon
 		ZetaWeapon.FireInterval 5142857;
 		ZetaWeapon.AmmoUse 0;
 		ZetaWeapon.WeaponName "Fist";
+
+		Obituary "%k showed %o some witty & humilitating knuckle usage.";
 	}
 
 	override bool IsPickupOf(Weapon other)

@@ -7,6 +7,8 @@ class ZetaMauler2 : ZetaWeapon
 		ZetaWeapon.AmmoUse 30;
 		ZetaWeapon.AmmoType "EnergyPod";
 		ZetaWeapon.WeaponName "Mauler";
+
+		Obituary "%k zapped %o out of existence with the Mauler!";
 	}
 	
 	double pow(double a, uint b)

@@ -6,6 +6,8 @@ class ZetaGrenade2 : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "PhosphorousGrenadeRounds";
 		ZetaWeapon.WeaponName "Grenade Launcher (Phosphorous)";
+
+		Obituary "%k burned %o's house down with the Grenade Launcher!";
 	}
 
 	override bool IsPickupOf(Weapon other)

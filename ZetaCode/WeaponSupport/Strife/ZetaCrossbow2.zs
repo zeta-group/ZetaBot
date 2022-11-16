@@ -6,6 +6,8 @@ class ZetaCrossbow2 : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "PoisonBolts";
 		ZetaWeapon.WeaponName "Crossbow  (Poison Bolts)";
+
+		Obituary "%o got deathly sick from %k's Crossbow.";
 	}
 	
 	double pow(double a, uint b)

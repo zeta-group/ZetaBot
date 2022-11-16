@@ -86,7 +86,7 @@ class ZetaSMushes : ZetaBotPawn
 			Stop;
 			
 		Death:
-			DRGN I 6 A_OnDeath;
+			DRGN I 6;
 			DRGN J 8 A_PlaySound("player/dragon/death");
 			DRGN K 9 A_NoBlocking;
 			DRGN L 8;
@@ -95,8 +95,6 @@ class ZetaSMushes : ZetaBotPawn
 			
 		XDeath:
 			TNT1 A 0 {
-				A_OnDeath();
-				
 				string gibClassName = "GibFX";
 				class<Actor> gibClass = gibClassName;
 				

@@ -6,6 +6,8 @@ class ZetaChaingun : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "Clip";
 		ZetaWeapon.WeaponName "Chaingun";
+
+		Obituary "%o was pelted by %k's %w!";
 	}
 
 	override bool IsPickupOf(Weapon other)

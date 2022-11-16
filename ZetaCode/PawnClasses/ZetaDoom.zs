@@ -86,7 +86,7 @@ class ZetaDoom : ZetaBotPawn
 			Stop;
 			
 		Death:
-			PLAY H 10 A_OnDeath;
+			PLAY H 10;
 			PLAY I 10 A_PlaySound("ztmisc/die");
 			PLAY J 0 A_NoBlocking;
 			PLAY J 10;
@@ -95,7 +95,7 @@ class ZetaDoom : ZetaBotPawn
 			Stop;
 			
 		XDeath:
-			PLAY O 5 A_OnDeath;
+			PLAY O 5;
 			PLAY P 5 A_PlaySound("ztmisc/xdie");
 			PLAY Q 0 A_NoBlocking;
 			PLAY Q 5;

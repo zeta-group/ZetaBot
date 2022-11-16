@@ -6,6 +6,8 @@ class ZetaPistol : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "Clip";
 		ZetaWeapon.WeaponName "Pistol";
+
+		Obituary "%o atoned before %k's mighty pea shooter.";
 	}
 
 	override bool IsPickupOf(Weapon other)

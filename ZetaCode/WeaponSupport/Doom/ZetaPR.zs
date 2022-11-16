@@ -6,6 +6,8 @@ class ZetaPR : ZetaWeapon
 		ZetaWeapon.MinAmmo 1;
 		ZetaWeapon.AmmoType "Cell";
 		ZetaWeapon.WeaponName "Plasma Rifle";
+
+		Obituary "%k melted %o's inferior brains with the %w!";
 	}
 
 	override bool IsPickupOf(Weapon other)
