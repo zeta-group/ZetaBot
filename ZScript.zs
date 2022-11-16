@@ -543,7 +543,7 @@ class ZTBotController : Actor {
 	}
 
 	void aimAtAngle(double angle, double speed, double threshold = 5) {
-		possessed.angle += DeltaAngle(possessed.angle, angle) * speed / 25;
+		possessed.angle += DeltaAngle(possessed.angle, angle) * speed / 100;
 
 		if (absangle(angle, possessed.angle) <= threshold)
 			possessed.angle = angle;
@@ -775,12 +775,12 @@ class ZTBotController : Actor {
 
 	void MoveAwayFrom(Actor other) {
 		possessed.MoveForward();
-		AimAwayFrom(other, 0.07);
+		AimAwayFrom(other, 35);
 	}
 
 	void StepBackFrom(Actor other) {
 		possessed.MoveBackward();
-		AimToward(other, 0.085);
+		AimToward(other, 20);
 	}
 
 	void StepBack() {
@@ -899,17 +899,20 @@ class ZTBotController : Actor {
 	bool MoveTowardDest() {
 		Actor dest = navDest;
 
-		if (!dest)
+		if (!dest) {
 			dest = goingAfter;
+		}
 
-		if (!dest)
+		if (!dest) {
 			dest = enemy;
+		}
 
-		if (!dest)
+		if (!dest) {
 			return false;
+		}
 
 		// MakeDestBall(dest);
-		MoveToward(dest, 0.2);
+		MoveToward(dest, 10);
 		return true;
 	}
 
@@ -942,24 +945,32 @@ class ZTBotController : Actor {
 				else if (toward.nodeType == toward.NT_CROUCH)
 					possessed.moveType = ZetaBotPawn.MM_Crouch;
 
-				else if (toward.nodeType == toward.NT_SLOW)
+				else if (toward.nodeType == toward.NT_SLOW) {
 					possessed.moveType = ZetaBotPawn.MM_None;
+				}
 
-				else
+				else {
 					possessed.moveType = ZetaBotPawn.MM_Run;
+				}
 
-				if (toward.pos.z - possessed.pos.z > 28 && possessed.pos.z - possessed.floorz < 1)
+				if (toward.pos.z - possessed.pos.z > 28 && possessed.pos.z - possessed.floorz < 1) {
 					possessed.Jump();
+				}
 
-				if (currNode.nodeType == ZTPathNode.NT_USE)
+				if (currNode.nodeType == ZTPathNode.NT_USE) {
 					DodgeAndUse();
+				}
 
 				else if (currNode.nodeType == ZTPathNode.NT_SHOOT && enemy == null) {
-					if (FRandom(0, 1) < 0.7 && FireBestWeapon())
-						possessed.BeginShoot();
+					AimAtAngle(currNode.angle, 20);
 
-					else
+					if (FRandom(0, 1) < 0.7 && FireBestWeapon()) {
+						possessed.BeginShoot();
+					}
+
+					else {
 						possessed.EndShoot();
+					}
 				}
 
 				MoveToward(toward, 20);
@@ -1489,7 +1500,7 @@ class ZTBotController : Actor {
 						}
 
 						else {
-							MoveToward(goingAfter, 0.27);
+							MoveToward(goingAfter, 30);
 						}
 
 						if (path) {
@@ -1513,7 +1524,7 @@ class ZTBotController : Actor {
 					ConsiderSetBotState(BS_WANDERING);
 
 				else
-					MoveToward(goingAfter, 15);
+					MoveToward(goingAfter, 25);
 			}
 
 			else
@@ -1532,7 +1543,7 @@ class ZTBotController : Actor {
 		}
 
 		else if (LineOfSight(enemy) || possessed.Distance3D(enemy) < 96) {
-			AimToward(enemy, 15);
+			AimToward(enemy, 50);
 			ConsiderSetBotState(BS_ATTACKING);
 			possessed.Jump();
 
@@ -1639,7 +1650,7 @@ class ZTBotController : Actor {
 
 		if (currNode.nodeType == ZTPathNode.NT_USE) {
 			FLineTraceData useData;
-			MoveTowardPos(currNode.pos + currNode.Vec3Angle(64 + possessed.radius, currNode.useDirection, 0, false), 0.45);
+			MoveTowardPos(currNode.pos + currNode.Vec3Angle(64 + possessed.radius, currNode.useDirection, 0, false), 15);
 			AimAtAngle(currNode.useDirection, 35);
 
 			possessed.LineTrace(
@@ -1819,7 +1830,7 @@ class ZTBotController : Actor {
 		}
 
 		if (possessed.Distance3D(enemy) > 256 + enemy.radius || w.IsMelee()) {
-			MoveToward(enemy, 0.282);
+			MoveToward(enemy, 35);
 
 			if (enemy.bShadow || enemy.CheckInventory("PowerInvisibility", 1)) {
 				angleMomentum += FRandom(-5, 5);
@@ -1831,7 +1842,7 @@ class ZTBotController : Actor {
 		}
 
 		RandomStrafe();
-		AimToward(enemy, 0.27, 30);
+		AimToward(enemy, 20, 30);
 
 		if (!LineOfSight(enemy)) {
 			possessed.EndShoot();
@@ -1977,7 +1988,7 @@ class ZTBotController : Actor {
 		}
 
 		if (bclosest) {
-			AimToward(bclosest, 15);
+			AimToward(bclosest, 50);
 
 			if ((currNode.nodeType != ZTPathnode.NT_SHOOT || possessed.Distance2D(currNode) > 40) && CVar.FindCVar('zb_autonodes').GetBool()) {
 				SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_SHOOT, possessed.AngleTo(bclosest)));
@@ -2215,7 +2226,7 @@ class ZTBotController : Actor {
 
 		if (currNode && currNode.nodeType == ZTPathNode.NT_TELEPORT_SOURCE) {
 			// always go to a teleport if going to it
-			MoveToward(currNode, 0.35);
+			MoveToward(currNode, 45);
 		}
 
 		switch (bstate) {
@@ -2509,6 +2520,10 @@ class BotName : Inventory {
 	}
 
 	string ActorName(Actor Other) {
+		if (!Other) {
+			return "";
+		}
+
 		if (ZetaBotPawn(Other)) {
 			ZTBotController cont = ZetaBotPawn(Other).cont;
 
