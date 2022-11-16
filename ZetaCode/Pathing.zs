@@ -783,7 +783,7 @@ class ZTPathNode : ZTPositionMarker
 			if (CheckSight(pn) && pn != self && pn != next && dist2 < dist - 64) {
 				let off2 = Vec2To(pn) / dist2;
 
-				//A_Log((dist2 / cullPreScale).." -> "..(off1.x * off2.x + off1.y * off2.y).." > "..minCullLimit + ((1.0 / (1.0 + exp(-(dist2 / cullPreScale)))) * 2 - 1.0) * cullPostScale);
+				//A_Log((dist2 / cullPreScale).." -> "..(off1 dot off2).." > "..minCullLimit + ((1.0 / (1.0 + exp(-(dist2 / cullPreScale)))) * 2 - 1.0) * cullPostScale);
 
 				if (off1 dot off2 > minCullLimit + ((1.0 / (1.0 + exp(-(dist2 / cullPreScale)))) * 2 - 1.0) * cullPostScale) {
 					return false; // there is already a shorter path in the same
