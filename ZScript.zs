@@ -116,7 +116,7 @@ class ZTBotOrderCode: Actor {
 	property SubjectType: mySubject;
 
 	default {
-		SubjectType ST_LOOKED;
+		ZTBotOrderCode.SubjectType ST_LOOKED;
 	}
 
 	Actor FindLookedAt() {
