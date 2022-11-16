@@ -1,1 +1,1 @@
-VERSION=0.12.0-rc6
+VERSION=0.12.0-rc7
