@@ -33,7 +33,7 @@ class LineCrossTracer : LineTracer {
 	}
 }
 
-class ZTBotOrder {
+class ZTBotOrder play {
 	Actor orderer;
 	Actor lookedAt;
 	String v_imperative, v_past, v_continuous;
@@ -86,7 +86,7 @@ class ZTBotOrder {
 	}
 
 	static ZTBotOrder Make(Actor i_orderer, Actor i_lookedAt, uint i_orderType) {
-		ZTBotOrder res = ZTBotOrder(Spawn("ZTBotOrder"));
+		ZTBotOrder res = ZTBotOrder(new("ZTBotOrder"));
 
 		res.orderer = i_orderer;
 		res.lookedAt = i_lookedAt;
@@ -111,6 +111,7 @@ class ZTBotOrderCode: Actor {
 
 	SubjectType mySubject;
 	uint orderType;
+	PlayerPawn Owner;
 
 	property OrderType: orderType;
 	property SubjectType: mySubject;
@@ -142,12 +143,11 @@ class ZTBotOrderCode: Actor {
 			case ST_SELF:
 				return Owner;
 		}
+
+		return null;
 	}
 
-	override void PostBeginPlay() {
-		// Find owner
-		PlayerPawn Owner;
-
+	void FindOwner() {
 		ThinkerIterator ownIter = ThinkerIterator.Create("PlayerPawn");
 		PlayerPawn pp;
 
@@ -157,19 +157,14 @@ class ZTBotOrderCode: Actor {
 			}
 		}
 
-		if (Owner == null) {
-			return;
-		}
+	}
 
-		// Find subject of the order
-		let subject = FindSubject();
+	ZTBotOrder ConcoctOrder(Actor subject) {
+		return ZTBotOrder.Make(Owner, subject, orderType);
+	}
 
-		if (subject == null && orderType != ZTBotController.BS_WANDERING) {
-			return;
-		}
-
-		// Make order and give it to all bots in radius
-		ZTBotOrder order = ZTBotOrder.Make(Owner, subject, orderType);
+	void GiveOrder(Actor subject) {
+		let order = ConcoctOrder(subject);
 
 		ThinkerIterator botIter = ThinkerIterator.Create("ZetaBotPawn", STAT_DEFAULT);
 		ZetaBotPawn zbp;
@@ -185,6 +180,24 @@ class ZTBotOrderCode: Actor {
 				cont.SetOrder(order);
 			}
 		}
+	}
+
+	override void PostBeginPlay() {
+		FindOwner();
+
+		if (Owner == null) {
+			return;
+		}
+
+		// Find subject of the order
+		let subject = FindSubject();
+
+		if (subject == null && orderType != ZTBotController.BS_WANDERING) {
+			return;
+		}
+
+		// Make order and give it to all bots in radius
+		GiveOrder(subject);
 
 		Destroy();
 	}
