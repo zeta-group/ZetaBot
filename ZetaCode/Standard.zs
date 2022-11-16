@@ -1,257 +1,3 @@
-class DictBucket
-{
-	Array<Object> keys;
-	Array<Object> values;
-	
-	Object Get(Object key) {
-		uint i;
-				
-		for ( i = 0; i < keys.Size(); i++ ) {
-			if ( keys[i] == key ) {
-				return values[i];
-			}
-		}
-		
-		return null;
-	}
-	
-	int Set(Object key, Object val) {
-		uint i = 0;
-		
-		for ( i = 0; i < keys.Size(); i++ ) {
-			if ( keys[i] == key ) {
-				keys[i] = key;
-				values[i] = val;
-				return i;
-			}
-		} 
-		
-		keys.Push(key);
-		values.Push(val);
-		return i;
-	}
-
-	void Remove(Object key) {
-		uint i = 0;
-		
-		for ( i = 0; i < keys.Size(); i++ ) {
-			if ( keys[i] == key ) {
-				break;
-			}
-		}
-		
-		keys.Delete(i);
-		values.Delete(i);
-	}
-
-	int Length() {
-		return keys.Size();
-	}
-}
-
-class Hasher abstract {
-	virtual int Hash(Object key) {
-		return -1;
-	}
-	
-	int _Hash(Object key, uint numBuckets) {
-		int res = abs(Hash(key));
-
-		return res % numBuckets;
-	}
-}
-
-class ActorHasher : Hasher {
-	override int Hash(Object other) {
-		if (!Actor(Other)) {
-			return 0;
-		}
-
-		Actor A = Actor(Other);
-		int x = A.pos.x * 16;
-		int y = A.pos.y * 16;
-
-		return (x << 3 | (x & 0x70) >> 4) ^ (y << 2) - (y & 0x1F ^ 0x1F);
-	}
-}
-
-class Dict {
-	uint numBuckets;
-	Array<DictBucket> buckets;
-	Hasher hasher;
-
-	static Dict Make(String hasherType, uint numBuckets = 16) {
-		Dict res = Dict(new("Dict"));
-
-		res.numBuckets = numBuckets;
-		res.hasher = Hasher(new(hasherType));
-
-		for (uint i = 0 ; i < numBuckets; i++) {
-			res.buckets.Push(new("DictBucket"));
-		}
-
-		return res;
-	}
-
-	int Length() {
-		int sum;
-
-		for (int i = 0; i < numBuckets; i++) {
-			sum += buckets[i].Length();
-		}
-
-		return sum;
-	}
-
-	int Hash(Object key) {
-		return hasher._Hash(key, numBuckets);
-	}
-
-	Object Get(Object key)
-	{
-		return buckets[Hash(key)].Get(key);
-	}
-
-	int Set(Object key, Object val)
-	{
-		return buckets[Hash(key)].Set(key, val);
-	}
-
-	void Remove(Object key)
-	{
-		buckets[Hash(key)].Remove(key);
-	}
-}
-
-class NumberDictBucket
-{
-	Array<Object> keys;
-	Array<double> values;
-
-	int Length() {
-		return keys.Size();
-	}
-	
-	double Get(Object key, double default) {
-		uint i;
-				
-		for ( i = 0; i < keys.Size(); i++ ) {
-			if ( keys[i] == key ) {
-				return values[i];
-			}
-		}
-		
-		return default;
-	}
-	
-	int Set(Object key, double val) {
-		int i;
-		
-		for ( i = 0; i < keys.Size(); i++ ) {
-			if ( keys[i] == key ) {
-				keys[i] = key;
-				values[i] = val;
-				return i;
-			}
-		}
-
-		keys.Push(key);
-		values.Push(val);
-		return i;
-	}
-
-	void Remove(Object key) {
-		uint i = 0;
-		
-		for ( i = 0; i < keys.Size(); i++ ) {
-			if ( keys[i] == key ) {
-				break;
-			}
-		}
-		
-		keys.Delete(i);
-		values.Delete(i);
-	}
-}
-
-class NumberDict {
-	int numBuckets;
-	Array<NumberDictBucket> buckets;
-	Hasher hasher;
-
-	int Length() {
-		int sum;
-
-		for (int i = 0; i < numBuckets; i++) {
-			sum += buckets[i].Length();
-		}
-
-		return sum;
-	}
-
-	static NumberDict Make(String hasherType, int numBuckets = 16) {
-		NumberDict res = NumberDict(new("NumberDict"));
-
-		res.numBuckets = numBuckets;
-		res.hasher = Hasher(new(hasherType));
-
-		for (int i = 0 ; i < numBuckets; i++) {
-			res.buckets.Push(new("NumberDictBucket"));
-		}
-
-		return res;
-	}
-
-	int Hash(Object key) {
-		return hasher._Hash(key, numBuckets);
-	}
-
-	double Get(Object key, double default)
-	{
-		return buckets[Hash(key)].Get(key, default);
-	}
-
-	int Set(Object key, double val)
-	{
-		return buckets[Hash(key)].Set(key, val);
-	}
-
-	void Remove(Object key)
-	{
-		buckets[Hash(key)].Remove(key);
-	}
-}
-
-class Set {
-	Dict selfMap;
-
-	static Set Make(String hasherType, int numBuckets) {
-		Set res = Set(new("Set"));
-
-		res.selfMap = Dict.Make(hasherType, numBuckets);
-
-		return res;
-	}
-
-	int Length() {
-		return selfMap.Length();
-	}
-
-	bool Has(Object key) {
-		return selfMap.Get(key) == key;
-	}
-
-	void Put(Object key) {
-		selfMap.Set(key, key);
-	}
-
-	void Remove(Object key) {
-		selfMap.Remove(key);
-	}
-}
-
-///////
-
 class QueueItem
 {
 	double cost;
@@ -291,14 +37,12 @@ class QueueItem
 
 class PriorityQueue {
 	Array<QueueItem> heap;
-	Set hasCheck;
-	NumberDict index;
 	int firstFree, lastUsed;
 	int numFree;
 	int numItems, size, height;
 
 	static PriorityQueue Make(String hasherType, int numBuckets = 32) {
-		PriorityQueue res = PriorityQueue(new("PriorityQueue"));
+		PriorityQueue res = PriorityQueue(New("PriorityQueue"));
 
 		res.size = 0;
 		res.height = 0;
@@ -309,19 +53,26 @@ class PriorityQueue {
 		res.GrowHeight();
 		res.GrowHeight();
 
-		res.hasCheck = Set.Make(hasherType, numBuckets);
-		res.index = NumberDict.Make(hasherType, numBuckets);
-
 		return res;
 	}
 
 	bool Has(Object other)
 	{
-		return hasCheck.Has(other);
+		return Find(other) != -1;
 	}
 
 	int Find(Object other) {
-		return index.Get(other, -1.0);
+		QueueItem qi;
+		uint i = 0;
+
+		while (i < heap.Size()) {
+			qi = heap[i++];
+			if (qi.item == other) {
+				return i;
+			}
+		}
+
+		return -1;
 	}
 
 	int Length() {
@@ -341,6 +92,9 @@ class PriorityQueue {
 
 	bool ShouldSwap(int a, int b) {
 		// NOTE: Depth(a) must be strictly smaller than Depth(b).
+		if (Depth(a) >= Depth(b)) {
+			return false;
+		}
 
 		bool has_a = heap[a].Has(), has_b = heap[b].Has();
 
@@ -386,8 +140,7 @@ class PriorityQueue {
 	}
 
 	void GrowHeight() {
-		int layerSize = 1 << height; // 2 ** height
-		height++;
+		int layerSize = 1 << (height++); // 2 ** height
 
 		size += layerSize;
 		numFree += layerSize;
@@ -419,8 +172,6 @@ class PriorityQueue {
 	}
 
 	void SetAt(int which, Object item, double cost) {
-		hasCheck.Put(item);
-		index.Set(item, which);
 		heap[which].Set(item, cost);
 	}
 
@@ -431,8 +182,6 @@ class PriorityQueue {
 
 		let item = heap[which].item;
 
-		hasCheck.Remove(item);
-		index.Remove(item);
 		heap[which].unSet();
 
 		/*SiftDown(which);
@@ -464,7 +213,7 @@ class PriorityQueue {
 				which = childSwap;
 			}
 
-			if (which * 2 + 1 > size /* already bottom layer */) {
+			if (which * 2 + 1 >= size /* already bottom layer */) {
 				return;
 			}
 
@@ -477,7 +226,6 @@ class PriorityQueue {
 			else {
 				childSwap = child2;
 			}
-
 		} while (CheckSwap(which, childSwap));
 	}
 

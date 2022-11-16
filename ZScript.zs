@@ -1512,7 +1512,7 @@ class ZTBotController : Actor {
 						SmartMove(lastEnemyPos);
 
 					else if (currNode != null && (navDest == null || possessed.Distance2D(navDest) < 64)) { // path to lastEnemyPos
-						ActorList path = currNode.findPathTo(lastEnemyPos, possessed);
+						ActorList path = currNode.findPathTo(lastEnemyPos, self);
 
 						if (path != null && path.Length() > 0) {
 							for (uint iii = 0; iii < path.Length(); iii++) {

@@ -261,11 +261,8 @@ class ZTPathNode : ZTPositionMarker
 	bool bPlopped;
 	uint id;
 	uint assoc_id;
-	Set candied;
+	Array<uint> candied;
 
-	void MakeCandied() {
-		candied = Set.Make("ActorHasher", 32);
-	}
 
 	override void BeginPlay()
 	{
@@ -454,10 +451,6 @@ class ZTPathNode : ZTPositionMarker
 			node.useDirection = ud;
 			node.angle = ud;
 			node.assoc_id = as;
-
-			if (node.nodeType == NT_CANDY_ONCE) {
-				node.MakeCandied();
-			}
 		
 			res.totalNodes++;
 		}
@@ -467,16 +460,16 @@ class ZTPathNode : ZTPositionMarker
 
 	void BecomesCurrent(ZTBotController cont, Actor other) {
 		if (nodeType == NT_CANDY_ONCE) {
-			candied.put(other);
+			candied.Push(cont.BotID);
 		}
 	}
 
-	double SpecialCost(ZTPathNode from, ZTPathNode goal, actor Other) // mimicks UT99's NavigationPoint.SpecialCost(Pawn Other)
+	double SpecialCost(ZTPathNode from, ZTPathNode goal, actor Other, ZTBotController cont) // mimicks UT99's NavigationPoint.SpecialCost(Pawn Other)
 	{
 		if ( nodeType == NT_AVOID )
 			return 512;
 
-		else if ( nodeType == NT_CANDY || (nodeType == NT_CANDY_ONCE && candied.has(Other)) )
+		else if ( nodeType == NT_CANDY || (nodeType == NT_CANDY_ONCE && candied.Find(cont.BotID) < candied.Size()) )
 			return -128;
 
 		else if ( nodeType == NT_TELEPORT_SOURCE && from )
@@ -601,8 +594,10 @@ class ZTPathNode : ZTPositionMarker
 		nb.Destroy(); // clean actorlists after use
 	}
 
-	ActorList findPathTo(ZTPathNode goal, Actor traveller = null, int numBuckets = 32)
+	ActorList findPathTo(ZTPathNode goal, ZTBotController controller, int numBuckets = 32)
 	{
+		Actor traveller = controller.possessed;
+
 		let res = ActorList.Empty();
 		int itersLeft = 5000; // safety limit
 
@@ -613,14 +608,21 @@ class ZTPathNode : ZTPositionMarker
 			return res;
 		}
 
-		NumberDict icosts = NumberDict.Make("ZTPathNodeHasher", numBuckets);
-		Dict cameFrom = Dict.Make("ZTPathNodeHasher", numBuckets);
+		Array<double> icosts;
+		Array<ZTPathNode> cameFrom;
 		PriorityQueue openSet = PriorityQueue.Make("ZTPathNodeHasher", numBuckets);
-		Set closedSet = Set.make("ZTPathNodeHasher", numBuckets);
+		Array<bool> closedSet;
+
+		while (closedSet.Size() < id) {
+			closedSet.Push(false);
+		}
 	
 		bool foundGoal = false;
 	
-		icosts.set(self, 0);
+		while (icosts.Size() <= self.id) {
+			icosts.Push(0.0);
+		}
+
 		openSet.add(self, 0);
 	
 		DebugLog(LT_VERBOSE, String.Format("> Pathfinding from %s to %s", NodeName(), goal.NodeName()));
@@ -638,11 +640,11 @@ class ZTPathNode : ZTPositionMarker
 				break;
 			}
 
-			if (closedSet.has(current)) {
+			if (current.id < closedSet.Size() && closedSet[current.id]) {
 				continue;
 			}
 
-			double thisICost = icosts.get(current, 0);
+			double thisICost = icosts[current.id];
 
 			DebugLog(LT_VERBOSE, String.Format("+-- Iterating pathfinding for node: %s", current.NodeName()));
 			ActorList nb = current.NeighborsOutward();
@@ -651,18 +653,25 @@ class ZTPathNode : ZTPositionMarker
 				ZTPathNode neigh = ZTPathNode(nb.get(i));
 				//DebugLog(LT_VERBOSE, String.Format("+-+-- Considering #%i's neighbor: %s", current.id, neigh.NodeName()));
 
-				if (neigh != current && !closedSet.has(neigh))
+				if (neigh != current && (closedSet.Size() <= neigh.id || !closedSet[neigh.id]))
 				{
 					double icost = thisICost + current.Distance3D(neigh);
-					double cost = neigh.Distance3D(goal) + icost + current.specialCost(neigh, goal, traveller);
+					double cost = neigh.Distance3D(goal) + icost + current.specialCost(neigh, goal, traveller, controller);
 
 					if (openSet.has(neigh) && openSet.GetCost(neigh) <= cost) {
 						continue;
 					}
 
-					cameFrom.set(neigh, current);
+					while (cameFrom.Size() <= neigh.id) {
+						cameFrom.push(null);
+					}
+					cameFrom[neigh.id] = current;
 			
-					icosts.set(neigh, icost);
+					while (icosts.Size() <= neigh.id) {
+						icosts.Push(0.0);
+					}
+
+					icosts[neigh.id] = icost;
 					openSet.add(neigh, cost);
 
 					if (neigh == goal)
@@ -680,7 +689,10 @@ class ZTPathNode : ZTPositionMarker
 				break;
 			}
 
-			closedSet.put(current);
+			while (closedSet.Size() <= current.id) {
+				closedSet.Push(false);
+			}
+			closedSet[current.id] = true;
 		}
 	
 		if ( !foundGoal ) {
@@ -705,7 +717,7 @@ class ZTPathNode : ZTPositionMarker
 
 			res.insert(0, cur);
 			pcur = cur;
-			cur = ZTPathNode(cameFrom.get(Object(cur)));
+			cur = cameFrom[cur.id];
 
 			// DebugLog(LT_VERBOSE, String.Format("%i -> %i", (cur == null ? -1 : cur.id), (pcur == null ? -1 : pcur.id)));
 
@@ -742,10 +754,7 @@ class ZTPathNode : ZTPositionMarker
 			res.iReset();
 		}
 
-		cameFrom.Destroy();
 		openSet.Destroy();
-		closedSet.Destroy();
-		icosts.Destroy();
 
 		res.Remove(0);
 	
@@ -994,7 +1003,6 @@ class ZTCandyOnceNode  : ZTNodeSpawner
 	override void ConfigNode(ZTPathNode node)
 	{
 		node.nodeType = ZTPathNode.NT_CANDY_ONCE;
-		node.MakeCandied();
 	}
 }
 
