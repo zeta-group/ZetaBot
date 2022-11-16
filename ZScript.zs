@@ -1540,13 +1540,13 @@ class ZTBotController : Actor {
 			ZetaBotPawn bot;
 
 			while (player = PlayerPawn(it_players.Next())) {
-				if (player.player) {
+				if (player.player && player.player.GetTeam() == myTeam) {
 					checkFrags += player.player.FragCount;
 				}
 			}
 
 			while (bot = ZetaBotPawn(it_bots.Next())) {
-				if (bot.cont) {
+				if (bot.cont && bot.cont.myTeam == myTeam) {
 					checkFrags += bot.cont.frags;
 				}
 			}
