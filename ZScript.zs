@@ -580,6 +580,13 @@ class ZTBotController : Actor {
 		TelefragTimer = 17;
 
 		DebugLog(LT_VERBOSE, String.format("%s respawned!", myName));
+
+		RespawnReset();
+	}
+
+	void RespawnReset() {
+		commander = null;
+		navDest = null;
 	}
 
 	const numTeams = 11;
