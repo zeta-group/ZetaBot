@@ -1877,7 +1877,7 @@ class ZTBotController : Actor {
 			}
 		}
 
-		if (friends != Null) {
+		if (friends) {
 			friends.Destroy(); // clean actorlists after use
 		}
 	}
@@ -1906,22 +1906,20 @@ class ZTBotController : Actor {
 			if (friends.length() > 0) {
 				commander = friends.get(Random(0, friends.length() - 1));
 
-				if (ZetaBotPawn(commander)) {
-					let ztcom = ZetaBotPawn(commander);
+				let ztcom = ZetaBotPawn(commander);
 
-					if (ztcom && ztcom.cont) {
-						if (ztcom.cont.commander && ztcom.cont.commander == self) {
-							commander = null;
-						}
-
-						else {
-							DebugLog(LT_INFO, myName.." is now led by "..ztcom.cont.myName);
-						}
+				if (ztcom && ztcom.cont) {
+					if (ztcom.cont.commander && ztcom.cont.commander == self) {
+						commander = null;
 					}
 
 					else {
-						DebugLog(LT_INFO, myName.." is now led by a "..commander.GetClassName());
+						DebugLog(LT_INFO, myName.." is now led by "..ztcom.cont.myName);
 					}
+				}
+
+				else {
+					DebugLog(LT_INFO, myName.." is now led by a "..commander.GetClassName());
 				}
 
 				if (commander) {
@@ -1929,7 +1927,7 @@ class ZTBotController : Actor {
 				}
 			}
 
-			if (friends != Null) {
+			if (friends) {
 				friends.Destroy(); // clean actorlists after use
 			}
 		}
