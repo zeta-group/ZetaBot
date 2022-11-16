@@ -2066,10 +2066,26 @@ class ZTBotController : Actor {
 		}
 	}
 
+	void RefreshCommander() {
+		if (commander != null && commander.health <= 0) {
+			commander = null;
+		}
+
+		if (currentOrder != null && (currentOrder.orderer == null || currentOrder.orderer.health <= 0)) {
+			currentOrder = null;
+		}
+
+		if (currentOrder != null && (currentOrder.lookedAt == null || currentOrder.lookedAt.health <= 0)) {
+			currentOrder = null;
+		}
+	}
+
 	void A_ZetaTick() {
 		StatusDoubleCheck();
 
 		CrossActivate();
+
+		RefreshCommander();
 
 		if (TelefragTimer > 0) TelefragTimer--;
 
