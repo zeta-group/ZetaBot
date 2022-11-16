@@ -122,16 +122,6 @@ class NumNodes : Thinker {
 	}
 }
 
-class ZTPathNodeHasher : Hasher {
-	override int Hash(Object key) {
-		if (!ZTPathNode(key)) {
-			return 0;
-		}
-
-		return ZTPathNode(key).id;
-	}
-}
-
 class ZTPathNode : ZTPositionMarker
 {
 	enum NavigationType
