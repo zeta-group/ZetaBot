@@ -176,7 +176,7 @@ class ZTBotOrderCode: Actor {
 				continue;
 			}
 
-			if (cont.commander == Owner && zbp.Distance2D(self) < 512) {
+			if ((cont.Commander == null || cont.commander == Owner || Owner is "PlayerPawn") && zbp.Distance2D(self) < 512) {
 				cont.SetOrder(order);
 			}
 		}
@@ -1850,7 +1850,7 @@ class ZTBotController : Actor {
 		while (i < friends.Length()) {
 			friend = ZetaBotPawn(friends.Get(i++));
 
-			if (friend && friend.cont && friend.cont.commander == self) {
+			if (friend && friend.cont && (friend.cont.commander == self || friend.cont.commander == null)) {
 				myOrder.Apply(friend.cont);
 
 				if (!chat) {
@@ -1892,14 +1892,24 @@ class ZTBotController : Actor {
 				if (ZetaBotPawn(commander)) {
 					let ztcom = ZetaBotPawn(commander);
 
-					if (ztcom == null || ztcom.cont == null)
-						DebugLog(LT_INFO, myName.." is now led by a "..commander.GetClassName());
+					if (ztcom != null && ztcom.cont != null) {
+						if (ztcom.cont.commander == self) {
+							commander = null;
+						}
 
-					else
-						DebugLog(LT_INFO, myName.." is now led by "..ztcom.cont.myName);
+						else {
+							DebugLog(LT_INFO, myName.." is now led by "..ztcom.cont.myName);
+						}
+					}
+
+					else {
+						DebugLog(LT_INFO, myName.." is now led by a "..commander.GetClassName());
+					}
 				}
 
-				BotChat("COMM", 0.8);
+				if (commander != null) {
+					BotChat("COMM", 0.8);
+				}
 			}
 
 			if (friends != Null) {
