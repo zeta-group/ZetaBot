@@ -1220,15 +1220,15 @@ class ZTPromptNodes : Actor
 			return ZTPathNode.plopNodes(Wads.ReadLump(mapLump));
 		}
 
-		A_Log("No map-local ZBMNODES lump found for %s, looking for fallback ZBNODES lumps...", level.mapname);
+		A_Log(String.Format("No map-local ZBMNODES lump found for %s, looking for fallback ZBNODES lumps...", level.mapname));
 
 		for (int nodesLump = Wads.FindLump("ZBNODES", 0, 1); nodesLump != -1; nodesLump = Wads.FindLump("ZBNODES", nodesLump + 1, 1)) {
-			A_Log("Trying ZBNODES lump @ %i..", nodesLump);
+			A_Log(String.Format("Trying ZBNODES lump @ %i..", nodesLump));
 			
 			let res = ZTPathNode.plopNodes(Wads.ReadLump(nodesLump));
 
 			if (res.found) {
-				A_Log("Found nodes definitions for %s successfully!", level.mapname);
+				A_Log(String.Format("Found nodes definitions for %s successfully!", level.mapname));
 				return res;
 			};
 		}
