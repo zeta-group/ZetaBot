@@ -642,7 +642,7 @@ class ZTBotController : Actor {
 		"Green",
 		"Gold", // yellow
 		"Black",
-		"White"
+		"White",
 		"Orange",
 		"Purple"
 	};
