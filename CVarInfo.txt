@@ -17,6 +17,9 @@ server string zb_extraweap = "";
 // The minimum interval between a bot's auto-use attempts, if zb_autouse is enabled.
 server float zb_autouseinterval = 9;
 
+// A scale for the bot's 'aim stutter'. Defaults to 1.0.
+server float zb_aimstutter = 1.0;
+
 // Whether the bot should try automatically using linedefs.
 server bool zb_autouse = true;
 

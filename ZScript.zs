@@ -351,6 +351,7 @@ class ZTBotController : Actor {
 	mixin DebugLog;
 
 	int frags;
+	float imprecision;
 	ZetaBotPawn possessed;
 	ZetaWeapon lastWeap;
 	BotState bstate;
@@ -467,6 +468,7 @@ class ZTBotController : Actor {
 		TelefragTimer = 17;
 
 		frozen = false;
+		imprecision = CVar.GetCVar("zb_aimstutter").GetFloat();
 
 		debugCount = 0;
 		retargetCount = 8;
@@ -552,6 +554,7 @@ class ZTBotController : Actor {
 	}
 
 	void aimAtAngle(double angle, double speed, double randRange = 3, double threshold = 5) {
+		randRange *= imprecision;
 		possessed.angle += DeltaAngle(possessed.angle, angle) * speed / 35.0 + FRandom(-randRange, randRange) / (35.0 + AbsAngle(possessed.angle, angle) / 15);
 		angleMomentum += (angle - possessed.angle) / 3.0;
 	}
