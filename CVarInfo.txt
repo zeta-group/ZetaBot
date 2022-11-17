@@ -1,24 +1,79 @@
+// How verbosely to display debug logs and paths, if at all.
 server int zb_debug = 0;
+
+// A list of pathnode definitions.
 server string nodeList = "::NONE";
+
+// Registered bot pawn module subclasses. Internal variable, do not edit.
 server string zb_btypes = "ZetaDoom:DoomPlayer;ZetaStrife:StrifePlayer;ZetaSMushes:YellowWyvern;ZetaHeretic:HereticPlayer";
+
+// Registered weapon module subclasses. Internal variable, do not exist.
 server string zb_wtypes = "ZetaDoomWeapons;ZetaStrifeWeapons;ZetaSentientMushesWeapons;ZetaHereticWeapons";
+
+// Extra inventory items to give to a bot. Comma separated. Case insensitive.
+// e.g. "shotgun;shellbox;BFG9000"
 server string zb_extraweap = "";
+
+// The minimum interval between a bot's auto-use attempts, if zb_autouse is enabled.
 server float zb_autouseinterval = 9;
+
+// Whether the bot should try automatically using linedefs.
 server bool zb_autouse = true;
-server bool zb_autonodes = true;
-server bool zb_autonodeuse = false;
+
+// Whether the bot should automatically plop nodes into a level at all.
+server bool zb_autonodes = false;
+
+// Whether the bot should automatically plop nodes whenever it successfully Uses a linedef.
+server bool zb_autonodeuse = true;
+
+// Whether the bot should automatically plop nodes for regular paths, such as to cover distance or around corners.
 server bool zb_autonodenormal = true;
+
+// Whether the bot should automatically plop nodes for teleporters.
 server bool zb_autonodetele = true;
+
+// Whether the bot should emit amusing voice lines. They vary depending on the situation or trigger.
 server bool zb_talk = true;
+
+// Whether bots should respawn in coop. Depends on zb_respawn=true.
 server bool zb_alsocooprespawn = false;
+
+// Whether bots should respawn in deathmatch, or also in coop if zb_alsocooprespawn=true.
 server bool zb_respawn = true;
-server bool zb_autonoderespawn = true;
+
+// Whether bots should auto node respawn points.
+server bool zb_autonoderespawn = false;
+
+// Whether any pathnode should be an eligible respawn point.
 server bool zb_anynoderespawn = true;
+
+// Whether bots should auto balance teams when teamplay=1.
 server bool zb_balanceteams = true;
+
+// Scales how often bots should talk. The higher the value, the more chattery they get. Fun!
 server float zb_talkfrequency = 1;
+
+// Which CVar to use to store the list of pathnodes. If you don't use a permanent CVar's name, the node list will not be persistent!
+//
+// If you want to keep different WAD pathnode definitions, it is better to save the nodelist into a file, which can then be made into 
+// a PK3 or WAD file with a ZBMNODES lump containing every level's path networks. Or if you're lucky, someone else will have made one
+// for you :)
 server string zb_nodevar = "nodelist";
+
+// Whether bots should not talk when idle. This makes it so they only talk on specific triggers, like pain, or spotting a target.
 server bool zb_noidletalk = false;
+
+// Whether bots should have a decorative cape behind them. This is a throwback to the old days of ZetaBots!
 server bool zb_cape = false;
+
+// The maximum number of teams bots can be assigned to, when teamplay=1. Does not apply to human players.
+//
+// This is the default order of team colors in Doom:
+// Blue - Red - Green - Gold - Black - White - Orange - Purple
+//
+// When teamplay is enabled, a "Team Beacon" (yes, like the mutator from Unreal Tournament) will display the
+// bot's team allegiance!
 server int zb_maxteams = 2;
 
+// A massive list of bot names, to randomly choose from when spawning a bot. Lo and behold!
 server string zb_names = "Jack,Persephone,Èmille,Robert,Amanda,Maria,Mary,Josh,Wagner,John,Louis,Goose,Lenny,Gusta,Goustaf,Hank,Gabriel,Carlsen,Renato,Alejandro,Alexander,Heinrich,Caesar,Walter,Amy,Lawrence,Marylenne,Leonhart,Leonard,Jackson,Lee,Bert,Humberto,Mike,Pablo,Michael,Hitchcock,Hilton,Ronald,Robinson,Son,House,Romulus,Remus,Peter,Peterson,Zephyrus,Robin,Paul,Paula,Thorson,Robohead,Minchson,James,Jamilton,Greg,Gregor,Gregory,Victoria,Anita,Whindersson,Melody,Xonon,Xihil,Thought,Hope,Rebecca,Prince,Larry,Barry,Garry,Garmond,Barney,Ade,Nate,Nathan,Jonathan,Jonas,Johnny,Harry,Rita,Rafael,Ben,Benjamin,Brian,Bruce,Bruno,Steve,Stevan,Ivan,Petrushya,Alexey,Maxim,Hustaad,Usain,Hua,Hoi,Shai,Kaito,Akima,Akuma,Kiri,Baku,Bakunin,Baraka,Barack,Yuri,Laika,Edward,Ed,Eddy,Biceps,Triceps,Goron,Gordon,Gorn,Blake,Harlin,Harley,David,Davidson,Eve,Evelyn,Parry,Alice,Aline,Alicia,Gorby,Karpov,Mark,Marcus,Marcos,Mitch,Craig,Cramwell,Heisenberg,Jesse,Ferdinand,Fernanda,Kleiner,Cleopatra,Filip,Frupp,Magnus,Owen,Darrough,Drumpf,Doug,Dagger,Umlaut,Urchid,Ulysses,Icarus,Irving,Crowl,Yacobsson,Zurich,Zabenda,Naßer,Oppen,Olrich,Ulrich,Quasimortis,Quench,Quarry,Sauerkrauter,Fleingen,Møsen,Haruld,Ångard,Yolk,Yafasta,Xand,Xor,Longshanks,Yak,Gnu,Zimmer,Zack";
