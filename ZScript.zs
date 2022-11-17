@@ -1622,13 +1622,20 @@ class ZTBotController : Actor {
 
 		String obituary = "";
 
-		if (source) {
+		if (source && source != possessed) {
 			obituary = Stringtable.Localize(source.GetObituary(possessed, inflictor, MeansOfDeath, false));
 		}
 
 		else {
-			obituary = "%o was looking nice and smart till they killed their dumb self.";
-			frags--;
+			if (MeansOFDeath == 'teamchange') {
+				obituary = "%o changed teams to "..teamNames[myTeam]..".";
+			}
+
+			else {
+				obituary = "%o was looking nice and smart till they killed their dumb self.";
+
+				frags--;
+			}
 		}
 
 		if (ZetaBotPawn(source) && ZetaBotPawn(source).cont && ZetaBotPawn(source).cont.IsEnemy(source, possessed)) {
@@ -2301,6 +2308,22 @@ class ZTBotController : Actor {
 		if (currentOrder && (currentOrder.lookedAt == null || currentOrder.lookedAt.health <= 0)) {
 			currentOrder = null;
 		}
+	}
+
+	void RefreshTeam() {
+		if (!CVar.FindCVar('teamplay').GetBool()) {
+				return;
+		}
+
+		int upperCap = CVar.FindCVar("zb_maxteams").GetInt();
+
+		if (myTeam < upperCap) {
+				return;
+		}
+
+		possessed.Die(possessed, possessed, 0, 'teamchange');
+		frags = 0;
+		PickBalancedTeams(true);
 	}
 
 	void A_ZetaTick() {
