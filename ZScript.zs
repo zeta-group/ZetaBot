@@ -1699,16 +1699,16 @@ class ZTBotController : Actor {
 		return checkFrags >= fragLimit;
 	}
 
-	void DisplayFrag() {
+	void DisplayTeamFrags() {
 		if (CVar.FindCVar('teamplay').GetInt() <= 0) {
 			return;
 		}
 
-		for (int ti = 1; ti <= CVar.FindCVar('zb_maxteams').GetInt(); ti++) {
+		for (int ti = 0; ti < CVar.FindCVar('zb_maxteams').GetInt(); ti++) {
 			int numFrags = GetTeamFrags(ti);
 
 			if (numFrags > 0) {
-				A_Log(String.Format("\cr* Team \cw%s\cr has \cw%i frags!"));
+				A_Log(String.Format("\cr* Team \cw%s\cr has \cw%i frags!", teamNames[ti], numFrags));
 			}
 		}
 	}
@@ -1724,7 +1724,7 @@ class ZTBotController : Actor {
 		frags++;
 
 		if (!CheckFragLimit()) {
-			DisplayFrag();
+			DisplayTeamFrags();
 		}
 	}
 
@@ -1812,6 +1812,7 @@ class ZTBotController : Actor {
 
 		if (PlayerPawn(source) && PlayerPawn(source).player && IsEnemy(PlayerPawn(source), possessed)) {
 			PlayerPawn(source).player.FragCount++;
+			DisplayTeamFrags();
 		}
 
 		obituary.replace("%o", myName);
