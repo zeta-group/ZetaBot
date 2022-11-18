@@ -903,10 +903,10 @@ class ZTBotController : Actor {
 		AimToward(other, aimSpeed);
 		MoveForward();
 
-		if (possessed.AngleTo(other) > possessed.Angle - 20)
+		if (possessed.AngleTo(other) > possessed.Angle - 50)
 			MoveRight();
 
-		else if (possessed.Angle + 20 < possessed.AngleTo(other))
+		else if (possessed.Angle + 50 < possessed.AngleTo(other))
 			MoveLeft();
 
 		else
