@@ -399,6 +399,7 @@ class ZTBotController : Actor {
 	mixin ActorName;
 
 	int frags;
+	int kills;
 	float imprecision;
 	ZetaBotPawn possessed;
 	ZetaWeapon lastWeap;
@@ -1594,6 +1595,9 @@ class ZTBotController : Actor {
 	}
 
 	void ScoreFrag() {
+		kills++;
+		BotChat("ELIM", 0.75);
+
 		if (CVar.FindCVar('deathmatch').GetInt() <= 0) {
 			return;
 		}
@@ -2032,9 +2036,6 @@ class ZTBotController : Actor {
 
 		if (enemy == null || enemy.Health < 1) {
 			SetOrder(null);
-			BotChat("ELIM", 0.75);
-
-			StepBackFrom(enemy);
 
 			possessed.EndShoot();
 			ConsiderSetBotState(BS_WANDERING);
@@ -2165,7 +2166,7 @@ class ZTBotController : Actor {
 			return true;
 		}
 
-		return zbp.kills < kills;
+		return zbp.cont.kills < kills;
 	}
 
 	void GiveCommands() {
