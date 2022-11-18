@@ -1655,6 +1655,64 @@ class ZTBotController : Actor {
 		}
 	}
 
+	int GetTeamFrags(int teamNum) {
+		int numFrags = 0;
+
+		let it_players = ThinkerIterator.create("PlayerPawn", STAT_PLAYER);
+		let it_bots = ThinkerIterator.create("ZetaBotPawn", STAT_DEFAULT);
+
+		PlayerPawn player;
+		ZetaBotPawn bot;
+
+		while (player = PlayerPawn(it_players.Next())) {
+			if (player.player && player.player.GetTeam() == teamNum) {
+				numFrags += player.player.FragCount;
+			}
+		}
+
+		while (bot = ZetaBotPawn(it_bots.Next())) {
+			if (bot.cont && bot.cont.myTeam == teamNum) {
+				numFrags += bot.cont.frags;
+			}
+		}
+
+		return numFrags;
+	}
+
+	bool CheckFragLimit() {
+		int fragLimit = CVar.FindCVar("fraglimit").GetInt();
+
+		if (fragLimit <= 0) {
+			return false;
+		}
+
+		int checkFrags = frags;
+
+		if (CVar.FindCVar("teamplay").GetInt() >= 1) {
+			checkFrags = GetTeamFrags(myTeam);
+		}
+
+		if (checkFrags >= fragLimit) {
+			EndGame('scorelimit');
+		}
+
+		return checkFrags >= fragLimit;
+	}
+
+	void DisplayFrag() {
+		if (CVar.FindCVar('teamplay').GetInt() <= 0) {
+			return;
+		}
+
+		for (int ti = 1; ti <= CVar.FindCVar('zb_maxteams').GetInt(); ti++) {
+			int numFrags = GetTeamFrags(ti);
+
+			if (numFrags > 0) {
+				A_Log(String.Format("\cr* Team \cw%s\cr has \cw%i frags!"));
+			}
+		}
+	}
+
 	void ScoreFrag() {
 		kills++;
 		BotChat("ELIM", 0.75);
@@ -1665,38 +1723,8 @@ class ZTBotController : Actor {
 
 		frags++;
 
-		int fragLimit = CVar.FindCVar("fraglimit").GetInt();
-
-		if (fragLimit <= 0) {
-			return;
-		}
-
-		int checkFrags = frags;
-
-		if (CVar.FindCVar("teamplay").GetInt() >= 1) {
-			checkFrags = 0;
-
-			let it_players = ThinkerIterator.create("PlayerPawn", STAT_PLAYER);
-			let it_bots = ThinkerIterator.create("ZetaBotPawn", STAT_DEFAULT);
-
-			PlayerPawn player;
-			ZetaBotPawn bot;
-
-			while (player = PlayerPawn(it_players.Next())) {
-				if (player.player && player.player.GetTeam() == myTeam) {
-					checkFrags += player.player.FragCount;
-				}
-			}
-
-			while (bot = ZetaBotPawn(it_bots.Next())) {
-				if (bot.cont && bot.cont.myTeam == myTeam) {
-					checkFrags += bot.cont.frags;
-				}
-			}
-		}
-
-		if (checkFrags >= fragLimit) {
-			EndGame('scorelimit');
+		if (!CheckFragLimit()) {
+			DisplayFrag();
 		}
 	}
 
