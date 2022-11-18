@@ -20,8 +20,8 @@ server float zb_autouseinterval = 9;
 // A scale for the bot's 'aim stutter'. Defaults to 1.0.
 server float zb_aimstutter = 1.0;
 
-// A scale for the bot's turning speed. Defaults to 2.5.
-server float zb_turnspeed = 2.5;
+// A scale for the bot's turning speed. Defaults to 1.5.
+server float zb_turnspeed = 1.5;
 
 // Whether the bot shouldalways try automatically using linedefs, rather than only in Use nodes.
 server bool zb_autouse = true;
