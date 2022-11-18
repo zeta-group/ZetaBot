@@ -1160,8 +1160,13 @@ class ZTBotController : Actor {
 		//if (currentOrder)
 		//	  SetOrder(null);
 
-		if (s != bstate)
+		if (s != bstate) {
+			if (lastEnemyPos != nulL) {
+				lastEnemyPos.Destroy();
+			}
+	
 			DebugLog(LT_INFO, myName.." is now \ck"..BStateNames[s].."!");
+		}
 
 		bstate = s;
 	}
