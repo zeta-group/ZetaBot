@@ -2157,6 +2157,11 @@ class ZTBotController : Actor {
 	}
 
 	void Subroutine_Attack() {
+		if (lastEnemyPos != null) {
+			lastEnemyPos.Destroy();
+			lastEnemyPos = null;
+		}
+
 		if (bstate != BS_ATTACKING && enemy == null) {
 			currEnemyPos = pos;
 		}
