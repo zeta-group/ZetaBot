@@ -1240,6 +1240,11 @@ class ZTBotController : Actor {
 			SetBotState(currentOrder.orderType);
 			ProcessOrderedState();
 		}
+
+		if (lastEnemyPos != null) {
+			lastEnemyPos.Destroy();
+			lastEnemyPos = null;
+		}
 	}
 
 	void ProcessOrderedState() {
