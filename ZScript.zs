@@ -2111,7 +2111,7 @@ class ZTBotController : Actor {
 		OrderGiven.UpdateOrder(
 			possessed,
 			(bstate == BS_FOLLOWING && goingAfter) ? goingAfter : (!enemy ? Actor(possessed) : enemy),
-			(!enemy) ? BS_FOLLOWING : BS_ATTACKING;
+			(!enemy) ? BS_FOLLOWING : BS_ATTACKING);
 	}
 
 	void ConcoctOrderToGive() {
