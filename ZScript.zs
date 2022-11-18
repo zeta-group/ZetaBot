@@ -575,8 +575,7 @@ class ZTBotController : Actor {
 		GruntInterval = 0;
 		TelefragTimer = 17;
 
-		imprecision = CVar.GetCVar("zb_aimstutter").GetFloat();
-		maxAngleRate = CVar.GetCVar('zb_turnspeed').GetFloat();
+		RefreshSkills();
 
 		debugCount = 0;
 		retargetCount = 8;
@@ -2744,10 +2743,16 @@ class ZTBotController : Actor {
 		}
 	}
 
+	void RefreshSkills() {
+		imprecision = CVar.GetCVar("zb_aimstutter").GetFloat();
+		maxAngleRate = CVar.GetCVar('zb_turnspeed').GetFloat();
+	}
+
 	void A_ZetaTick() {
 		StatusDoubleCheck();
 		CrossActivate();
 		RefreshCommander();
+		RefreshSkills();
 
 		if (TelefragTimer > 0) {
 			TelefragTimer--;
