@@ -1849,22 +1849,21 @@ class ZTBotController : Actor {
 			else {
 				MoveToward(Where, 20);
 			}
+
+			return true;
 		}
 
-		else if (currNode && (navDest == null || possessed.Distance2D(navDest) < 64)) {
+		if (currNode && (navDest == null || possessed.Distance2D(navDest) < 64)) {
 			return ComplexPathTo(Where);
 		}
 
-		else if (navDest && CheckSight(navDest)) {
+		if (navDest && CheckSight(navDest)) {
 			SmartMove(navDest);
+			return true;
 		}
 
-		else {
-			navDest = null;
-		    return false;
-		}
-
-		return true;
+		navDest = null;
+		return false;
 	}
 
 	void Subroutine_Hunt() {
@@ -2305,11 +2304,11 @@ class ZTBotController : Actor {
 			return false;
 		}
 
-		if (possessed.Distance3D(who) > 900) {
+		if (possessed.Distance3D(who) > 400) {
 			return true;
 		}
 
-		if (possessed.Distance3D(who) < 300) {
+		if (possessed.Distance3D(who) < 100) {
 			return false;
 		}
 
