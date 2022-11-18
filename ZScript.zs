@@ -2286,9 +2286,7 @@ class ZTBotController : Actor {
 	}
 
 	void RefreshNode() {
-		if (!currNode) {
-			CheckPlopGround();
-		}
+		CheckPlopGround();
 
 		if (currNode && possessed.CheckSight(currNode)) {
 			currSeeNodePos = possessed.pos;
