@@ -2188,6 +2188,7 @@ class ZTBotController : Actor {
 
 			if (
 				friend
+				&& friend != possessed
 				&& friend.cont
 				&& (!friend.cont.commander || friend.cont.commander == self || BetterCommander(friend.cont.commander))
 				&& (!friend.cont.currentOrder || friend.cont.currentOrder != orderGiven)
