@@ -833,7 +833,7 @@ class ZTBotController : Actor {
 		}
 
 		while (pp = PlayerPawn(iter2.Next())) {
-			if (pp.player) {
+			if (pp.player && pp.player.GetTeam() != 255) {
 				teamCounts[pp.player.GetTeam()]++;
 			}
 		}
