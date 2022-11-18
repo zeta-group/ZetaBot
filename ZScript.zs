@@ -2318,19 +2318,24 @@ class ZTBotController : Actor {
 
 		DodgeAndUse();
 
-		if (currNode) {
-			navDest = currNode.RandomNeighbor();
+		if (currNode && possessed.Distance2D(currNode) < 100 && navDest && navDest != currNode) {
+			MoveToward(navDest, 10); // wander to this random neighbouring node
 		}
 
 		else {
 			navDest = null;
+			RandomMove();
 		}
 
-		if (currNode && possessed.Distance2D(currNode) < 100 && navDest && navDest != currNode) {
-			MoveToward(navDest, 10); // wander to this random 'neighboring' node
+		if (!navDest) {
+			if (currNode) {
+				navDest = currNode.RandomNeighbor();
+		
+				if (navDest == currNode) {
+					navDest = null;
+				}
+			}
 		}
-
-		else RandomMove();
 	}
 
 	void FireAtBarrels() {
