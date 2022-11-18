@@ -401,6 +401,7 @@ class ZTBotController : Actor {
 	int frags;
 	int kills;
 	float imprecision;
+	float maxAngleRate;
 	ZetaBotPawn possessed;
 	ZetaWeapon lastWeap;
 	BotState bstate;
@@ -518,6 +519,7 @@ class ZTBotController : Actor {
 		TelefragTimer = 17;
 
 		imprecision = CVar.GetCVar("zb_aimstutter").GetFloat();
+		maxAngleRate = CVar.GetCVar('zb_turnspeed').GetFloat();
 
 		debugCount = 0;
 		retargetCount = 8;
@@ -1842,7 +1844,7 @@ class ZTBotController : Actor {
 
 		else {
 			if (enemy == null && bstate != BS_HUNTING) {
-				RefreshEnemy();
+				PickEnemy();
 			}
 
 			if (bstate == BS_HUNTING) {
@@ -1966,7 +1968,7 @@ class ZTBotController : Actor {
 		return currNode.nodeType == ZTPathNode.NT_USE;
 	}
 
-	void RefreshEnemy() {
+	void PickEnemy() {
 		if (currentOrder && currentOrder.lookedAt && LineOfSight(currentOrder.lookedAt) && (
 			currentOrder.orderType == BS_ATTACKING ||
 			currentOrder.orderType == BS_FLEEING   ||
@@ -2273,6 +2275,7 @@ class ZTBotController : Actor {
 			&& CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar("zb_autonodenormal").GetBool()
 		) {
 			SetCurrentNode(ZTPathNode.plopNode(currSeeNodePos, ZTPathNode.NT_NORMAL, possessed.angle));
+			currSeeNodePos = possessed.pos;
 		}
 	}
 
@@ -2504,63 +2507,40 @@ class ZTBotController : Actor {
 		}
 	}
 
-	void A_ZetaTick() {
-		StatusDoubleCheck();
+	void TickAge() {
+		age += 1. / 35;
+		debugCount -= 1;
+	}
 
-		CrossActivate();
-
-		RefreshCommander();
-
-		if (TelefragTimer > 0) TelefragTimer--;
-
-		if (possessed == null || possessed.Health <= 0) {
-			if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
-
-			if (CVar.FindCVar('zb_respawn').GetBool() && (CVar.FindCVar('deathmatch').GetInt() > 0 || CVar.FindCVar('zb_alsocooprespawn').GetBool())) {
-				DebugLog(LT_VERBOSE, String.format("Setting Respawn mode for %s.", myName));
-				SetStateLabel("Respawn");
-			}
-
-			else
-				Destroy();
-
-			return;
-		}
-
+	void ApplyMovement() {
 		possessed.angle += angleMomentum * 5;
-
-		//A_Log(String.Format("%f + %f = %f", possessed.angle - angleMomentum, angleMomentum, possessed.angle));
-
 		possessed.ApplyMovement();
-
-		/*if (currNode && currNode.nodeType == ZTPathNode.NT_AVOID)
-			MoveAwayFrom(currNode);*/
 
 		angleMomentum *= 0.95;
 
-		if (possessed.health <= 0)
-			return;
-
-		if (frozen) {
-			possessed.EndShoot();
-			return;
+		if (angleMomentum > maxAngleRate) {
+			angleMomentum = maxAngleRate;
 		}
 
-		age += 1. / 35;
-		debugCount -= 1;
+		if (angleMomentum < -maxAngleRate) {
+			angleMomentum = -maxAngleRate;
+		}
+	}
 
-		if (age - lastShot > 0.7 && possessed.bShooting)
-			possessed.EndShoot();
-
+	bool TickToThink() {
 		if (thinkTimer > 0) {
 			thinkTimer--;
-			return;
+			return true;
 		}
 
 		else {
 			thinkTimer = 3;
 		}
 
+		return false;
+	}
+
+	void RefreshEnemy() {
 		if (enemy && enemy.Health <= 0) {
 			if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
 			enemy = null;
@@ -2576,13 +2556,12 @@ class ZTBotController : Actor {
 			}
 		}
 
-		if (--logRate <= 0) {
-			logRate = 50;
-			LogStats();
-		}
+	}
 
-		if (possessed.blockingMobj || possessed.blockingLine)
+	void CheckBlocked() {
+		if (possessed.blockingMobj || possessed.blockingLine) {
 			blocked += 1 + sqrt(possessed.vel.x * possessed.vel.x + possessed.vel.y * possessed.vel.y) / 2;
+		}
 
 		if (blocked > 0) {
 			blocked--;
@@ -2591,7 +2570,73 @@ class ZTBotController : Actor {
 			angleMomentum += FRandom(-1, 1);
 			angleMomentum *= 1.6 * (blocked / 3 + 1);
 		}
+	}
 
+	void TryUse() {
+		if (currNode && currNode.nodeType == ZTPathNode.NT_USE) {
+			DodgeAndUse();
+		}
+
+		else if (CVar.FindCVar('zb_autouse').GetBool()) {
+			AutoUseAtAngle(0);
+		}
+	}
+
+	void A_ZetaTick() {
+		StatusDoubleCheck();
+		CrossActivate();
+		RefreshCommander();
+
+		if (TelefragTimer > 0) {
+			TelefragTimer--;
+		}
+
+		if (possessed == null || possessed.Health <= 0) {
+			if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
+
+			if (CVar.FindCVar('zb_respawn').GetBool() && (CVar.FindCVar('deathmatch').GetInt() > 0 || CVar.FindCVar('zb_alsocooprespawn').GetBool())) {
+				DebugLog(LT_VERBOSE, String.format("Setting Respawn mode for %s.", myName));
+				SetStateLabel("Respawn");
+			}
+
+			else
+				Destroy();
+
+			return;
+		}
+
+		if (possessed.health <= 0) {
+			enemy = null;
+			return;
+		}
+
+		TickAge();
+		ApplyMovement();
+
+		if (frozen) {
+			possessed.EndShoot();
+			return;
+		}
+
+		RefreshNode();
+
+		if (age - lastShot > 0.7 && possessed.bShooting)
+			possessed.EndShoot();
+
+		if (!TickToThink()) {
+			return;
+		}
+
+		RefreshEnemy();
+
+		if (--logRate <= 0) {
+			logRate = 50;
+			LogStats();
+		}
+
+		CheckBlocked();
+
+		/*
 		let pickupIter = ThinkerIterator.Create("Weapon", STAT_INVENTORY);
 		Weapon inv;
 
@@ -2601,16 +2646,14 @@ class ZTBotController : Actor {
 			if (possessed.Distance2D(inv) < possessed.Radius + inv.Radius) if (abs(possessed.pos.z - inv.pos.z) < possessed.Height + inv.Height) {
 				ZetaWeapon zw = loader.CheckType(inv);
 
-				if (zw )
+				if (zw) {
 					inv.CallTryPickup(possessed); // weapon items are checked by fireBestWeap
+				}
 			}
 		}
+		*/
 
-		if (currNode && currNode.nodeType == ZTPathNode.NT_USE)
-			DodgeAndUse();
-
-		else if (CVar.FindCVar('zb_autouse').GetBool())
-			AutoUseAtAngle(0);
+		TryUse();
 
 		GiveCommands();
 
@@ -2623,17 +2666,12 @@ class ZTBotController : Actor {
 
 		if (bstate != BS_ATTACKING) {
 			if (bstate != BS_FLEEING)
-				RefreshEnemy();
+				PickEnemy();
 		}	
 
-		if (currNode)
+		if (currNode) {
 			FireAtBarrels();
-
-		if (angleMomentum > 1)
-			angleMomentum = 1;
-
-		if (angleMomentum < -1)
-			angleMomentum = -1;
+		}
 	}
 
 	States {
