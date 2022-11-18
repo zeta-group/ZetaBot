@@ -1278,7 +1278,7 @@ class ZTBotController : Actor {
 		ZTPathNode cur = null;
 
 		while (cur = ZTPathNode(iter.Next())) {
-			if (best == null || other.Distance3D(cur) < other.Distance3D(best)) {
+			if (best == null || (other.Distance3D(cur) < other.Distance3D(best) && other.nodeType != ZTPathNode.NT_TARGET)) {
 				best = cur;
 			}
 		}
@@ -1331,7 +1331,7 @@ class ZTBotController : Actor {
 				continue;
 			}
 
-			if (best == null || other.Distance3D(cur) < other.Distance3D(best)) {
+			if (best == null || (other.Distance3D(cur) < other.Distance3D(best) && other.nodeType != ZTPathNode.NT_TARGET)) {
 				best = cur;
 			}
 		}
