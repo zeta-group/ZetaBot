@@ -471,6 +471,7 @@ class ZTBotController : Actor {
 	Actor enemy;
 	Actor commander;
 	ZTPathNode currNode;
+	ActorList currPath;
 	double strafeMomentum;
 	double angleMomentum;
 	ZTPathNode lastEnemyPos;
@@ -1991,28 +1992,58 @@ class ZTBotController : Actor {
 
 	bool ComplexPathTo(Actor Where) {
 		let closestNode = Where is "ZTPathNode" ? ZTPathNode(Where) : ClosestVisibleNode(Where);
-		ActorList path = currNode.findPathTo(closestNode, self);
+		bool bDiscardPath = true;
 
-		if (!path || path.Length() <= 0) {
-			return false;
+		if (currPath != null && currPath.Get(currPath.Length() - 1) == closestNode) {
+			uint closest = 0, furthest = 0;
+
+			for (closest = currPath.Length() - 1; closest > 0 && !possessed.CheckSight(currPath.Get(closest)); closest--);
+
+			while (closest--) {
+				currPath.Remove(0);
+			}
+
+			if (currPath.Length() > 1) {
+				for (furthest = 0; furthest < currPath.Length() - 1 && possessed.CheckSight(currPath.Get(furthest + 1)) && possessed.Distance2D(currPath.Get(furthest + 1) < 500; furthest++);
+
+				while (furthest--) {
+					currPath.Remove(0);
+				}
+			}
+
+			bDiscardPath = (currPath.Length() <= 0 || !CheckSight(currPath.Get(0)));
 		}
 
-		navDest = ZTPathNode(path.get(0));
-
-		if (navDest) {
-			SmartMove(navDest);
-
-			//DebugLog(LT_INFO, "Next navigation point found: "..navDest.NodeName());
+		if (currPath && bDiscardPath) {
+			currPath.Destroy();
 		}
 
-		if (path) {
-			path.Destroy(); // clean actorlists after use
+		if (currPath == null) {
+			ActorList path = currNode.findPathTo(closestNode, self);
+
+			if (!path || path.Length() <= 0) {
+				return false;
+			}
+
+			navDest = ZTPathNode(path.get(0));
+
+			if (navDest) {
+				SmartMove(navDest);
+
+				//DebugLog(LT_INFO, "Next navigation point found: "..navDest.NodeName());
+			}
+
+			currPath = path;
+		}
+
+		else {
+			navDest = ZTPathNode(currPath.Get(0));
 		}
 
 		return navDest != null;
 	}
 
-	bool PathMoveTo(Actor Where, bool bUseLastEnemyPos = false) {
+	bool PathMoveTo(Actor Where) {
 		if (possessed.CheckSight(Where)) {
 			if (Where is "ZTPathNode") {
 				SmartMove(ZTPathNode(Where));
@@ -2026,7 +2057,7 @@ class ZTBotController : Actor {
 		}
 
 		if (currNode && (navDest == null || possessed.Distance2D(navDest) < 64)) {
-			return ComplexPathTo(bUseLastEnemyPos ? Where : Actor(lastEnemyPos));
+			return ComplexPathTo(Where);
 		}
 
 		if (navDest && CheckSight(navDest)) {
@@ -2034,7 +2065,10 @@ class ZTBotController : Actor {
 			return true;
 		}
 
-		navDest = null;
+		if (possessed.Distance2D(navDest) > 200) {
+			navDest = null;
+		}
+
 		return false;
 	}
 
@@ -2197,12 +2231,24 @@ class ZTBotController : Actor {
 			return;
 		}
 
-		PriorityQueue targets = PriorityQueue.Make("ActorHasher", 64);
+		Array<Actor> targets;
 
-		for (uint i = 0; i < mon.length(); i++)
-			targets.add(mon.get(i), TargetPriority(mon.get(i)));
+		for (uint i = 0; i < mon.length(); i++) {
+			uint insert = 0;
+			let cur = mon.get(i);
 
-		Actor newEnemy = Actor(targets.poll());
+			while (insert < targets.Size()) {
+				if (TargetPriority(targets[insert]) < TargetPriority(cur)) {
+					break;
+				}
+
+				insert++;
+			}
+
+			targets.Insert(insert, cur);
+		}
+
+		Actor newEnemy = targets[0];
 
 		if (enemy == null || TargetPriority(enemy) < TargetPriority(newEnemy)) {
 			if (lastEnemyPos != null) {

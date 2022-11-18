@@ -8,7 +8,7 @@ class PlopResult : Thinker {
 class PathMarker : Actor {
 	Default {
 		Scale 0.1;
-		RenderStyle "AddStencil";
+		RenderStyle "Stencil";
 		StencilColor "10A8EC";
 		Alpha 0.6;
 		Radius 2;
@@ -126,6 +126,309 @@ class NumNodes : Thinker {
 	static void Reset() {
 		NumNodes res = Get();
 		res.value = 0;
+	}
+}
+
+class QueueItem
+{
+	double cost;
+	ZTPathNode item;
+	
+	static QueueItem of(ZTPathNode item, double cost)
+	{
+		QueueItem r = new("QueueItem");
+		r.item = item;
+		r.cost = cost;
+		
+		return r;
+	}
+
+	static QueueItem empty() {
+		QueueItem r = new("QueueItem");
+		r.item = null;
+		r.cost = 0;
+		
+		return r;
+	}
+
+	void Set(ZTPathNode item, double cost) {
+		self.item = item;
+		self.cost = cost;
+	}
+	
+	void Unset() {
+		self.item = null;
+		self.cost = 0.0;
+	}
+
+	bool Has() {
+		return self.item != null;
+	}
+}
+
+class PriorityQueue {
+	Array<QueueItem> heap;
+	Array<int> index;
+	int firstFree, lastUsed;
+	int numFree;
+	int numItems, size, height;
+
+	static PriorityQueue Make() {
+		PriorityQueue res = PriorityQueue(New("PriorityQueue"));
+
+		res.size = 0;
+		res.height = 0;
+		res.numFree = 0;
+		res.firstFree = 0;
+		res.lastUsed = 0;
+
+		res.GrowHeight();
+		res.GrowHeight();
+
+		return res;
+	}
+
+	bool Has(ZTPathNode other)
+	{
+		return Find(other) != -1;
+	}
+
+	int Find(ZTPathNode other) {
+		while (index.Size() <= other.id) {
+			index.Push(-1);
+		}
+
+		return index[other.id];
+	}
+
+	int Length() {
+		// for backwards compat's sake
+		return numItems;
+	}
+
+	void Swap(int a, int b) {
+		let temp = heap[a];
+		heap[a] = heap[b];
+		heap[b] = temp;
+	}
+
+	int Depth(int which) {
+		return floor(log(which + 1) / log(2));
+	}
+
+	bool ShouldSwap(int a, int b) {
+		// NOTE: Depth(a) must be strictly smaller than Depth(b).
+		if (Depth(a) >= Depth(b)) {
+			return false;
+		}
+
+		bool has_a = heap[a].Has(), has_b = heap[b].Has();
+
+		if (!has_b) {
+			return false;
+		}
+
+		if (!has_a) {
+			return true;
+		}
+
+		double cost_a = heap[a].cost;
+		double cost_b = heap[b].cost;
+
+		return cost_a > cost_b;
+	}
+
+	bool CheckSwap(int a, int b) {
+		if (a > b /* otherwise no need to try Depth */ && Depth(a) > Depth(b)) {
+			return CheckSwap(b, a);
+		}
+
+		if (!ShouldSwap(a, b)) {
+			return false;
+		}
+
+		Swap(a, b);
+		return true;
+	}
+
+	int Parent(int which) {
+		which = which - 1; // because we start counting at 0
+		return (which - which % 2 /* for floored division */) / 2;
+	}
+
+	void Children(int which, out int left, out int right) {
+		left = which * 2 + 1;
+		right = left + 1;
+	}
+
+	void GrowOne() {
+		heap.Push(QueueItem.empty());
+	}
+
+	void GrowHeight() {
+		int layerSize = 1 << (height++); // 2 ** height
+
+		size += layerSize;
+		numFree += layerSize;
+
+		while (layerSize--) {
+			GrowOne();
+		}
+	}
+
+	void UpdateFree(int which) {
+		numFree--;
+
+		if (which > lastUsed) {
+			lastUsed = which;
+		}
+
+		if (numFree <= 0) {
+			GrowHeight();
+			return;
+		}
+
+		if (firstFree <= which) {
+			do {
+				firstFree++;
+			} while (firstFree < size && heap[firstFree].Has());
+		}
+
+		numItems++;
+	}
+
+	void SetAt(int which, ZTPathNode item, double cost) {
+		heap[which].Set(item, cost);
+	}
+
+	void UnsetAt(int which) {
+		if (!heap[which].Has()) {
+			return;
+		}
+
+		let item = heap[which].item;
+
+		heap[which].unSet();
+
+		/*SiftDown(which);
+		SiftDown(which);
+
+		numItems--;*/
+	}
+
+	int SetFree(ZTPathNode item, double cost) {
+		int which = firstFree;
+
+		SetAt(which, item, cost);
+		UpdateFree(which);
+
+		return which;
+	}
+
+	void SiftUp(int which) {
+		while (which > 0 && CheckSwap(Parent(which), which)) {
+			which = Parent(which);
+		}
+	}
+
+	void SiftDown(int which) {
+		int child1, child2, childSwap = -1;
+
+		do {
+			if (childSwap != -1) {
+				which = childSwap;
+			}
+
+			if (which * 2 + 1 >= size /* already bottom layer */) {
+				return;
+			}
+
+			Children(which, child1, child2);
+
+			if (heap[child1].cost < heap[child2].cost) {
+				childSwap = child1;
+			}
+
+			else {
+				childSwap = child2;
+			}
+		} while (CheckSwap(which, childSwap));
+	}
+
+	double GetCost(ZTPathNode item) {
+		int index = Find(item);
+		return heap[index].cost;
+	}
+
+	void UpdateCost(int which, double newCost) {
+		double oldCost = heap[which].cost;
+
+		if (newCost == oldCost) {
+			return;
+		}
+
+		heap[which].cost = newCost;
+
+		if (newCost < oldCost) {
+			SiftDown(which);
+		}
+
+		else {
+			SiftUp(which);
+		}
+	}
+
+	void Add(ZTPathNode item, double cost) {
+		int existing = Find(item);
+
+		if (existing != -1) {
+			UpdateCost(existing, cost);
+
+			return;
+		}
+		
+		SetFree(item, cost);
+	}
+
+	void ReplaceRoot() {
+		Swap(0, lastUsed);
+		UnsetAt(lastUsed);
+
+		if (firstFree > lastUsed) {
+			firstFree = lastUsed;
+		}
+
+		if (lastUsed > 0) {
+			do {
+				lastUsed--;
+			} while (lastUsed >= 0 && !heap[lastUsed].has());
+		}
+
+		SiftDown(0);
+
+		numItems--;
+	}
+
+	ZTPathNode, double Poll() {
+		if (!heap[0].Has()) {
+			numItems = 0;
+			return null, 0;
+		}
+
+		ZTPathNode item = heap[0].item;
+		double cost = heap[0].cost;
+
+		ReplaceRoot();
+
+		return item, cost;
+	}
+
+	ZTPathNode, double Peek() {
+		if (!heap[0].Has()) {
+			return null, 0;
+		}
+
+		return heap[0].item, heap[0].cost;
 	}
 }
 
@@ -479,15 +782,15 @@ class ZTPathNode : ZTPositionMarker
 	double SpecialCost(ZTPathNode from, ZTPathNode goal, actor Other, ZTBotController cont) // mimicks UT99's NavigationPoint.SpecialCost(Pawn Other)
 	{
 		if ( nodeType == NT_AVOID )
-			return 512;
+			return 1024;
 
 		else if ( nodeType == NT_CANDY || (nodeType == NT_CANDY_ONCE && candied.Find(cont.BotID) < candied.Size()) )
-			return -128;
+			return -1024;
 
 		else if ( nodeType == NT_TELEPORT_SOURCE && from )
-			return 128 - Distance3D(from);
+			return 64 - Distance3D(from);
 
-		return 0;
+		return (pos.z - from.pos.z) * (pos.z- from.pos.z) / 50;
 	}
 
 	ActorList NeighborsOutward()
@@ -606,7 +909,7 @@ class ZTPathNode : ZTPositionMarker
 		nb.Destroy(); // clean actorlists after use
 	}
 
-	ActorList findPathTo(ZTPathNode goal, ZTBotController controller, int numBuckets = 32)
+	ActorList findPathTo(ZTPathNode goal, ZTBotController controller)
 	{
 		Actor traveller = controller.possessed;
 
@@ -622,7 +925,7 @@ class ZTPathNode : ZTPositionMarker
 
 		Array<double> icosts, totcosts;
 		Array<ZTPathNode> cameFrom;
-		PriorityQueue openSet = PriorityQueue.Make("ZTPathNodeHasher", numBuckets);
+		PriorityQueue openSet = PriorityQueue.Make();
 		Array<bool> closedSet;
 
 		while (closedSet.Size() < id) {
@@ -658,7 +961,7 @@ class ZTPathNode : ZTPositionMarker
 
 			double thisICost = icosts[current.id];
 
-			DebugLog(LT_VERBOSE, String.Format("+-- Iterating pathfinding for node: %s", current.NodeName()));
+			//DebugLog(LT_VERBOSE, String.Format("+-- Iterating pathfinding for node: %s", current.NodeName()));
 			ActorList nb = current.NeighborsOutward();
 	
 			for ( uint i = 0; i < nb.Length(); i++ ) {
@@ -673,8 +976,10 @@ class ZTPathNode : ZTPositionMarker
 					continue;
 				}
 
-				double icost = thisICost + current.Distance3D(neigh) + current.specialCost(neigh, goal, traveller, controller);
-				double cost = neigh.Distance3D(goal) + icost;
+				double icost = thisICost + current.Distance3D(neigh) + current.SpecialCost(neigh, goal, traveller, controller);
+				double cost = neigh.Distance3D(goal) * 2 + icost;
+
+				//A_Log("icost for "..current.id.."->"..neigh.id.." went from "..thisICost.." to "..icost.." | tot cost = "..cost);
 
 				if (neigh.id < totCosts.Size() && totCosts[neigh.id] != -1.0 && totCosts[neigh.id] <= cost) {
 					continue;
