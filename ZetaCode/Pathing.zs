@@ -60,6 +60,12 @@ class ZTPositionMarker : Actor {
 		Gravity 100;
 	}
 
+	virtual void NodeCountAge(float duration) {}
+
+	void A_NodeCountAge(int duration = 2) {
+		NodeCountAge(double(duration) / 35.0);
+	}
+
 	override void Tick() {
 		if ( CVar.FindCVar("zb_debug").GetInt() < 1 )
 			SetStateLabel("DLoop");
@@ -78,11 +84,11 @@ class ZTPositionMarker : Actor {
 			Goto DLoop;
 		
 		DLoop:
-			TNT1 A 2;
+			TNT1 A 2 A_NodeCountAge;
 			Loop;
 		
 		DVisible:
-			NODE A 2 Bright;
+			NODE A 2 Bright A_NodeCountAge;
 			Loop;
 	}
 }
@@ -141,6 +147,20 @@ class ZTPathNode : ZTPositionMarker
 		NT_TELEPORT_SOURCE,
 		NT_BLOCK,
 	};
+
+	double age;
+
+	override void NodeCountAge(float duration) {
+		if (nodeType != NT_TARGET) {
+			return;
+		}
+
+		age += duration;
+
+		if (age > 10) {
+			Destroy();
+		}
+	}
 
 	static string StencilColorForType(NavigationType navType) {
 		if (navType == NT_NORMAL)
@@ -259,6 +279,7 @@ class ZTPathNode : ZTPositionMarker
 	{
 		Super.BeginPlay();
 
+		age = 0.0;
 		colorSetup = -1;
 	
 		id = NumNodes.Increment();
