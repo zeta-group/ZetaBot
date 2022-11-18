@@ -2511,11 +2511,6 @@ class ZTBotController : Actor {
 	}
 
 	void ApplyMovement() {
-		possessed.angle += angleMomentum * 5;
-		possessed.ApplyMovement();
-
-		angleMomentum *= 0.95;
-
 		if (angleMomentum > maxAngleRate) {
 			angleMomentum = maxAngleRate;
 		}
@@ -2523,6 +2518,11 @@ class ZTBotController : Actor {
 		if (angleMomentum < -maxAngleRate) {
 			angleMomentum = -maxAngleRate;
 		}
+
+		possessed.angle += angleMomentum * 5;
+		possessed.ApplyMovement();
+
+		angleMomentum *= 0.95;
 	}
 
 	bool TickToThink() {
