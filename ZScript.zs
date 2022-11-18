@@ -2452,8 +2452,6 @@ class ZTBotController : Actor {
 		enemy = null;
 		BotChat("IDLE", 2.25 / 100);
 
-		MoveForward();
-
 		if (ShouldFollow(commander)) {
 			ConsiderSetBotState(BS_FOLLOWING);
 
@@ -2471,8 +2469,8 @@ class ZTBotController : Actor {
 
 		DodgeAndUse();
 
-		if (currNode && possessed.Distance2D(currNode) < 100 && navDest && navDest != currNode) {
-			MoveToward(navDest, 10); // wander to this random neighbouring node
+		if (currNode && possessed.Distance2D(currNode) < 200 && navDest && navDest != currNode) {
+			MoveToward(navDest, 5); // wander to this random neighbouring node
 		}
 
 		else {
