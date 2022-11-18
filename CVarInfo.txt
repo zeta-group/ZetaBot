@@ -10,6 +10,13 @@ server string zb_btypes = "ZetaDoom:DoomPlayer;ZetaStrife:StrifePlayer;ZetaSMush
 // Registered weapon module subclasses. Internal variable, do not exist.
 server string zb_wtypes = "ZetaDoomWeapons;ZetaStrifeWeapons;ZetaSentientMushesWeapons;ZetaHereticWeapons";
 
+// The variables below control situations in which bots are allowed to drop weapons.
+// By default, bots respect sv_weapondrop.
+// One makes it so drops always happen regardless of sv_weapondrop.
+// The other one makes it so drops never happen, and also overrides the previous one.
+server bool zb_alwaysdropweapons = false;
+server bool zb_neverdropweapons = false;
+
 // Extra inventory items to give to a bot. Comma separated. Case insensitive.
 // e.g. "shotgun;shellbox;BFG9000"
 server string zb_extraweap = "";

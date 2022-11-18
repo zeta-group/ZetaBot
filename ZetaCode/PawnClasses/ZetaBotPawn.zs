@@ -277,6 +277,14 @@ class ZetaBotPawn : Actor {
 	}
 	
 	void A_DropWeapons() {
+		if (CVar.FindCVar("sv_dropweapons").GetBool() && !CVar.FindCVar("zb_alwaysdropweapons").GetBool()) {
+			return;
+		}
+
+		if (CVar.FindCVar("zb_neverdropweapons").GetBool()) {
+			return;
+		}
+
 		let iter = ThinkerIterator.Create("Weapon");
 		
 		Weapon w;
