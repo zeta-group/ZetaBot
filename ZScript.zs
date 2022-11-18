@@ -2322,7 +2322,7 @@ class ZTBotController : Actor {
 			navDest = null;
 		}
 
-		if (currNode && possessed.Distance2D(currNode) < 100 && navDest) {
+		if (currNode && possessed.Distance2D(currNode) < 100 && navDest && navDest != currNode) {
 			MoveToward(navDest, 10); // wander to this random 'neighboring' node
 		}
 
