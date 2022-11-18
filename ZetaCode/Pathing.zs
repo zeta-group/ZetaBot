@@ -157,7 +157,7 @@ class ZTPathNode : ZTPositionMarker
 
 		age += duration;
 
-		if (age > 10) {
+		if (age > 25) {
 			Destroy();
 		}
 	}
