@@ -1349,8 +1349,8 @@ class ZTBotController : Actor {
 					if (!(alt || zweap.CanFire(possessed)))
 						continue;
 
-					if (CVar.FindCVar("zb_debug").GetInt() > 2)
-						DebugLog(LT_VERBOSE, myName.." considering a "..zweap.GetClassName()..": alt="..alt.." rating="..(alt ? assessed2 : assessed1).."dm");
+					/*if (CVar.FindCVar("zb_debug").GetInt() > 2)
+						DebugLog(LT_VERBOSE, myName.." considering a "..zweap.GetClassName()..": alt="..alt.." rating="..(alt ? assessed2 : assessed1).."dm");*/
 
 					let maxAssessed = alt ? assessed2 : assessed1;
 
