@@ -1965,19 +1965,19 @@ class ZTBotController : Actor {
 			return;
 		}
 
-		if (lastEnemyPos == null && !possessed.CheckSight(goingAfter)) {
+		/*if (lastEnemyPos == null && !possessed.CheckSight(goingAfter)) {
 			lastEnemyPos = ZTPathNode.plopNode(goingAfter.pos, ZTPathNode.NT_TARGET, 0);
 		}
 
 		if (lastEnemyPos != null) {
 			lastEnemyPos.SetOrigin(goingAfter.pos, true);
-		}
+		}*/
 
 		BotChat("IDLE", 2.25 / 90);
 
 		DodgeAndUse();
 
-		if (!PathMoveTo(goingAfter, true)) {
+		if (!PathMoveTo(goingAfter)) {
 			DebugLog(LT_INFO, String.Format("Unable to follow %s! Going back to wandering.", ActorName(goingAfter)));
 
 			goingAfter = null;
@@ -1990,7 +1990,7 @@ class ZTBotController : Actor {
 	}
 
 	bool ComplexPathTo(Actor Where) {
-		let closestNode = Where is "ZTPathNode" ? ZTPathNode(Where) : ClosestNode(Where);
+		let closestNode = Where is "ZTPathNode" ? ZTPathNode(Where) : ClosestVisibleNode(Where);
 		ActorList path = currNode.findPathTo(closestNode, self);
 
 		if (!path || path.Length() <= 0) {
@@ -2830,7 +2830,7 @@ class ZTBotController : Actor {
 		if (blocked > 0) {
 			blocked--;
 			RandomStrafe();
-			possessed.MoveBackward();
+			//possessed.MoveBackward();
 			angleMomentum += FRandom(-1, 1);
 			angleMomentum *= 1.6 * (blocked / 3 + 1);
 		}
