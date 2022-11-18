@@ -143,6 +143,11 @@ class ZTBotOrder play {
 			bot.lastEnemy = lookedAt;
 		}
 
+		if (bot.lastEnemyPos != null) {
+			bot.lastEnemyPos.Destroy();
+			bot.lastEnemyPos = null;
+		}
+
 		bot.SetOrder(self);
 	}
 
@@ -2094,18 +2099,30 @@ class ZTBotController : Actor {
 
 		Actor newEnemy = Actor(targets.poll());
 
-		if (enemy == null || TargetPriority(enemy) < TargetPriority(newEnemy))
+		if (enemy == null || TargetPriority(enemy) < TargetPriority(newEnemy)) {
+			if (lastEnemyPos != null) {
+				lastEnemyPos.Destroy();
+				lastEnemyPos = null;
+			}
+
 			enemy = Actor(newEnemy);
+		}
 
 		/*
 		else {
 			if (retargetCount < 1) {
+				if (lastEnemyPos != null) {
+					lastEnemyPos.Destroy();
+					lastEnemyPos = null;
+				}
+
 				enemy = Actor(targets.poll());
 				retargetCount = 15;
 			}
 
-			else
+			else {
 				retargetCount--;
+			}
 		}
 		*/
 
@@ -2185,6 +2202,11 @@ class ZTBotController : Actor {
 		ZetaWeapon w = BestWeaponAllTic();
 
 		if (w == null) {
+			if (lastEnemyPos != null) {
+				lastEnemyPos.Destroy();
+				lastEnemyPos = null;
+			}
+
 			enemy = null;
 			goingAfter = null;
 
@@ -2417,6 +2439,11 @@ class ZTBotController : Actor {
 	}
 
 	void Subroutine_Wander() {
+		if (lastEnemyPos != null) {
+			lastEnemyPos.Destroy();
+			lastEnemyPos = null;
+		}
+
 		enemy = null;
 		BotChat("IDLE", 2.25 / 100);
 
