@@ -1172,7 +1172,7 @@ class ZTBotController : Actor {
 			else {
 				DebugLog(LT_INFO, myName.." has no orders now ("..(currentOrder.v_past)..").");
 			}
-		}	
+		}
 
 		currentOrder = newOrder;
 
@@ -1780,7 +1780,7 @@ class ZTBotController : Actor {
 
 		if (!path || path.Length() <= 0) {
 			return false;
-		}		
+		}
 
 		navDest = ZTPathNode(path.get(0));
 
@@ -1880,7 +1880,7 @@ class ZTBotController : Actor {
 
 						return;
 					}
-					
+
 					if (bstate == BS_HUNTING) {
 						if (FRandom(0, 1) < 0.12)
 							possessed.Jump();
@@ -1982,7 +1982,7 @@ class ZTBotController : Actor {
 			mon.Destroy(); // clean actorlists after use
 			return;
 		}
-	
+
 		PriorityQueue targets = PriorityQueue.Make("ActorHasher", 64);
 
 		for (uint i = 0; i < mon.length(); i++)
@@ -2239,7 +2239,7 @@ class ZTBotController : Actor {
 			if (friends.length() > 0) {
 				let newCommander = friends.get(Random(0, friends.length() - 1));
 				SetCommander(newCommander);
-				
+
 				if (commander) {
 					BotChat("COMM", 0.8);
 				}
@@ -2267,7 +2267,7 @@ class ZTBotController : Actor {
 		return !possessed.CheckSight(who) || ClosestNode(who) != currNode;
 	}
 
-	void CheckPlopGround() {	
+	void CheckPlopGround() {
 		SetCurrentNode(ClosestVisibleNode(possessed));
 
 		if (
@@ -2330,7 +2330,7 @@ class ZTBotController : Actor {
 		if (!navDest) {
 			if (currNode) {
 				navDest = currNode.RandomNeighbor();
-		
+
 				if (navDest == currNode) {
 					navDest = null;
 				}
@@ -2678,7 +2678,7 @@ class ZTBotController : Actor {
 		if (bstate != BS_ATTACKING) {
 			if (bstate != BS_FLEEING)
 				PickEnemy();
-		}	
+		}
 
 		if (currNode) {
 			FireAtBarrels();
@@ -2917,7 +2917,7 @@ class _BotName : Thinker {
 			return String.Format("\crAttacking \cw%s\cr!",
 				ActorName(cont.enemy));
 		}
-		
+
 		if (cont.bstate == ZTBotController.BS_FOLLOWING && cont.goingAfter) {
 			return String.Format("\crFollowing \cw%s",
 				ActorName(cont.goingAfter));
