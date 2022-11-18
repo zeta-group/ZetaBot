@@ -10,3 +10,9 @@ script "__ZetaBot_respawn" RESPAWN
 {
     GiveInventory("BotName", 1);
 }
+
+script "__ZetaBot_endlevelDM" (void)
+{
+	Exit_Normal(0);
+}
+

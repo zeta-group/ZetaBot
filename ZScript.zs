@@ -1664,6 +1664,10 @@ class ZTBotController : Actor {
 		}
 	}
 
+	void TriggerExit() {
+		ACS_NamedExecute("__ZetaBot_endlevelDM");
+	}
+
 	int GetTeamFrags(int teamNum) {
 		int numFrags = 0;
 
@@ -1732,6 +1736,10 @@ class ZTBotController : Actor {
 
 		frags++;
 
+		FragRecap();
+	}
+
+	void FragRecap() {
 		if (!CheckFragLimit()) {
 			DisplayTeamFrags();
 		}
@@ -1821,7 +1829,7 @@ class ZTBotController : Actor {
 
 		if (PlayerPawn(source) && PlayerPawn(source).player && IsEnemy(PlayerPawn(source), possessed)) {
 			PlayerPawn(source).player.FragCount++;
-			DisplayTeamFrags();
+			FragRecap();
 		}
 
 		obituary.replace("%o", myName);
@@ -2865,8 +2873,9 @@ class ZTBotController : Actor {
 		EndGameTimer:
 			TNT1 A 0;
 			TNT1 A 175;
-			TNT1 A -1 Exit_Normal(0);
-			Stop;
+		EndGame:
+			TNT1 A 35 TriggerExit();
+			Loop;
 	}
 }
 
