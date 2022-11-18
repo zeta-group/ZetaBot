@@ -1278,7 +1278,7 @@ class ZTBotController : Actor {
 		ZTPathNode cur = null;
 
 		while (cur = ZTPathNode(iter.Next())) {
-			if (best == null || (other.Distance3D(cur) < other.Distance3D(best) && other.nodeType != ZTPathNode.NT_TARGET)) {
+			if (best == null || (other.Distance3D(cur) < other.Distance3D(best) && cur.nodeType != ZTPathNode.NT_TARGET)) {
 				best = cur;
 			}
 		}
@@ -1331,7 +1331,7 @@ class ZTBotController : Actor {
 				continue;
 			}
 
-			if (best == null || (other.Distance3D(cur) < other.Distance3D(best) && other.nodeType != ZTPathNode.NT_TARGET)) {
+			if (best == null || (other.Distance3D(cur) < other.Distance3D(best) && cur.nodeType != ZTPathNode.NT_TARGET)) {
 				best = cur;
 			}
 		}
@@ -1619,7 +1619,7 @@ class ZTBotController : Actor {
 			navDestS = navDest.NodeName();
 
 		String lastWeapS = "none.";
-		bool useNode = (currNode && currNode.nodeType == ZTPathNode.NT_USE );
+		bool useNode = (currNode && currNode.nodeType == ZTPathNode.NT_USE);
 
 		if (lastWeap)
 			lastWeapS = lastWeap.GetClassName();
@@ -1809,11 +1809,19 @@ class ZTBotController : Actor {
 			return;
 		}
 
+		if (lastEnemyPos == null && !possessed.CheckSight(goingAfter)) {
+			lastEnemyPos = ZTPathNode.plopNode(goingAfter.pos, ZTPathNode.NT_TARGET, 0);
+		}
+
+		if (lastEnemyPos != null) {
+			lastEnemyPos.SetOrigin(goingAfter.pos, true);
+		}
+
 		BotChat("IDLE", 2.25 / 90);
 
 		DodgeAndUse();
 
-		if (!PathMoveTo(goingAfter)) {
+		if (!PathMoveTo(goingAfter, true)) {
 			DebugLog(LT_INFO, String.Format("Unable to follow %s! Going back to wandering.", ActorName(goingAfter)));
 
 			goingAfter = null;
@@ -1848,7 +1856,7 @@ class ZTBotController : Actor {
 		return navDest != null;
 	}
 
-	bool PathMoveTo(Actor Where) {
+	bool PathMoveTo(Actor Where, bool bUseLastEnemyPos = false) {
 		if (possessed.CheckSight(Where)) {
 			if (Where is "ZTPathNode") {
 				SmartMove(ZTPathNode(Where));
@@ -1862,7 +1870,7 @@ class ZTBotController : Actor {
 		}
 
 		if (currNode && (navDest == null || possessed.Distance2D(navDest) < 64)) {
-			return ComplexPathTo(Where);
+			return ComplexPathTo(bUseLastEnemyPos ? Where : Actor(lastEnemyPos));
 		}
 
 		if (navDest && CheckSight(navDest)) {
@@ -2113,7 +2121,7 @@ class ZTBotController : Actor {
 			}
 
 			navdest = null;
-			lastEnemyPos = ZTPathNode.plopNode(currEnemyPos, NT_TARGET, 0);
+			lastEnemyPos = ZTPathNode.plopNode(currEnemyPos, ZTPathNode.NT_TARGET, 0);
 			ConsiderSetBotState(BS_HUNTING);
 
 			return;
