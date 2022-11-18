@@ -1717,7 +1717,7 @@ class ZTBotController : Actor {
 		}
 
 		if (CVar.FindCVar("teamplay").GetInt() >= 1) {
-			for (int ti = 0; ti < CVar.FindCVar('zb_maxteams'); ti++) {
+			for (int ti = 0; ti < CVar.FindCVar('zb_maxteams').GetInt(); ti++) {
 				if (GetTeamFrags(ti) >= fragLimit) {
 					EndGame('scorelimit');
 					return true;
@@ -1800,7 +1800,12 @@ class ZTBotController : Actor {
 
 	void DisplayScoreLimit() {
 		if (CVar.FindCVar("teamplay").GetInt() >= 1) {
-			possessed.A_Print(String.Format("\caTeam \cw%s\ca Won!", teamNames[myTeam]));
+			for (int ti = 0; ti < CVar.FindCVar('zb_maxteams').GetInt(); ti++) {
+				if (GetTeamFrags(ti) >= fragLimit) {
+					possessed.A_Print(String.Format("\caTeam \cw%s\ca Won!", teamNames[ti]));
+					return;
+				}
+			}
 		}
 
 		else {
@@ -1849,7 +1854,7 @@ class ZTBotController : Actor {
 			ZetaBotPawn(source).cont.ScoreFrag();
 		}
 
-		if (PlayerPawn(source) && PlayerPawn(source).player && IsEnemy(PlayerPawn(source), possessed)) {
+		if (source is "PlayerPawn" && PlayerPawn(source).player && IsEnemy(possessed, PlayerPawn(source))) {
 			PlayerPawn(source).player.FragCount++;
 			FragRecap();
 		}
