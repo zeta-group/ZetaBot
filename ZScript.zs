@@ -304,6 +304,10 @@ class ZTBotOrderCode: Actor {
 		}
 	}
 
+	String OrderString() {
+		return mySubject == ST_NOORDER ? "dismiss" : ZTBotOrder.BStateImperative[orderType];
+	}
+
 	void A_GiveBotOrder() {
 		if (Owner == null) {
 			A_Log(String.Format("\cwCould not find owner to give \cb%s\cw order", ZTBotOrder.BStateImperative[orderType]));
@@ -320,15 +324,16 @@ class ZTBotOrderCode: Actor {
 
 		// Make order and give it to all bots in radius
 		int howMany = GiveOrder(subject);
+		string orderString = OrderString();
 
 		if (howMany > 0) {
 			string status = "\cwGiven \cb%s\cw order to \cb%i\cw people";
-			A_Log(String.Format(status, ZTBotOrder.BStateImperative[orderType], howMany));
+			A_Log(String.Format(status, orderString, howMany));
 		}
 
 		else {
 			string status = "\cb%s\cw order could not reach anyone";
-			A_Log(String.Format(status, ZTBotOrder.BStateImperative[orderType]));
+			A_Log(String.Format(status, orderString));
 		}
 	}
 
