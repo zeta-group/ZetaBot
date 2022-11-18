@@ -1173,8 +1173,10 @@ class ZTBotController : Actor {
 
 		currentOrder = newOrder;
 
-		SetBotState(currentOrder.orderType);
-		ProcessOrderedState();
+		if (currentOrder) {
+			SetBotState(currentOrder.orderType);
+			ProcessOrderedState();
+		}
 	}
 
 	void ProcessOrderedState() {
