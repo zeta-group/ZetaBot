@@ -224,7 +224,6 @@ class ZTBotOrderCode: Actor {
 				Owner = pp;
 			}
 		}
-
 	}
 
 	ZTBotOrder ConcoctOrder(Actor subject) {
@@ -1240,7 +1239,7 @@ class ZTBotController : Actor {
 			}
 		}
 
-		DebugLog(LT_VERBOSE, "Closest node to "..other.GetClassName().." is "..(best == null ? "none" : ""..best.NodeName()));
+		//DebugLog(LT_VERBOSE, "Closest node to "..other.GetClassName().." is "..(best == null ? "none" : ""..best.NodeName()));
 
 		return best;
 	}
@@ -1293,7 +1292,7 @@ class ZTBotController : Actor {
 			}
 		}
 
-		DebugLog(LT_VERBOSE, "Closest visible node to "..other.GetClassName().." is "..(best == null ? "none" : ""..best.NodeName()));
+		//DebugLog(LT_VERBOSE, "Closest visible node to "..other.GetClassName().." is "..(best == null ? "none" : ""..best.NodeName()));
 
 		return best;
 	}
