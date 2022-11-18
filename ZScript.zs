@@ -2195,6 +2195,11 @@ class ZTBotController : Actor {
 				&& possessed.Distance2D(friend) < 600
 			) {
 				orderGiven.Apply(friend.cont);
+
+				if (friend.cont.bstate == BS_HUNTING && friend.cont.enemy == enemy) {
+					friend.cont.lastEnemyPos = lastEnemyPos;
+				}
+
 				friend.cont.SetCommander(self);
 
 				if (!didChat) {
