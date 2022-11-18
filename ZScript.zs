@@ -218,6 +218,7 @@ class ZTBotOrderCode: Actor {
 				return FindLookedAt();
 
 			case ST_SELF:
+			case ST_NOORDER:
 				return Owner;
 		}
 
@@ -264,7 +265,14 @@ class ZTBotOrderCode: Actor {
 				|| cont.commander == Owner
 				|| Owner is "PlayerPawn"
 			) && zbp.Distance2D(owner) < owner.radius + zbp.radius + 300) {
-				order.Apply(cont);
+				if (order != null) {
+					order.Apply(cont);
+				}
+
+				else {
+					cont.SetOrder(order);
+				}
+
 				howMany++;
 			}
 		}
