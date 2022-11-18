@@ -168,7 +168,7 @@ class ZTBotOrder play {
 }
 
 class ZTBotOrderCode: Actor {
-	// Sets all bots in a 512 units radius
+	// Sets all bots in a 300 units radius
 	// to be of an order of a specific type.
 
 	enum SubjectType {
@@ -186,6 +186,15 @@ class ZTBotOrderCode: Actor {
 
 	default {
 		ZTBotOrderCode.SubjectType ST_LOOKED;
+		ZTBotOrderCode.OrderType ZTBotController.BS_FOLLOWING;
+
+		Gravity 0;
+		Scale 0.5;
+		Height 2;
+		Radius 2;
+		Alpha 0.75;
+		RenderStyle "Shaded";
+		StencilColor "A810EC";
 	}
 
 	Actor FindLookedAt() {
@@ -216,12 +225,14 @@ class ZTBotOrderCode: Actor {
 	}
 
 	void FindOwner() {
-		ThinkerIterator ownIter = ThinkerIterator.Create("PlayerPawn");
+		ThinkerIterator ownIter = ThinkerIterator.Create("PlayerPawn", STAT_PLAYER);
 		PlayerPawn pp;
 
-		while ((pp = PlayerPawn(ownIter.Next()))) {
+		while (pp = PlayerPawn(ownIter.Next())) {
 			if (Owner == null || pp.Distance3D(self) < Owner.Distance3D(self)) {
-				Owner = pp;
+				if (pp.player) {
+					Owner = pp;
+				}
 			}
 		}
 	}
@@ -234,11 +245,12 @@ class ZTBotOrderCode: Actor {
 		return null;
 	}
 
-	void GiveOrder(Actor subject) {
+	int GiveOrder(Actor subject) {
 		let order = ConcoctOrder(subject);
 
 		ThinkerIterator botIter = ThinkerIterator.Create("ZetaBotPawn", STAT_DEFAULT);
 		ZetaBotPawn zbp;
+		int howMany = 0;
 
 		while ((zbp = ZetaBotPawn(botIter.Next()))) {
 			ZTBotController cont = zbp.cont;
@@ -248,21 +260,36 @@ class ZTBotOrderCode: Actor {
 			}
 
 			if ((
-				(cont.Commander == null && mySubject != ST_NOORDER)
+				(cont.commander == null && mySubject != ST_NOORDER)
 				|| cont.commander == Owner
 				|| Owner is "PlayerPawn"
-			) && zbp.Distance2D(self) < 512) {
-				cont.SetOrder(order);
+			) && zbp.Distance2D(owner) < owner.radius + zbp.radius + 300) {
+				order.Apply(cont);
+				howMany++;
 			}
 		}
+
+		return howMany;
 	}
 
 	override void PostBeginPlay() {
+		Super.PostBeginPlay();
+
 		SetXYZ(pos + Vec3Angle(-56, angle));
 
 		FindOwner();
 
+		if (Owner) {
+			Vector3 newPos = Owner.pos + Vec3Angle(10, Owner.angle);
+			newPos.z += Owner.Height * 0.75;
+
+			SetOrigin(newPos, false);
+		}
+	}
+
+	void A_GiveBotOrder() {
 		if (Owner == null) {
+			A_Log(String.Format("\cwCould not find owner to give \cb%s\cw order", ZTBotOrder.BStateImperative[orderType]));
 			return;
 		}
 
@@ -270,13 +297,30 @@ class ZTBotOrderCode: Actor {
 		let subject = FindSubject();
 
 		if (subject == null && orderType != ZTBotController.BS_WANDERING) {
+			A_Log(String.Format("\cwCould not find looked-at subject to give \cb%s\cw order", ZTBotOrder.BStateImperative[orderType]));
 			return;
 		}
 
 		// Make order and give it to all bots in radius
-		GiveOrder(subject);
+		int howMany = GiveOrder(subject);
 
-		Destroy();
+		if (howMany > 0) {
+			string status = "\cwGiven \cb%s\cw order to \cb%i\cw people";
+			A_Log(String.Format(status, ZTBotOrder.BStateImperative[orderType], howMany));
+		}
+
+		else {
+			string status = "\cb%s\cw order could not reach anyone";
+			A_Log(String.Format(status, ZTBotOrder.BStateImperative[orderType]));
+		}
+	}
+
+	States {
+		Spawn:
+			PLSS C 1;
+			PLSS C 3 A_GiveBotOrder;
+			PLSS BC 3;
+			Stop;
 	}
 }
 

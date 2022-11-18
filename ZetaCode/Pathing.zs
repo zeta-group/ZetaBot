@@ -57,6 +57,7 @@ class ZTPositionMarker : Actor {
 		Alpha 0.75;
 		RenderStyle "Shaded";
 		StencilColor "ECA810";
+		Gravity 100;
 	}
 
 	override void Tick() {
@@ -73,7 +74,7 @@ class ZTPositionMarker : Actor {
 
 	States {
 		Spawn:
-			TNT1 A 0;
+			NODE A 0;
 			Goto DLoop;
 		
 		DLoop:
