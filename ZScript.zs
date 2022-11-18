@@ -1793,12 +1793,18 @@ class ZTBotController : Actor {
 
 	void Subroutine_Follow() {
 		if (!goingAfter || goingAfter.Health <= 0) {
+			if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
+			lastEnemyPos = null;
+
 			RefreshCommander(); // make sure invalid orders do not stay, to avoid infinite loops
 			ConsiderSetBotState(BS_WANDERING);
 			return;
 		}
 
-		if (!ShouldFollow(goingAfter)) {
+		if (HasFollowed(goingAfter)) {
+			if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
+			lastEnemyPos = null;
+
 			ConsiderSetBotState(AssessBotAttitude(goingAfter));
 			return;
 		}
@@ -1812,6 +1818,8 @@ class ZTBotController : Actor {
 
 			goingAfter = null;
 			ConsiderSetBotState(BS_WANDERING);
+
+			Subroutine_Wander();
 
 			return;
 		}
@@ -1830,7 +1838,7 @@ class ZTBotController : Actor {
 		if (navDest) {
 			SmartMove(navDest);
 
-			DebugLog(LT_INFO, "Next navigation point found: "..navDest.NodeName());
+			//DebugLog(LT_INFO, "Next navigation point found: "..navDest.NodeName());
 		}
 
 		if (path) {
@@ -2299,12 +2307,24 @@ class ZTBotController : Actor {
 		}
 	}
 
+	bool HasFollowed(Actor who) {
+		if (!who) {
+			return false;
+		}
+
+		if (possessed.Distance3D(who) > 200) {
+			return false;
+		}
+
+		return possessed.CheckSight(who) || possessed.Distance2D(who) < 100;
+	}
+
 	bool ShouldFollow(Actor who) {
 		if (!who) {
 			return false;
 		}
 
-		if (possessed.Distance3D(who) > 400) {
+		if (possessed.Distance3D(who) > 500) {
 			return true;
 		}
 
@@ -2312,7 +2332,7 @@ class ZTBotController : Actor {
 			return false;
 		}
 
-		return !possessed.CheckSight(who) || ClosestNode(who) != currNode;
+		return !possessed.CheckSight(who);
 	}
 
 	void CheckPlopGround() {
