@@ -264,7 +264,7 @@ class ZTBotOrderCode: Actor {
 				(cont.commander == null && mySubject != ST_NOORDER)
 				|| cont.commander == Owner
 				|| Owner is "PlayerPawn"
-			) && zbp.Distance2D(owner) < owner.radius + zbp.radius + 300 && !zbp.cont.IsEnemy(owner) && zbp.CheckSight(owner)) {
+			) && zbp.Distance2D(owner) < owner.radius + zbp.radius + 300 && !zbp.cont.IsEnemy(zbp, owner) && zbp.CheckSight(owner)) {
 				if (order != null) {
 					order.Apply(cont);
 				}
