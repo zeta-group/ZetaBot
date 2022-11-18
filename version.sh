@@ -1,1 +1,1 @@
-VERSION=0.12.0-rc8
+VERSION=0.12.0-rc9
