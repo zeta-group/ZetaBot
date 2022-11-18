@@ -1716,17 +1716,22 @@ class ZTBotController : Actor {
 			return false;
 		}
 
-		int checkFrags = frags;
-
 		if (CVar.FindCVar("teamplay").GetInt() >= 1) {
-			checkFrags = GetTeamFrags(myTeam);
+			for (int ti = 0; ti < CVar.FindCVar('zb_maxteams'); ti++) {
+				if (GetTeamFrags(ti) >= fragLimit) {
+					EndGame('scorelimit');
+					return true;
+				}
+			}
+
+			return false;
 		}
 
-		if (checkFrags >= fragLimit) {
+		if (frags >= fragLimit) {
 			EndGame('scorelimit');
 		}
 
-		return checkFrags >= fragLimit;
+		return frags >= fragLimit;
 	}
 
 	void DisplayTeamFrags() {
