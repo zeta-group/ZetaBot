@@ -2260,15 +2260,13 @@ class ZTBotController : Actor {
 			lastEnemyPos = null;
 		}
 
-		if (bstate != BS_ATTACKING && enemy == null) {
-			currEnemyPos = pos;
-		}
-
 		if (enemy == null || enemy.Health < 1) {
 			SetOrder(null);
 
 			possessed.EndShoot();
 			ConsiderSetBotState(BS_WANDERING);
+
+			return;
 		}
 
 		if (!LineOfSight(enemy)) {
