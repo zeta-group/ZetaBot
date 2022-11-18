@@ -2267,12 +2267,16 @@ class ZTBotController : Actor {
 		SetCurrentNode(ClosestVisibleNode(possessed));
 
 		if (
-			(currNode == null || possessed.Distance2D(currNode) > 400 || (
-				(!possessed.CheckSight(currNode) && possessed.Distance2D(currNode) > 64))
+			(currNode == null || possessed.Distance2D(currNode) > 300 || (
+				(!possessed.CheckSight(currNode) && possessed.Distance2D(currNode) > 32))
 			)
 			&& CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar("zb_autonodenormal").GetBool()
 		) {
-			SetCurrentNode(ZTPathNode.plopNode(currSeeNodePos, ZTPathNode.NT_NORMAL, possessed.angle));
+			SetCurrentNode(ZTPathNode.plopNode(
+				currNode == null ? possessed.pos : currSeeNodePos,
+				ZTPathNode.NT_NORMAL,
+				possessed.angle));
+
 			currSeeNodePos = possessed.pos;
 		}
 	}
