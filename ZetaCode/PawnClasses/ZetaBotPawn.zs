@@ -277,7 +277,7 @@ class ZetaBotPawn : Actor {
 	}
 	
 	void A_DropWeapons() {
-		if (CVar.FindCVar("sv_dropweapons").GetBool() && !CVar.FindCVar("zb_alwaysdropweapons").GetBool()) {
+		if (CVar.FindCVar("sv_weapondrop").GetBool() && !CVar.FindCVar("zb_alwaysdropweapons").GetBool()) {
 			return;
 		}
 
