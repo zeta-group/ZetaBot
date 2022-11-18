@@ -2113,6 +2113,7 @@ class ZTBotController : Actor {
 			}
 
 			navdest = null;
+			lastEnemyPos = ZTPathNode.plopNode(currEnemyPos, NT_TARGET, 0);
 			ConsiderSetBotState(BS_HUNTING);
 
 			return;
