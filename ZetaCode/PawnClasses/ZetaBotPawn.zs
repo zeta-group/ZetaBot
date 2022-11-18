@@ -274,6 +274,8 @@ class ZetaBotPawn : Actor {
 		}
 			
 		A_DropWeapons();
+
+		cont = null;
 	}
 	
 	void A_DropWeapons() {
