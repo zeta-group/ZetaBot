@@ -143,7 +143,6 @@ class ZTBotOrder play {
 		}
 
 		bot.SetOrder(self);
-		bot.ConsiderSetBotState(orderType);
 	}
 
 	void UpdateOrder(Actor i_orderer, Actor i_lookedAt, uint i_orderType) {
@@ -1172,6 +1171,19 @@ class ZTBotController : Actor {
 		}	
 
 		currentOrder = newOrder;
+
+		SetBotState(currentOrder.orderType);
+		ProcessOrderedState();
+	}
+
+	void ProcessOrderedState() {
+		if (bstate == BS_ATTACKING || bstate == BS_HUNTING) {
+			SetBotState(LineOfSight(enemy) ? BS_ATTACKING : BS_HUNTING);
+		}
+
+		if (bstate == BS_FOLLOWING && !ShouldFollow(goingAfter)) {
+			SetBotState(BS_WANDERING);
+		}
 	}
 
 	void SetCurrentNode(ZTPathNode pn) {
@@ -2107,11 +2119,31 @@ class ZTBotController : Actor {
 		}
 	}
 
+	Actor GetOrderSubject() {
+		if (enemy) {
+			return enemy;
+		}
+
+		if (bstate == BS_FOLLOWING && goingAfter) {
+			return goingAfter;
+		}
+
+		return possessed;
+	}
+
+	uint GetOrderState() {
+		if (enemy) {
+			return BS_ATTACKING;
+		}
+
+		return BS_FOLLOWING;
+	}
+
 	void UpdateOrderGiven() {
 		OrderGiven.UpdateOrder(
 			possessed,
-			(bstate == BS_FOLLOWING && goingAfter) ? goingAfter : (!enemy ? Actor(possessed) : enemy),
-			(!enemy) ? BS_FOLLOWING : BS_ATTACKING);
+			GetOrderSubject(),
+			enemy ? BS_ATTACKING : BS_FOLLOWING);
 	}
 
 	void ConcoctOrderToGive() {
@@ -2120,6 +2152,20 @@ class ZTBotController : Actor {
 		}
 
 		UpdateOrderGiven();
+	}
+
+	bool BetterCommander(Actor otherCommander) {
+		if (otherCommander is "PlayerPawn") {
+			return false;
+		}
+
+		ZetaBotPawn zbp = ZetaBotPawn(otherCommander);
+
+		if (!zbp || !zbp.cont) {
+			return true;
+		}
+
+		return zbp.kills < kills;
 	}
 
 	void GiveCommands() {
@@ -2137,11 +2183,12 @@ class ZTBotController : Actor {
 			if (
 				friend
 				&& friend.cont
-				&& (friend.cont.commander == self || !friend.cont.commander)
+				&& (!friend.cont.commander || friend.cont.commander == self || BetterCommander(friend.cont.commander))
 				&& (!friend.cont.currentOrder || friend.cont.currentOrder != orderGiven)
 				&& possessed.Distance2D(friend) < 600
 			) {
 				orderGiven.Apply(friend.cont);
+				friend.cont.SetCommander(self);
 
 				if (!didChat) {
 					BotChat("ORDR", 0.2);
