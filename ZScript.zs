@@ -140,6 +140,7 @@ class ZTBotOrder play {
 
 		if (orderType == ZTBotController.BS_ATTACKING || orderType == ZTBotController.BS_HUNTING) {
 			bot.enemy = lookedAt;
+			bot.lastEnemy = lookedAt;
 		}
 
 		bot.SetOrder(self);
@@ -1848,16 +1849,13 @@ class ZTBotController : Actor {
 			}
 
 			if (bstate == BS_HUNTING) {
-				if (lastEnemyPos == null) {
+				if (lastEnemyPos == null || lastEnemy == null) {
 					ConsiderSetBotState(BS_WANDERING);
-
-					if (bstate != BS_HUNTING) {
-						return;
-					}
+					return;
 				}
 
-				double lastPosSqDist = ((possessed.pos.x - lastEnemyPos.pos.x) * (possessed.pos.x - lastEnemyPos.pos.x))
-										+ ((possessed.pos.y - lastEnemyPos.pos.y) * (possessed.pos.y - lastEnemyPos.pos.y));
+				Vector2 posDiff = possessed.pos.xy - lastEnemy.pos.xy;
+				double lastPosSqDist = posDiff dot posDiff;
 
 				if (lastPosSqDist < 48 * 48) {
 					DebugLog(LT_VERBOSE, String.Format("Close to last seen enemy pos but no enemy spotted! Going back to wandering. (expected x > %i, got = %i)", 40 * 40, lastPosSqDist));
