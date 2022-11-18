@@ -39,6 +39,10 @@ mixin class ActorName {
 			return "";
 		}
 
+		if (ZTBotController(Other)) {
+			return ZTBotController(other).myName;
+		}
+
 		if (ZetaBotPawn(Other)) {
 			ZTBotController cont = ZetaBotPawn(Other).cont;
 
@@ -1685,6 +1689,35 @@ class ZTBotController : Actor {
 		ACS_NamedExecute("__ZetaBot_endlevelDM");
 	}
 
+	Actor DMWinner() {
+		int fragLimit = CVar.FindCVar("fraglimit").GetInt();
+
+		if (fragLimit <= 0) {
+			return null;
+		}
+
+		let it_players = ThinkerIterator.create("PlayerPawn", STAT_PLAYER);
+		let it_bots = ThinkerIterator.create("ZetaBotPawn", STAT_DEFAULT);
+
+		PlayerPawn player;
+		ZetaBotPawn bot;
+
+		while (player = PlayerPawn(it_players.Next())) {
+			if (player.player && player.player.FragCount >= fragLimit) {
+				return Actor(player);
+			}
+		}
+
+		while (bot = ZetaBotPawn(it_bots.Next())) {
+			if (bot.cont && bot.cont.frags >= fragLimit) {
+				return Actor(bot);
+			}
+		}
+
+		return null;
+	}
+
+
 	int GetTeamFrags(int teamNum) {
 		int numFrags = 0;
 
@@ -1709,6 +1742,36 @@ class ZTBotController : Actor {
 		return numFrags;
 	}
 
+	bool CheckDMFrags() {
+		int fragLimit = CVar.FindCVar("fraglimit").GetInt();
+
+		if (fragLimit <= 0) {
+			return false;
+		}
+
+		let it_players = ThinkerIterator.create("PlayerPawn", STAT_PLAYER);
+		let it_bots = ThinkerIterator.create("ZetaBotPawn", STAT_DEFAULT);
+
+		PlayerPawn player;
+		ZetaBotPawn bot;
+
+		while (player = PlayerPawn(it_players.Next())) {
+			if (player.player && player.player.FragCount >= fragLimit) {
+				EndGame('scorelimit');
+				return true;
+			}
+		}
+
+		while (bot = ZetaBotPawn(it_bots.Next())) {
+			if (bot.cont && bot.cont.frags >= fragLimit) {
+				EndGame('scorelimit');
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	bool CheckFragLimit() {
 		int fragLimit = CVar.FindCVar("fraglimit").GetInt();
 
@@ -1727,11 +1790,7 @@ class ZTBotController : Actor {
 			return false;
 		}
 
-		if (frags >= fragLimit) {
-			EndGame('scorelimit');
-		}
-
-		return frags >= fragLimit;
+		return CheckDMFrags();
 	}
 
 	void DisplayTeamFrags() {
@@ -1809,7 +1868,7 @@ class ZTBotController : Actor {
 		}
 
 		else {
-			possessed.A_Print(String.Format("\cw%s\ca Won!", myName));
+			possessed.A_Print(String.Format("\cw%s\ca Won!", ActorName(DMWinner())));
 		}
 	}
 
