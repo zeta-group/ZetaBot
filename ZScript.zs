@@ -1978,35 +1978,39 @@ class ZTBotController : Actor {
 
 		ActorList mon = VisibleEnemies(possessed);
 
-		if (mon.length() > 0) {
-			PriorityQueue targets = PriorityQueue.Make("ActorHasher", 64);
-
-			for (uint i = 0; i < mon.length(); i++)
-				targets.add(mon.get(i), TargetPriority(mon.get(i)));
-
-			Actor newEnemy = Actor(targets.poll());
-
-			if (enemy == null || TargetPriority(enemy) < TargetPriority(newEnemy))
-				enemy = Actor(newEnemy);
-
-			/*
-			else {
-				if (retargetCount < 1) {
-					enemy = Actor(targets.poll());
-					retargetCount = 15;
-				}
-
-				else
-					retargetCount--;
-			}
-			*/
-
-			DebugLog(LT_INFO, "Attacking a "..enemy.GetClassName());
-
-			BotChat("TARG", 0.8);
-
-			ConsiderSetBotState(BS_ATTACKING);
+		if (mon.length() <= 0) {
+			mon.Destroy(); // clean actorlists after use
+			return;
 		}
+	
+		PriorityQueue targets = PriorityQueue.Make("ActorHasher", 64);
+
+		for (uint i = 0; i < mon.length(); i++)
+			targets.add(mon.get(i), TargetPriority(mon.get(i)));
+
+		Actor newEnemy = Actor(targets.poll());
+
+		if (enemy == null || TargetPriority(enemy) < TargetPriority(newEnemy))
+			enemy = Actor(newEnemy);
+
+		/*
+		else {
+			if (retargetCount < 1) {
+				enemy = Actor(targets.poll());
+				retargetCount = 15;
+			}
+
+			else
+				retargetCount--;
+		}
+		*/
+
+		DebugLog(LT_INFO, "Attacking a "..enemy.GetClassName());
+
+		BotChat("TARG", 0.8);
+
+		navDest = null;
+		ConsiderSetBotState(BS_ATTACKING);
 
 		if (mon) {
 			mon.Destroy(); // clean actorlists after use
