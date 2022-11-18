@@ -2326,7 +2326,7 @@ class ZTBotController : Actor {
 			return false;
 		}
 
-		if (possessed.Distance3D(who) > 200) {
+		if (possessed.Distance3D(who) > 100) {
 			return false;
 		}
 
@@ -2338,11 +2338,11 @@ class ZTBotController : Actor {
 			return false;
 		}
 
-		if (possessed.Distance3D(who) > 500) {
+		if (possessed.Distance3D(who) > 300) {
 			return true;
 		}
 
-		if (possessed.Distance3D(who) < 100) {
+		if (possessed.Distance3D(who) < 60) {
 			return false;
 		}
 
