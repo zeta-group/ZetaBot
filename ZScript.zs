@@ -143,19 +143,25 @@ class ZTBotOrder play {
 		}
 
 		bot.SetOrder(self);
-		bot.SetBotState(orderType);
+		bot.ConsiderSetBotState(orderType);
+	}
+
+	void UpdateOrder(Actor i_orderer, Actor i_lookedAt, uint i_orderType) {
+		orderer = i_orderer;
+		lookedAt = i_lookedAt;
+		orderType = i_orderType;
+
+		v_imperative = ZTBotOrder.BStateImperative[i_orderType];
+		v_past = ZTBotOrder.BStatePast[i_orderType];
+		v_continuous = ZTBotOrder.BStateContinuous[i_orderType];
 	}
 
 	static ZTBotOrder Make(Actor i_orderer, Actor i_lookedAt, uint i_orderType) {
 		ZTBotOrder res = ZTBotOrder(new("ZTBotOrder"));
 
-		res.orderer = i_orderer;
-		res.lookedAt = i_lookedAt;
-		res.orderType = i_orderType;
-
-		res.v_imperative = ZTBotOrder.BStateImperative[i_orderType];
-		res.v_past = ZTBotOrder.BStatePast[i_orderType];
-		res.v_continuous = ZTBotOrder.BStateContinuous[i_orderType];
+		if (i_orderer) {
+			res.UpdateOrder(i_orderer, i_lookedAt, i_orderType);
+		}
 
 		return res;
 	}
@@ -1148,6 +1154,7 @@ class ZTBotController : Actor {
 	}
 
 	ZTBotOrder currentOrder;
+	ZTBotOrder orderGiven;
 
 	void SetOrder(ZTBotOrder newOrder) {
 		if (newOrder && newOrder.orderer != commander) {
@@ -2100,12 +2107,23 @@ class ZTBotController : Actor {
 		}
 	}
 
-	void GiveCommands() {
-		ZTBotOrder myOrder = ZTBotOrder.Make(
+	void UpdateOrderGiven() {
+		OrderGiven.UpdateOrder(
 			possessed,
-			(bstate == BS_FOLLOWING) ? goingAfter : (!enemy ? Actor(possessed) : enemy),
-			(!enemy) ? BS_FOLLOWING : ((bstate == BS_ATTACKING) ? BS_HUNTING : bstate)
-		);
+			(bstate == BS_FOLLOWING && goingAfter) ? goingAfter : (!enemy ? Actor(possessed) : enemy),
+			(!enemy) ? BS_FOLLOWING : BS_ATTACKING;
+	}
+
+	void ConcoctOrderToGive() {
+		if (orderGiven == null) {
+			orderGiven = ZTBotOrder.Make(null, null, 0);
+		}
+
+		UpdateOrderGiven();
+	}
+
+	void GiveCommands() {
+		ConcoctOrderToGive();
 
 		ActorList friends = VisibleFriends(possessed, true);
 		ZetaBotPawn friend;
@@ -2116,8 +2134,14 @@ class ZTBotController : Actor {
 		while (i < friends.Length()) {
 			friend = ZetaBotPawn(friends.Get(i++));
 
-			if (friend && friend.cont && (friend.cont.commander == self || friend.cont.commander == null) && possessed.Distance2D(friend) < 600) {
-				myOrder.Apply(friend.cont);
+			if (
+				friend
+				&& friend.cont
+				&& (friend.cont.commander == self || !friend.cont.commander)
+				&& (!friend.cont.currentOrder || friend.cont.currentOrder != orderGiven)
+				&& possessed.Distance2D(friend) < 600
+			) {
+				orderGiven.Apply(friend.cont);
 
 				if (!didChat) {
 					BotChat("ORDR", 0.2);
@@ -2132,6 +2156,10 @@ class ZTBotController : Actor {
 	}
 
 	bool SetCommander(Actor newCommander) {
+		if (newCommander == commander) {
+			return true;
+		}
+
 		if (!newCommander) {
 			DebugLog(LT_INFO, myName.." is no longer led "..(!commander ? "" : "(was previously led by"..ActorName(commander)..")"));
 			commander = null;
@@ -2402,6 +2430,30 @@ class ZTBotController : Actor {
 		PickBalancedTeams(true);
 	}
 
+	void DispatchAiState() {
+		switch (bstate) {
+			case BS_HUNTING:
+				Subroutine_Hunt();
+				break;
+
+			case BS_FLEEING:
+				Subroutine_Flee();
+				break;
+
+			case BS_ATTACKING:
+				Subroutine_Attack();
+				break;
+
+			case BS_WANDERING:
+				Subroutine_Wander();
+				break;
+
+			case BS_FOLLOWING:
+				Subroutine_Follow();
+				break;
+		}
+	}
+
 	void A_ZetaTick() {
 		StatusDoubleCheck();
 
@@ -2517,27 +2569,7 @@ class ZTBotController : Actor {
 			MoveToward(currNode, 45);
 		}
 
-		switch (bstate) {
-			case BS_HUNTING:
-				Subroutine_Hunt();
-				break;
-
-			case BS_FLEEING:
-				Subroutine_Flee();
-				break;
-
-			case BS_ATTACKING:
-				Subroutine_Attack();
-				break;
-
-			case BS_WANDERING:
-				Subroutine_Wander();
-				break;
-			
-			case BS_FOLLOWING:
-				Subroutine_Follow();
-				break;
-		}
+		DispatchAiState();
 
 		if (bstate != BS_ATTACKING) {
 			if (bstate != BS_FLEEING)
