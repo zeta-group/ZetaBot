@@ -1367,6 +1367,13 @@ class ZTBotController : Actor {
 		return best;
 	}
 
+	bool CheckSightPos(Vector3 location) {
+		Actor dummy = Spawn('Candle', pos);
+		let res = possessed.CheckSight(dummy);
+		dummy.Destroy();
+		return res;
+	}
+
 	ZTPathNode ClosestVisibleNodeAt(Vector3 location) {
 		Actor dummy = Spawn("Candle", pos);
 		let res = ClosestVisibleNode(dummy);
@@ -2517,9 +2524,8 @@ class ZTBotController : Actor {
 		SetCurrentNode(ClosestVisibleNode(possessed));
 
 		if (
-			(currNode == null || possessed.Distance2D(currNode) > 300 || (
-				(!possessed.CheckSight(currNode) && possessed.Distance2D(currNode) > 32))
-			)
+			(currNode == null || possessed.Distance2D(currNode) > 500 || (
+				(!possessed.CheckSight(currNode) && CheckSightPos(currSeeNodePos))))
 			&& CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar("zb_autonodenormal").GetBool()
 		) {
 			SetCurrentNode(ZTPathNode.plopNode(
