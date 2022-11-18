@@ -1758,6 +1758,10 @@ class ZTBotController : Actor {
 
 		String obituary = "";
 
+		if (lastEnemyPos != null) {
+			lastEnemyPos.Destroy();
+		}
+
 		if (source && source != possessed) {
 			obituary = Stringtable.Localize(source.GetObituary(possessed, inflictor, MeansOfDeath, false));
 		}
