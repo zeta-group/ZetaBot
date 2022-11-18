@@ -1665,6 +1665,23 @@ class ZTBotController : Actor {
 	}
 
 	void TriggerExit() {
+		let it_bots = ThinkerIterator.create("ZetaBotPawn", STAT_DEFAULT);
+		let it_conts = ThinkerIterator.create("ZTBotController", STAT_DEFAULT);
+
+		ZetaBotPawn bot;
+		ZTBotController cont;
+
+		while (bot = ZetaBotPawn(it_bots.Next())) {
+			bot.Destroy();
+		}
+
+		while (cont = ZTBotController(it_conts.Next())) {
+			if (cont != self) {
+				cont.Destroy();
+			}
+		}
+
+		Destroy();
 		ACS_NamedExecute("__ZetaBot_endlevelDM");
 	}
 
