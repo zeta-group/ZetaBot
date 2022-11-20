@@ -1971,20 +1971,14 @@ class ZTBotController : Actor {
 			return;
 		}
 
-		/*if (lastEnemyPos == null && !possessed.CheckSight(goingAfter)) {
-			lastEnemyPos = ZTPathNode.plopNode(goingAfter.pos, ZTPathNode.NT_TARGET, 0);
-		}
-
-		if (lastEnemyPos != null) {
-			lastEnemyPos.SetOrigin(goingAfter.pos, true);
-		}*/
-
 		BotChat("IDLE", 2.25 / 90);
 
 		DodgeAndUse();
 
 		if (!PathMoveTo(goingAfter)) {
 			DebugLog(LT_INFO, String.Format("Unable to follow %s! Going back to wandering.", ActorName(goingAfter)));
+
+			RandomMove();
 
 			goingAfter = null;
 			ConsiderSetBotState(BS_WANDERING);
@@ -2549,21 +2543,23 @@ class ZTBotController : Actor {
 	}
 
 	void PickCommander() {
-		if (!commander) { // get a commander
-			ActorList friends = VisibleFriends(possessed);
+		if (commander) {
+			return;
+		}
 
-			if (friends.length() > 0) {
-				let newCommander = friends.get(Random(0, friends.length() - 1));
-				SetCommander(newCommander);
+		ActorList friends = VisibleFriends(possessed);
 
-				if (commander) {
-					BotChat("COMM", 0.8);
-				}
+		if (friends.length() > 0) {
+			let newCommander = friends.get(Random(0, friends.length() - 1));
+			SetCommander(newCommander);
+
+			if (commander) {
+				BotChat("COMM", 0.8);
 			}
+		}
 
-			if (friends) {
-				friends.Destroy(); // clean actorlists after use
-			}
+		if (friends) {
+			friends.Destroy(); // clean actorlists after use
 		}
 	}
 
@@ -2641,7 +2637,7 @@ class ZTBotController : Actor {
 		enemy = null;
 		BotChat("IDLE", 2.25 / 100);
 
-		if (ShouldFollow(commander)) {
+		if (bstate != BS_FOLLOWING && ShouldFollow(commander)) {
 			ConsiderSetBotState(BS_FOLLOWING);
 
 			if (bstate == BS_FOLLOWING) {
