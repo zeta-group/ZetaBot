@@ -548,21 +548,23 @@ class ZTBotController : Actor {
 
 		Line l = td.HitLine;
 		DebugLog(LT_VERBOSE, "["..myName.." USE NODE LOGS] Auto-activating wall! Line special: "..l.Special);
-		l.Activate(possessed, 0, SPAC_Use);
+		bool special = l.Activate(possessed, 0, SPAC_Use);
 
-		Level.ExecuteSpecial(
-			l.Special,
-			possessed,
-			l, 0,
+		if (special) {
+			Level.ExecuteSpecial(
+				l.Special,
+				possessed,
+				l, 0,
 
-			l.Args[0],
-			l.Args[1],
-			l.Args[2],
-			l.Args[3],
-			l.Args[4]
-		);
+				l.Args[0],
+				l.Args[1],
+				l.Args[2],
+				l.Args[3],
+				l.Args[4]
+			);
+		}
 
-		if (CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar('zb_autonodeuse').GetBool() && currnode.NodeType != ZTPathNode.NT_USE) {
+		if (special && CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar('zb_autonodeuse').GetBool() && currnode.NodeType != ZTPathNode.NT_USE) {
 			SetCurrentNode(ZTPathNode.plopNode(pos, ZTPathNode.NT_USE, possessed.angle));
 			currNode.Angle = Angle;
 		}
@@ -2187,29 +2189,33 @@ class ZTBotController : Actor {
 			);
 
 			if (useData.HitType == TRACE_HitWall) {
+				bool special = false;
+
 				if (useData.HitLine.Special > 0) {
 					Line l = useData.HitLine;
 					DebugLog(LT_VERBOSE, "["..myName.." USE NODE LOGS] Activating wall! Line special: "..l.Special);
-					l.Activate(possessed, 0, SPAC_Use);
+					special = l.Activate(possessed, 0, SPAC_Use);
 
-					Level.ExecuteSpecial(
-						l.Special,
-						possessed,
-						l, 0,
+					if (special) {
+						Level.ExecuteSpecial(
+							l.Special,
+							possessed,
+							l, 0,
 
-						l.Args[0],
-						l.Args[1],
-						l.Args[2],
-						l.Args[3],
-						l.Args[4]
-					);
+							l.Args[0],
+							l.Args[1],
+							l.Args[2],
+							l.Args[3],
+							l.Args[4]
+						);
+					}
 
 					// Prevent bots from getting stuck trying to use forever.
 					RandomStrafe();
 					RandomMove();
 				}
 
-				else {
+				if (!special) {
 					if (GruntInterval == 0 || GruntInterval-- == 0) {
 						possessed.A_PlaySound("ztmisc/grunt", CHAN_VOICE, attenuation: 1.1);
 						GruntInterval = 20;
@@ -2778,23 +2784,25 @@ class ZTBotController : Actor {
 				double lastAngle = possessed.angle;
 
 				DebugLog(LT_VERBOSE, "["..myName.." CROSS LOGS] Activating cross line! Line special: "..l.Special);
-				l.Activate(possessed, 0, SPAC_Cross);
+				bool special = l.Activate(possessed, 0, SPAC_Cross);
 
-				Level.ExecuteSpecial(
-					l.Special,
-					possessed,
-					l, 0,
+				if (special) {
+					Level.ExecuteSpecial(
+						l.Special,
+						possessed,
+						l, 0,
 
-					l.Args[0],
-					l.Args[1],
-					l.Args[2],
-					l.Args[3],
-					l.Args[4]
-				);
+						l.Args[0],
+						l.Args[1],
+						l.Args[2],
+						l.Args[3],
+						l.Args[4]
+					);
 
-				if ((possessed.pos.xy - lastPos.xy).Length() > 256) {
-					PlopTeleportNodes(lastPos, lastAngle);
-					return;
+					if ((possessed.pos.xy - lastPos.xy).Length() > 256) {
+						PlopTeleportNodes(lastPos, lastAngle);
+						return;
+					}
 				}
 			}
 		}
