@@ -2136,31 +2136,31 @@ class ZTBotController : Actor {
 			lastEnemyPos = null;
 		}
 
-		else if (lastEnemyPos) {
-			if (!PathMoveTo(lastEnemyPos)) {
-				DebugLog(LT_INFO, String.Format("No path found to last enemy pos while hunting %s! Going back to wandering.", ActorName(lastEnemyPos)));
-
-				if (lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) {
-					lastEnemyPos.Destroy();
-				}
-
-				lastEnemyPos = null;
-				ConsiderSetBotState(BS_WANDERING);
-
-				return;
-			}
-
-			if (bstate == BS_HUNTING) {
-				if (FRandom(0, 1) < 0.12)
-					possessed.Jump();
-
-				AutoUseAtAngle(0);
-			}
-		}
-
-		else {
+		else if (!lastEnemyPos) {
 			enemy = null;
 			ConsiderSetBotState(BS_WANDERING);
+			return;
+		}
+
+		if (!PathMoveTo(lastEnemyPos)) {
+			DebugLog(LT_INFO, String.Format("No path found to last enemy pos while hunting %s! Going back to wandering.", ActorName(lastEnemyPos)));
+
+			if (lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) {
+				lastEnemyPos.Destroy();
+			}
+
+			lastEnemyPos = null;
+			ConsiderSetBotState(BS_WANDERING);
+
+			return;
+		}
+
+		if (bstate == BS_HUNTING) {
+			if (FRandom(0, 1) < 0.12) {
+				possessed.Jump();
+			}
+
+			AutoUseAtAngle(0);
 		}
 
 		if (bstate == BS_HUNTING) {
