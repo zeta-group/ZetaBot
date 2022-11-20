@@ -2009,7 +2009,15 @@ class ZTBotController : Actor {
 			}
 
 			if (currPath.Length() > 1) {
-				for (furthest = 0; furthest < currPath.Length() - 1 && possessed.CheckSight(currPath.Get(furthest + 1)) && possessed.Distance2D(currPath.Get(furthest + 1) < 500; furthest++);
+				for (
+					furthest = 0;
+					(
+						furthest < currPath.Length() - 1 &&
+						possessed.CheckSight(currPath.Get(furthest + 1)) &&
+						possessed.Distance3D(currPath.Get(furthest + 1)) < 400
+					);
+					furthest++
+				);
 
 				while (furthest--) {
 					currPath.Remove(0);
