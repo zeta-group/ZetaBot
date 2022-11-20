@@ -212,6 +212,10 @@ class ZetaBotPawn : Actor {
 	}
 
 	void SetMoveType(uint nmoveType) {
+		if (moveType == MM_CROUCH && !CVar.GetCVar("sv_allowcrouch").GetBool()) {
+			return;
+		}
+
 		moveType = nmoveType;
 		
 		if ( moveType == MM_CROUCH )
@@ -230,6 +234,10 @@ class ZetaBotPawn : Actor {
 	}
 	
 	void Jump() {
+		if (!CVar.GetCVar("sv_allowjump").GetBool()) {
+			return;
+		}
+
 		if ( pos.z - floorZ > 1 || vel.z > 0 )
 			return;
 			
