@@ -2088,77 +2088,89 @@ class ZTBotController : Actor {
 	void Subroutine_Hunt() {
 		if (enemy == null || enemy.Health <= 0) {
 			enemy = null;
-			ConsiderSetBotState(BS_WANDERING);
 			SetOrder(null);
+			ConsiderSetBotState(BS_WANDERING);
 
 			if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
 			lastEnemyPos = null;
+
+			// Prevent getting stuck in a state transition loop.
+			RandomMove();
+			return;
 		}
 
-		else if (LineOfSight(enemy) || possessed.Distance3D(enemy) < 96) {
+		if (HasHunted(enemy)) {
 			AimToward(enemy, 50);
 			ConsiderSetBotState(BS_ATTACKING);
 			possessed.Jump();
 
 			if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
 			lastEnemyPos = null;
+
+			// Prevent getting stuck in a state transition loop.
+			RandomMove();
+			return;
 		}
 
-		else {
-			if (enemy == null && bstate != BS_HUNTING) {
-				PickEnemy();
+		if (CheckSight(enemy)) {
+			// It must be nearby somewhere!
+			RandomMove();
+			return;
+		}
+
+		if (lastEnemyPos == null || lastEnemy == null) {
+			enemy = null;
+
+			SetOrder(null);
+			ConsiderSetBotState(BS_WANDERING);
+
+			// Prevent getting stuck in a state transition loop.
+			RandomMove();
+			return;
+		}
+
+		Vector2 posDiff = possessed.pos.xy - lastEnemy.pos.xy;
+		double lastPosSqDist = posDiff dot posDiff;
+
+		if (lastPosSqDist < 48 * 48) {
+			DebugLog(LT_VERBOSE, String.Format("Close to last seen enemy pos but no enemy spotted! Going back to wandering. (expected x > %i, got = %i)", 40 * 40, lastPosSqDist));
+
+			enemy = null;
+			ConsiderSetBotState(BS_WANDERING);
+
+			if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
+			lastEnemyPos = null;
+		}
+
+		else if (lastEnemyPos) {
+			if (!PathMoveTo(lastEnemyPos)) {
+				DebugLog(LT_INFO, String.Format("No path found to last enemy pos while hunting %s! Going back to wandering.", ActorName(lastEnemyPos)));
+
+				if (lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) {
+					lastEnemyPos.Destroy();
+				}
+
+				lastEnemyPos = null;
+				ConsiderSetBotState(BS_WANDERING);
+
+				return;
 			}
 
 			if (bstate == BS_HUNTING) {
-				if (lastEnemyPos == null || lastEnemy == null) {
-					ConsiderSetBotState(BS_WANDERING);
-					return;
-				}
+				if (FRandom(0, 1) < 0.12)
+					possessed.Jump();
 
-				Vector2 posDiff = possessed.pos.xy - lastEnemy.pos.xy;
-				double lastPosSqDist = posDiff dot posDiff;
-
-				if (lastPosSqDist < 48 * 48) {
-					DebugLog(LT_VERBOSE, String.Format("Close to last seen enemy pos but no enemy spotted! Going back to wandering. (expected x > %i, got = %i)", 40 * 40, lastPosSqDist));
-
-					enemy = null;
-					ConsiderSetBotState(BS_WANDERING);
-
-					if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
-					lastEnemyPos = null;
-				}
-
-				else if (lastEnemyPos) {
-					if (!PathMoveTo(lastEnemyPos)) {
-						DebugLog(LT_INFO, String.Format("No path found to last enemy pos while hunting %s! Going back to wandering.", ActorName(lastEnemyPos)));
-
-						if (lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) {
-							lastEnemyPos.Destroy();
-						}
-
-						lastEnemyPos = null;
-						ConsiderSetBotState(BS_WANDERING);
-
-						return;
-					}
-
-					if (bstate == BS_HUNTING) {
-						if (FRandom(0, 1) < 0.12)
-							possessed.Jump();
-
-						AutoUseAtAngle(0);
-					}
-				}
-
-				else {
-					enemy = null;
-					ConsiderSetBotState(BS_WANDERING);
-				}
-
-				if (bstate == BS_HUNTING) {
-					BotChat("ACTV", 0.025);
-				}
+				AutoUseAtAngle(0);
 			}
+		}
+
+		else {
+			enemy = null;
+			ConsiderSetBotState(BS_WANDERING);
+		}
+
+		if (bstate == BS_HUNTING) {
+			BotChat("ACTV", 0.025);
 		}
 	}
 
@@ -2197,6 +2209,10 @@ class ZTBotController : Actor {
 						l.Args[3],
 						l.Args[4]
 					);
+
+					// Prevent bots from getting stuck trying to use forever.
+					RandomStrafe();
+					RandomMove();
 				}
 
 				else {
@@ -2561,6 +2577,18 @@ class ZTBotController : Actor {
 		}
 
 		return possessed.CheckSight(who) || possessed.Distance2D(who) < 100;
+	}
+
+	bool HasHunted(Actor who) {
+		if (!who) {
+			return false;
+		}
+
+		if (possessed.Distance3D(who) < 100) {
+			return true;
+		}
+
+		return LineOfSight(who);
 	}
 
 	bool ShouldFollow(Actor who) {
