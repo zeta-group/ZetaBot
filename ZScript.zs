@@ -2548,6 +2548,16 @@ class ZTBotController : Actor {
 		return true;
 	}
 
+	bool Commands(Actor another) {
+		ZetaBotPawn zbp = ZetaBotPawn(another);
+
+		if (!zbp || !zbp.cont) {
+			return false;
+		}
+
+		return zbp.cont.commander == possessed;
+	}
+
 	void PickCommander() {
 		if (commander) {
 			return;
@@ -2556,7 +2566,7 @@ class ZTBotController : Actor {
 		ActorList friends = VisibleFriends(possessed);
 		int tries = 20;
 
-		while ((!commander || commander.commander == possessed) && tries--) {
+		while ((!commander || Commands(commander)) && tries--) {
 			if (friends.length() > 0) {
 				let newCommander = friends.get(Random(0, friends.length() - 1));
 				SetCommander(newCommander);
