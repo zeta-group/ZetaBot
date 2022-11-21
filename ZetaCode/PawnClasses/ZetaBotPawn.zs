@@ -212,13 +212,13 @@ class ZetaBotPawn : Actor {
 	}
 
 	void SetMoveType(uint nmoveType) {
-		if (moveType == MM_CROUCH && !CVar.GetCVar("sv_allowcrouch").GetBool()) {
-			return;
+		if (moveType == MM_Crouch && !CVar.GetCVar("sv_allowcrouch").GetBool()) {
+			moveType = MM_None;
 		}
 
 		moveType = nmoveType;
 		
-		if ( moveType == MM_CROUCH )
+		if ( moveType == MM_Crouch )
 			Height = Default.Height / 2;
 			
 		else
