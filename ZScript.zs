@@ -2007,7 +2007,7 @@ class ZTBotController : Actor {
         if (currPath != null && currPath.Get(currPath.Length() - 1) == closestNode) {
             uint closest = 0, furthest = 0;
 
-            for (closest = currPath.Length() - 1; closest > 0 && !possessed.CheckSight(currPath.Get(closest)); closest--);
+            for (closest = currPath.Length() - 1; closest > 0 && (!currPath.Get(closest) || !possessed.CheckSight(currPath.Get(closest))); closest--);
 
             while (closest--) {
                 currPath.Remove(0);
@@ -2018,8 +2018,9 @@ class ZTBotController : Actor {
                     furthest = 0;
                     (
                         furthest < currPath.Length() - 1 &&
-                        possessed.CheckSight(currPath.Get(furthest + 1)) &&
-                        possessed.Distance3D(currPath.Get(furthest + 1)) < 400
+                        (!currPath.Get(furthest + 1) || (
+                            possessed.CheckSight(currPath.Get(furthest + 1)) &&
+                            possessed.Distance3D(currPath.Get(furthest + 1)) < 400))
                     );
                     furthest++
                 );
@@ -2046,7 +2047,7 @@ class ZTBotController : Actor {
             do {
                 navDest = ZTPathNode(path.get(0));
                 path.remove(0);
-            } while (navDest == currNode);
+            } while (!navDest || navDest == currNode);
 
             if (navDest) {
                 SmartMove(navDest);
