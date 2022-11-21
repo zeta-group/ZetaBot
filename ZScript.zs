@@ -2680,6 +2680,10 @@ class ZTBotController : Actor {
         if (currNode && possessed.CheckSight(currNode)) {
             currSeeNodePos = possessed.pos;
         }
+
+        if (navDest && !possessed.CheckSight(navDest)) {
+            navDest = null;
+        }
     }
 
     void Subroutine_Wander() {
