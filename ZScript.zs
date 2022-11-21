@@ -3347,89 +3347,103 @@ class _BotName : Thinker {
 
 		bool showing = false;
 
-		if (countDown < 1) {
-			let iter = ThinkerIterator.Create("ZetaBotPawn", STAT_DEFAULT);
-			ZetaBotPawn zb = null;
-			ZetaBotPawn closest = null;
-			double cdist = 512;
+		if (countDown > 0) {
+			countdown--;
+			return;
+		}
 
-			while (zb = ZetaBotPawn(iter.Next())) {
-				Vector2 v1 = Owner.AngleToVector(Owner.angle);
-				Vector2 v2 = Owner.Vec2To(zb) / Owner.Distance2D(zb);
+		let iter = ThinkerIterator.Create("ZetaBotPawn", STAT_DEFAULT);
+		ZetaBotPawn zb = null;
+		ZetaBotPawn closest = null;
+		double cdist = 512;
 
-				double vdot = v1 dot v2;
+		while (zb = ZetaBotPawn(iter.Next())) {
+			Vector2 v1 = Owner.AngleToVector(Owner.angle);
+			Vector2 v2 = Owner.Vec2To(zb) / Owner.Distance2D(zb);
 
-				if (vdot > 1.0 - 1.0 / (Owner.Distance2D(zb) / (zb.Radius + 2)) && Owner.CheckSight(zb) && zb.cont && zb.Health > 0 && (closest == null || Owner.Distance2D(zb) < cdist)) {
-					if (cdist > Owner.Distance2D(zb)) {
-						cdist = Owner.Distance2D(zb);
-					}
+			double vdot = v1 dot v2;
 
-					closest = zb;
-				}
-			}
-
-			if (closest && closest.cont) {
-				//DebugLog(LT_VERBOSE, "Printing status for bot "..closest.cont.myName.." in state "..ZTBotController.BStateNames[closest.cont.bstate]);
-
-				countDown = 3;
-
-				Owner.A_Print(String.Format("\ci%s\n\cg\%i HP%s\n\cr%s\n%s\n\n%s\n\n%s\n\n%s",
-					closest.cont.myName,
-					closest.Health,
-					DescribeFrags(closest.cont),
-					DescribeTeam(closest.cont),
-					DescribeTask(closest.cont),
-					DescribeOrders(closest.cont),
-					DescribeCommander(closest.cont),
-					DescribeDebug(closest.cont)
-				));
-
-				lastShown = closest;
-				printing = true;
-			}
-
-			ZTPathNode pnClosest;
-
-			if (closest == null && CVar.FindCVar("zb_debug").GetInt() >= 2) {
-				let nodeIter = ThinkerIterator.Create("ZTPathnode", 91);
-				ZTPathNode pn;
-				double pcdist = 256;
-
-				while (pn = ZTPathNode(nodeIter.Next())) {
-					Vector2 v1 = Owner.AngleToVector(Owner.angle);
-					Vector2 v2 = Owner.Vec2To(pn) / Owner.Distance2D(pn);
-
-					double vdot = v1 dot v2;
-
-					if (vdot > 1 - 1 / (Owner.Distance2D(pn) / (pn.Radius + 2)) && Owner.CheckSight(pn) && (pnClosest == null || Owner.Distance2D(pn) < pcdist)) {
-						if (Owner.Distance2D(pn) < pcdist) {
-							pcdist = Owner.Distance2D(pn);
-						}
-
-						pnClosest = pn;
-					}
+			if (vdot > 1.0 - 1.0 / (Owner.Distance2D(zb) / (zb.Radius + 2)) && Owner.CheckSight(zb) && zb.cont && zb.Health > 0 && (closest == null || Owner.Distance2D(zb) < cdist)) {
+				if (cdist > Owner.Distance2D(zb)) {
+					cdist = Owner.Distance2D(zb);
 				}
 
-				if (pnClosest && pnClosest != lastShown) {
-					countDown = 2;
-					if (!printing) Owner.A_Print(String.Format("\ci%s Node: \cr#%i \cg(x=%d, y=%d)", ZTPathNode.ZTNavTypeNames[pnClosest.nodeType], pnClosest.id, pnClosest.pos.x, pnClosest.pos.y));
-					printing = true;
-					lastShown = pnClosest;
+				else {
+					continue;
 				}
-			}
 
-			if (pnClosest || closest) showing = true;
-
-			if (!showing) {
-				if (printing) Owner.A_Print("");
-
-				printing = false;
-				lastShown = null;
-				countDown = 2;
+				closest = zb;
 			}
 		}
 
-		else
-			countDown--;
+		if (closest && closest.cont) {
+			//DebugLog(LT_VERBOSE, "Printing status for bot "..closest.cont.myName.." in state "..ZTBotController.BStateNames[closest.cont.bstate]);
+
+			countDown = 3;
+
+			Owner.A_Print(String.Format("\ci%s\n\cg\%i HP%s\n\cr%s\n%s\n\n%s\n\n%s\n\n%s",
+				closest.cont.myName,
+				closest.Health,
+				DescribeFrags(closest.cont),
+				DescribeTeam(closest.cont),
+				DescribeTask(closest.cont),
+				DescribeOrders(closest.cont),
+				DescribeCommander(closest.cont),
+				DescribeDebug(closest.cont)
+			));
+
+			lastShown = closest;
+			showing = true;
+			printing = true;
+		}
+
+		ZTPathNode pnClosest;
+
+		if ((!closest || lastShown != closest) && CVar.FindCVar("zb_debug").GetInt() >= 2) {
+			let nodeIter = ThinkerIterator.Create("ZTPathnode", 91);
+			ZTPathNode pn;
+			double pcdist = 256;
+
+			while (pn = ZTPathNode(nodeIter.Next())) {
+				Vector2 v1 = Owner.AngleToVector(Owner.angle);
+				Vector2 v2 = Owner.Vec2To(pn) / Owner.Distance2D(pn);
+
+				double vdot = v1 dot v2;
+
+				if (vdot > 1 - 1 / (Owner.Distance2D(pn) / (pn.Radius + 2)) && Owner.CheckSight(pn) && (pnClosest == null || Owner.Distance2D(pn) < pcdist)) {
+					if (Owner.Distance2D(pn) < pcdist) {
+						pcdist = Owner.Distance2D(pn);
+					}
+
+					else {
+						continue;
+					}
+
+					pnClosest = pn;
+				}
+			}
+
+			if (pnClosest) {
+				countDown = 3;
+				Owner.A_Print(String.Format(
+					"\ci%s Node: \cr#%i \cg(x=%d, y=%d%s)",
+					ZTPathNode.ZTNavTypeNames[pnClosest.nodeType], pnClosest.id,
+					pnClosest.pos.x, pnClosest.pos.y,
+					pnClosest.assoc_id == 0 ? "" : ", assoc="..pnClosest.assoc_id
+				));
+
+				showing = true;
+				printing = true;
+				lastShown = pnClosest;
+			}
+		}
+
+		if (!showing) {
+			if (printing) Owner.A_Print("");
+
+			printing = false;
+			lastShown = null;
+			countDown = 2;
+		}
 	}
 }
