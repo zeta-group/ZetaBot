@@ -550,19 +550,17 @@ class ZTBotController : Actor {
 		DebugLog(LT_VERBOSE, "["..myName.." USE NODE LOGS] Auto-activating wall! Line special: "..l.Special);
 		bool special = l.Activate(possessed, 0, SPAC_Use);
 
-		if (special) {
-			Level.ExecuteSpecial(
-				l.Special,
-				possessed,
-				l, 0,
+		special = special || Level.ExecuteSpecial(
+			l.Special,
+			possessed,
+			l, 0,
 
-				l.Args[0],
-				l.Args[1],
-				l.Args[2],
-				l.Args[3],
-				l.Args[4]
-			);
-		}
+			l.Args[0],
+			l.Args[1],
+			l.Args[2],
+			l.Args[3],
+			l.Args[4]
+		);
 
 		if (special && CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar('zb_autonodeuse').GetBool() && currnode.NodeType != ZTPathNode.NT_USE) {
 			SetCurrentNode(ZTPathNode.plopNode(pos, ZTPathNode.NT_USE, possessed.angle));
@@ -2199,19 +2197,17 @@ class ZTBotController : Actor {
 					DebugLog(LT_VERBOSE, "["..myName.." USE NODE LOGS] Activating wall! Line special: "..l.Special);
 					special = l.Activate(possessed, 0, SPAC_Use);
 
-					if (special) {
-						Level.ExecuteSpecial(
-							l.Special,
-							possessed,
-							l, 0,
+					special |+ Level.ExecuteSpecial(
+						l.Special,
+						possessed,
+						l, 0,
 
-							l.Args[0],
-							l.Args[1],
-							l.Args[2],
-							l.Args[3],
-							l.Args[4]
-						);
-					}
+						l.Args[0],
+						l.Args[1],
+						l.Args[2],
+						l.Args[3],
+						l.Args[4]
+					);
 
 					// Prevent bots from getting stuck trying to use forever.
 					RandomStrafe();
@@ -2821,23 +2817,21 @@ class ZTBotController : Actor {
 				DebugLog(LT_VERBOSE, "["..myName.." CROSS LOGS] Activating cross line! Line special: "..l.Special);
 				bool special = l.Activate(possessed, 0, SPAC_Cross);
 
-				if (special) {
-					Level.ExecuteSpecial(
-						l.Special,
-						possessed,
-						l, 0,
+				special = special || Level.ExecuteSpecial(
+					l.Special,
+					possessed,
+					l, 0,
 
-						l.Args[0],
-						l.Args[1],
-						l.Args[2],
-						l.Args[3],
-						l.Args[4]
-					);
+					l.Args[0],
+					l.Args[1],
+					l.Args[2],
+					l.Args[3],
+					l.Args[4]
+				);
 
-					if ((possessed.pos.xy - lastPos.xy).Length() > 256) {
-						PlopTeleportNodes(lastPos, lastAngle);
-						return;
-					}
+				if (special && (possessed.pos.xy - lastPos.xy).Length() > 256) {
+					PlopTeleportNodes(lastPos, lastAngle);
+					return;
 				}
 			}
 		}
