@@ -2933,6 +2933,14 @@ class ZTBotController : Actor {
         possessed.angle += angleMomentum * 5;
         possessed.ApplyMovement();
 
+        if (possessed.vel.xy.Length() < 5 && FRandom(0, 1) < 0.3) {
+            Vector2 dir = possessed.AngleToVector(-possessed.angle, 5);
+
+            while (possessed.vel.xy dot dir < 0) {
+                possessed.vel.xy += dir;
+            }
+        }
+
         angleMomentum *= 0.95;
     }
 
