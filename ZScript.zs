@@ -2047,7 +2047,7 @@ class ZTBotController : Actor {
             do {
                 navDest = ZTPathNode(path.get(0));
                 path.remove(0);
-            } while (!navDest || navDest == currNode);
+            } while (path.Length() && (!navDest || navDest == currNode));
 
             if (navDest) {
                 SmartMove(navDest);
