@@ -2807,7 +2807,7 @@ class ZTBotController : Actor {
         tracer.Trace(
             possessed.pos,
             possessed.CurSector,
-            (possessed.vel.xy, 0),
+            (possessed.vel.xy.Unit(), 0),
             possessed.vel.xy.Length(),
             0
         );
