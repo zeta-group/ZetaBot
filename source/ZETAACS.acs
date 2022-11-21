@@ -13,6 +13,6 @@ script "__ZetaBot_respawn" RESPAWN
 
 script "__ZetaBot_endlevelDM" (void)
 {
-	Exit_Normal(0);
+    Exit_Normal(0);
 }
 
