@@ -2061,6 +2061,11 @@ class ZTBotController : Actor {
 
 			else {
 				MoveToward(Where, 20);
+
+				// Prevent getting stuck chasing unreachable enemies
+				if (FRandom(0, 1) < 0.08) {
+					RandomMove();
+				}
 			}
 
 			return true;
