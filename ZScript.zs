@@ -509,7 +509,7 @@ class ZTBotController : Actor {
 
         possessed.LineTrace(
             possessed.angle + angle,
-            possessed.radius + 64,
+            possessed.radius + 32,
             0,
             flags: TRF_THRUBLOCK | TRF_THRUHITSCAN | TRF_THRUACTORS | TRF_BLOCKUSE,
             offsetz: possessed.height - 24,
