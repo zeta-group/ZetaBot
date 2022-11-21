@@ -2554,8 +2554,9 @@ class ZTBotController : Actor {
 		}
 
 		ActorList friends = VisibleFriends(possessed);
+		int tries = 20;
 
-		while (!commander || commander.commander == possessed) {
+		while ((!commander || commander.commander == possessed) && tries--) {
 			if (friends.length() > 0) {
 				let newCommander = friends.get(Random(0, friends.length() - 1));
 				SetCommander(newCommander);
