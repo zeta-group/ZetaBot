@@ -2555,13 +2555,15 @@ class ZTBotController : Actor {
 
 		ActorList friends = VisibleFriends(possessed);
 
-		if (friends.length() > 0) {
-			let newCommander = friends.get(Random(0, friends.length() - 1));
-			SetCommander(newCommander);
-
-			if (commander) {
-				BotChat("COMM", 0.8);
+		while (!commander || commander.commander == possessed) {
+			if (friends.length() > 0) {
+				let newCommander = friends.get(Random(0, friends.length() - 1));
+				SetCommander(newCommander);
 			}
+		}
+
+		if (commander) {
+			BotChat("COMM", 0.8);
 		}
 
 		if (friends) {
