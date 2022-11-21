@@ -2030,7 +2030,7 @@ class ZTBotController : Actor {
                 }
             }
 
-            bDiscardPath = (currPath.Length() <= 0 || !CheckSight(currPath.Get(0)));
+            bDiscardPath = (currPath.Length() <= 0 || !possessed.CheckSight(currPath.Get(0)));
         }
 
         if (currPath && bDiscardPath) {
@@ -2087,7 +2087,7 @@ class ZTBotController : Actor {
             return ComplexPathTo(Where);
         }
 
-        if (navDest && CheckSight(navDest)) {
+        if (navDest && possessed.CheckSight(navDest)) {
             SmartMove(navDest);
             return true;
         }
@@ -2126,7 +2126,7 @@ class ZTBotController : Actor {
             return;
         }
 
-        if (CheckSight(enemy)) {
+        if (possessed.CheckSight(enemy)) {
             // It must be nearby somewhere!
             RandomMove();
             return;
