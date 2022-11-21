@@ -2847,6 +2847,10 @@ class ZTBotController : Actor {
 			commander = null;
 		}
 
+		if (Commands(commander)) {
+			commander = null;
+		}
+
 		if (currentOrder && (currentOrder.orderer == null || currentOrder.orderer.health <= 0)) {
 			currentOrder = null;
 		}
