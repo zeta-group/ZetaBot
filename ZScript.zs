@@ -907,18 +907,20 @@ class ZTBotController : Actor {
         RespawnReset();
     }
 
-    void MoveToward(Actor other, double aimSpeed) {
+    void MoveToward(Actor other, double aimSpeed, bool bWithStrafe = true) {
         AimToward(other, aimSpeed);
         MoveForward();
 
-        if (possessed.AngleTo(other) > possessed.Angle - 50)
-            MoveRight();
+        if (bWithStrafe) {
+            if (possessed.AngleTo(other) > possessed.Angle + 15)
+                MoveRight();
 
-        else if (possessed.Angle + 50 < possessed.AngleTo(other))
-            MoveLeft();
+            else if (possessed.Angle - 15 < possessed.AngleTo(other))
+                MoveLeft();
 
-        else
-            MoveForward();
+            else
+                RandomStrafe();
+        }
     }
 
     void MoveTowardPos(Vector3 other, double aimSpeed) {
@@ -1104,6 +1106,13 @@ class ZTBotController : Actor {
 
         if (currNode && currNode.nodeType == ZTPathNode.NT_USE)
             DodgeAndUse();
+
+        if (currNode && currNode.nodeType == ZTPathNode.NT_TELEPORT_SOURCE) {
+            // always go to a teleport if going to it
+            MoveToward(currNode, 15);
+            MoveToward(currNode, 15);
+            MoveToward(currNode, 15);
+        }
 
         if (toward) {
             if (currNode) {
@@ -3059,11 +3068,6 @@ class ZTBotController : Actor {
         TryUse();
 
         GiveCommands();
-
-        if (currNode && currNode.nodeType == ZTPathNode.NT_TELEPORT_SOURCE) {
-            // always go to a teleport if going to it
-            MoveToward(currNode, 45);
-        }
 
         DispatchAiState();
 
