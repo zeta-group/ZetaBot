@@ -2982,16 +2982,7 @@ class ZTBotController : Actor {
         maxAngleRate = CVar.GetCVar('zb_turnspeed').GetFloat();
     }
 
-    void A_ZetaTick() {
-        StatusDoubleCheck();
-        CrossActivate();
-        RefreshCommander();
-        RefreshSkills();
-
-        if (TelefragTimer > 0) {
-            TelefragTimer--;
-        }
-
+    void HealthCheck() {
         if (possessed == null || possessed.Health <= 0) {
             if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
 
@@ -3010,6 +3001,19 @@ class ZTBotController : Actor {
             enemy = null;
             return;
         }
+    }
+
+    void A_ZetaTick() {
+        HealthCheck();
+        StatusDoubleCheck();
+        RefreshCommander();
+        RefreshNode();
+        RefreshSkills();
+        CrossActivate();
+
+        if (TelefragTimer > 0) {
+            TelefragTimer--;
+        }
 
         TickAge();
         ApplyMovement();
@@ -3018,8 +3022,6 @@ class ZTBotController : Actor {
             possessed.EndShoot();
             return;
         }
-
-        RefreshNode();
 
         if (age - lastShot > 0.7 && possessed.bShooting)
             possessed.EndShoot();
