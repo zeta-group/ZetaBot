@@ -2034,7 +2034,10 @@ class ZTBotController : Actor {
 				return false;
 			}
 
-			navDest = ZTPathNode(path.get(0));
+			do {
+				navDest = ZTPathNode(path.get(0));
+				path.remove(0);
+			} while (navDest == currNode);
 
 			if (navDest) {
 				SmartMove(navDest);
