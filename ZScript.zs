@@ -2122,7 +2122,7 @@ class ZTBotController : Actor {
             return;
         }
 
-        if (lastEnemyPos == null || lastEnemy == null) {
+        if (lastEnemyPos == null || lastEnemy == null && (!commander || possessed.Distance2D(commander) < 80 || !PathMoveTo(commander))) {
             enemy = null;
 
             SetOrder(null);
