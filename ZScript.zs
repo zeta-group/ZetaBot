@@ -2497,26 +2497,45 @@ class ZTBotController : Actor {
 		while (i < friends.Length()) {
 			friend = ZetaBotPawn(friends.Get(i++));
 
-			if (
-				friend
-				&& friend != possessed
-				&& friend.cont
-				&& (!friend.cont.commander || friend.cont.commander == self || BetterCommander(friend.cont.commander))
-				&& (!friend.cont.currentOrder || friend.cont.currentOrder != orderGiven)
-				&& possessed.Distance2D(friend) < 600
-			) {
-				orderGiven.Apply(friend.cont);
+			if (!friend) {
+				continue;
+			}
 
-				if (friend.cont.bstate == BS_HUNTING && friend.cont.enemy == enemy) {
-					friend.cont.lastEnemyPos = lastEnemyPos;
-				}
+			if (friend == possessed) {
+				continue;
+			}
 
-				friend.cont.SetCommander(self);
+			if (friend == commander) {
+				continue;
+			}
 
-				if (!didChat) {
-					BotChat("ORDR", 0.2);
-					didChat = true;
-				}
+			if (!friend.cont) {
+				continue;
+			}
+
+			if (friend.cont.commander && friend.cont.commander != self && !BetterCommander(friend.cont.commander)) {
+				continue;
+			}
+
+			if (friend.cont.currentOrder && friend.cont.currentOrder == orderGiven) {
+				continue;
+			}
+
+			if (possessed.Distance2D(friend) > 600) {
+				continue;
+			}
+
+			orderGiven.Apply(friend.cont);
+
+			if (friend.cont.bstate == BS_HUNTING && friend.cont.enemy == enemy) {
+				friend.cont.lastEnemyPos = lastEnemyPos;
+			}
+
+			friend.cont.SetCommander(self);
+
+			if (!didChat) {
+				BotChat("ORDR", 0.2);
+				didChat = true;
 			}
 		}
 
