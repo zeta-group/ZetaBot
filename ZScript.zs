@@ -562,7 +562,7 @@ class ZTBotController : Actor {
             l.Args[4]
         );
 
-        if (special && CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar('zb_autonodeuse').GetBool() && currnode.NodeType != ZTPathNode.NT_USE) {
+        if (special && CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar('zb_autonodeuse').GetBool() && (currnode.NodeType != ZTPathNode.NT_USE || !possessed.CheckSight(currNode))) {
             SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_USE, possessed.angle));
             currNode.Angle = Angle;
         }
