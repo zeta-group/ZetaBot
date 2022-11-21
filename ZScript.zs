@@ -562,7 +562,9 @@ class ZTBotController : Actor {
             l.Args[4]
         );
 
-        if (special && CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar('zb_autonodeuse').GetBool() && (currnode.NodeType != ZTPathNode.NT_USE || !possessed.CheckSight(currNode))) {
+        if (special && CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar('zb_autonodeuse').GetBool() &&
+            (currnode.NodeType != ZTPathNode.NT_USE || !possessed.CheckSight(currNode) || possessed.Distance2D(currNode) > 40)
+        ) {
             SetCurrentNode(ZTPathNode.plopNode(possessed.pos, ZTPathNode.NT_USE, possessed.angle));
             currNode.Angle = Angle;
         }
@@ -2562,7 +2564,7 @@ class ZTBotController : Actor {
 
         let ztcom = ZetaBotPawn(newCommander);
 
-        if (ztcom && ztcom.cont && ztcom.cont.commander && ztcom.cont.commander == self) {
+        if (ztcom && ztcom.cont && ztcom.cont.commander && ztcom.cont.commander == possessed) {
             return false;
         }
 
