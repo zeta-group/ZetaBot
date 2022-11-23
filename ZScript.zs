@@ -144,7 +144,6 @@ class ZTBotOrder play {
 
         if (orderType == ZTBotController.BS_ATTACKING || orderType == ZTBotController.BS_HUNTING) {
             bot.enemy = lookedAt;
-            bot.lastEnemy = lookedAt;
         }
 
         bot.SetOrder(self);
