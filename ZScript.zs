@@ -1385,7 +1385,7 @@ class ZTBotController : Actor {
     }
 
     bool CheckSightPos(Vector3 location) {
-        Actor dummy = Spawn('Candle', pos);
+        Actor dummy = Spawn('Candle', location);
         let res = possessed.CheckSight(dummy);
         dummy.Destroy();
         return res;
