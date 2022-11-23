@@ -1392,7 +1392,7 @@ class ZTBotController : Actor {
     }
 
     ZTPathNode ClosestVisibleNodeAt(Vector3 location) {
-        Actor dummy = Spawn("Candle", pos);
+        Actor dummy = Spawn("Candle", location);
         let res = ClosestVisibleNode(dummy);
         dummy.Destroy();
         return res;
