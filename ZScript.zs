@@ -147,11 +147,6 @@ class ZTBotOrder play {
             bot.lastEnemy = lookedAt;
         }
 
-        if (bot.lastEnemyPos != null) {
-            bot.lastEnemyPos.Destroy();
-            bot.lastEnemyPos = null;
-        }
-
         bot.SetOrder(self);
     }
 
@@ -479,7 +474,8 @@ class ZTBotController : Actor {
     ActorList currPath;
     double strafeMomentum;
     double angleMomentum;
-    ZTPathNode lastEnemyPos;
+    Vector3 lastEnemyPos;
+    bool hasLEP;
     Vector3 currSeeNodePos;
     Vector3 currEnemyPos;
     double age;
@@ -1189,19 +1185,21 @@ class ZTBotController : Actor {
         "fleeing"
     };
 
+    void StatePostInit(uint state) {
+        hasLEP = (state == BS_HUNTING && enemy && lastEnemyPos == currEnemyPos);
+    }
+
     void SetBotState(uint s) {
         //if (currentOrder)
         //    SetOrder(null);
 
         if (s != bstate) {
-            if (lastEnemyPos != nulL) {
-                lastEnemyPos.Destroy();
-            }
-    
             DebugLog(LT_INFO, myName.." is now \ck"..BStateNames[s].."!");
         }
 
         bstate = s;
+
+        StatePostInit(s);
     }
 
     bool StateAboveOrder(uint s) {
@@ -1260,11 +1258,6 @@ class ZTBotController : Actor {
         if (currentOrder) {
             SetBotState(currentOrder.orderType);
             ProcessOrderedState();
-        }
-
-        if (lastEnemyPos != null) {
-            lastEnemyPos.Destroy();
-            lastEnemyPos = null;
         }
     }
 
@@ -1387,6 +1380,13 @@ class ZTBotController : Actor {
     bool CheckSightPos(Vector3 location) {
         Actor dummy = Spawn('Candle', location);
         let res = possessed.CheckSight(dummy);
+        dummy.Destroy();
+        return res;
+    }
+
+    bool PathMoveToPos(Vector3 location) {
+        Actor dummy = Spawn('Candle', location);
+        let res = PathMoveTo(dummy);
         dummy.Destroy();
         return res;
     }
@@ -1913,10 +1913,6 @@ class ZTBotController : Actor {
 
         String obituary = "";
 
-        if (lastEnemyPos != null) {
-            lastEnemyPos.Destroy();
-        }
-
         if (source && source != possessed) {
             obituary = Stringtable.Localize(source.GetObituary(possessed, inflictor, MeansOfDeath, false));
         }
@@ -1966,18 +1962,12 @@ class ZTBotController : Actor {
 
     void Subroutine_Follow() {
         if (!goingAfter || goingAfter.Health <= 0) {
-            if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
-            lastEnemyPos = null;
-
             RefreshCommander(); // make sure invalid orders do not stay, to avoid infinite loops
             ConsiderSetBotState(BS_WANDERING);
             return;
         }
 
         if (HasFollowed(goingAfter)) {
-            if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
-            lastEnemyPos = null;
-
             ConsiderSetBotState(AssessBotAttitude(goingAfter));
             return;
         }
@@ -2105,9 +2095,6 @@ class ZTBotController : Actor {
             SetOrder(null);
             ConsiderSetBotState(BS_WANDERING);
 
-            if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
-            lastEnemyPos = null;
-
             // Prevent getting stuck in a state transition loop.
             RandomMove();
             return;
@@ -2117,9 +2104,6 @@ class ZTBotController : Actor {
             AimToward(enemy, 50);
             ConsiderSetBotState(BS_ATTACKING);
             possessed.Jump();
-
-            if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
-            lastEnemyPos = null;
 
             // Prevent getting stuck in a state transition loop.
             RandomMove();
@@ -2132,7 +2116,7 @@ class ZTBotController : Actor {
             return;
         }
 
-        if (lastEnemyPos == null || lastEnemy == null && (!commander || possessed.Distance2D(commander) < 80 || !PathMoveTo(commander))) {
+        if (!hasLEP || lastEnemy == null && (!commander || possessed.Distance2D(commander) < 80 || !PathMoveTo(commander))) {
             enemy = null;
 
             SetOrder(null);
@@ -2151,25 +2135,18 @@ class ZTBotController : Actor {
 
             enemy = null;
             ConsiderSetBotState(BS_WANDERING);
-
-            if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
-            lastEnemyPos = null;
         }
 
-        else if (!lastEnemyPos) {
+        else if (!hasLEP) {
             enemy = null;
             ConsiderSetBotState(BS_WANDERING);
             return;
         }
 
-        if (!PathMoveTo(lastEnemyPos)) {
-            DebugLog(LT_INFO, String.Format("No path found to last enemy pos while hunting %s! Going back to wandering.", ActorName(lastEnemyPos)));
+        if (!PathMoveToPos(lastEnemyPos)) {
+            DebugLog(LT_INFO, String.Format("No path found to last enemy pos while hunting %s! Going back to wandering.", ActorName(enemy)));
+            enemy = null;
 
-            if (lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) {
-                lastEnemyPos.Destroy();
-            }
-
-            lastEnemyPos = null;
             ConsiderSetBotState(BS_WANDERING);
 
             return;
@@ -2296,22 +2273,12 @@ class ZTBotController : Actor {
         Actor newEnemy = targets[0];
 
         if (enemy == null || TargetPriority(enemy) < TargetPriority(newEnemy)) {
-            if (lastEnemyPos != null) {
-                lastEnemyPos.Destroy();
-                lastEnemyPos = null;
-            }
-
             enemy = Actor(newEnemy);
         }
 
         /*
         else {
             if (retargetCount < 1) {
-                if (lastEnemyPos != null) {
-                    lastEnemyPos.Destroy();
-                    lastEnemyPos = null;
-                }
-
                 enemy = Actor(targets.poll());
                 retargetCount = 15;
             }
@@ -2353,11 +2320,6 @@ class ZTBotController : Actor {
     }
 
     void Subroutine_Attack() {
-        if (lastEnemyPos != null) {
-            lastEnemyPos.Destroy();
-            lastEnemyPos = null;
-        }
-
         if (enemy == null || enemy.Health < 1) {
             SetOrder(null);
 
@@ -2369,21 +2331,10 @@ class ZTBotController : Actor {
 
         if (!LineOfSight(enemy)) {
             possessed.endshoot();
-
-            if (lastenemypos && lastenemypos.nodetype == ztpathnode.nt_target) lastenemypos.destroy();
-
-            let node = closestvisiblenodeat(currenemypos);
-
-            if (node == null || node.Distance3D(enemy) > 100) {
-                lastenemypos = ztpathnode.plopnode(currenemypos, ztpathnode.nt_target);
-            }
-
-            else {
-                lastenemypos = node;
-            }
+            hasLEP = false;
 
             navdest = null;
-            lastEnemyPos = ZTPathNode.plopNode(currEnemyPos, ZTPathNode.NT_TARGET, 0);
+            lastEnemyPos = currEnemyPos;
             ConsiderSetBotState(BS_HUNTING);
 
             return;
@@ -2401,11 +2352,6 @@ class ZTBotController : Actor {
         ZetaWeapon w = BestWeaponAllTic();
 
         if (w == null) {
-            if (lastEnemyPos != null) {
-                lastEnemyPos.Destroy();
-                lastEnemyPos = null;
-            }
-
             enemy = null;
             goingAfter = null;
 
@@ -2687,11 +2633,6 @@ class ZTBotController : Actor {
     }
 
     void Subroutine_Wander() {
-        if (lastEnemyPos != null) {
-            lastEnemyPos.Destroy();
-            lastEnemyPos = null;
-        }
-
         enemy = null;
         BotChat("IDLE", 2.25 / 100);
 
@@ -2959,7 +2900,6 @@ class ZTBotController : Actor {
 
     void RefreshEnemy() {
         if (enemy && enemy.Health <= 0) {
-            if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
             enemy = null;
 
             if (bstate == BS_ATTACKING) {
@@ -3006,8 +2946,6 @@ class ZTBotController : Actor {
 
     void HealthCheck() {
         if (possessed == null || possessed.Health <= 0) {
-            if (lastEnemyPos && lastEnemyPos.nodeType == ZTPathNode.NT_TARGET) lastEnemyPos.Destroy();
-
             if (CVar.FindCVar('zb_respawn').GetBool() && (CVar.FindCVar('deathmatch').GetInt() > 0 || CVar.FindCVar('zb_alsocooprespawn').GetBool())) {
                 DebugLog(LT_VERBOSE, String.format("Setting Respawn mode for %s.", myName));
                 SetStateLabel("Respawn");
