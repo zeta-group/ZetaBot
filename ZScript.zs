@@ -2117,18 +2117,7 @@ class ZTBotController : Actor {
             return;
         }
 
-        if (!hasLEP || lastEnemy == null && (!commander || possessed.Distance2D(commander) < 80 || !PathMoveTo(commander))) {
-            enemy = null;
-
-            SetOrder(null);
-            ConsiderSetBotState(BS_WANDERING);
-
-            // Prevent getting stuck in a state transition loop.
-            RandomMove();
-            return;
-        }
-
-        Vector2 posDiff = possessed.pos.xy - lastEnemy.pos.xy;
+        Vector2 posDiff = possessed.pos.xy - lastEnemyPos.xy;
         double lastPosSqDist = posDiff dot posDiff;
 
         if (lastPosSqDist < 48 * 48) {
