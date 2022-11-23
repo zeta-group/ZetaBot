@@ -2036,7 +2036,7 @@ class ZTBotController : Actor {
             do {
                 navDest = ZTPathNode(path.get(0));
                 path.remove(0);
-            } while (path.Length() && (!navDest || navDest == currNode));
+            } while (path.Length() > 0 && ((path.Length() > 1 && !possessed.CheckSight(path.get(1))) || !(navDest || navDest == currNode)));
 
             if (navDest) {
                 SmartMove(navDest);
@@ -2044,7 +2044,9 @@ class ZTBotController : Actor {
                 //DebugLog(LT_INFO, "Next navigation point found: "..navDest.NodeName());
             }
 
-            currPath = path;
+            if (path.Length() > 0) {
+                currPath = path;
+            }
         }
 
         else {
