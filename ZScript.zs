@@ -2634,10 +2634,6 @@ class ZTBotController : Actor {
             return false;
         }
 
-        if (possessed.Distance3D(who) < 100) {
-            return true;
-        }
-
         return LineOfSight(who);
     }
 
