@@ -2850,7 +2850,7 @@ class ZTBotController : Actor {
                     l.Args[4]
                 );
 
-                if (special && (possessed.pos.xy - lastPos.xy).Length() > 256) {
+                if (special && (possessed.pos.xy - lastPos.xy).Length() > possessed.vel.xy.Length()) {
                     PlopTeleportNodes(lastPos, lastAngle);
                     return;
                 }
