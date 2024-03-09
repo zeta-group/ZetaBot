@@ -1296,6 +1296,10 @@ class ZTBotController : Actor {
         if (currNode) {
             currNode.BecomesCurrent(self, possessed);
         }
+        
+        if (navDest && navDest == currNode) {
+            navDest = null;
+        }
     }
 
     bool isEnemy(Actor from, Actor other) {
