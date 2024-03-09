@@ -2726,12 +2726,16 @@ class ZTBotController : Actor {
         }
 
         if (!navDest) {
-            if (currNode) {
-                navDest = currNode.RandomNeighbor();
+            SetWanderNavdest();
+        }
+    }
 
-                if (navDest == currNode) {
-                    navDest = null;
-                }
+    void SetWanderNavdest() {
+        if (currNode) {
+            navDest = currNode.RandomNeighbor();
+
+            if (navDest == currNode) {
+                navDest = null;
             }
         }
     }
