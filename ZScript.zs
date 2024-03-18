@@ -2337,7 +2337,7 @@ class ZTBotController : Actor {
     void Subroutine_Flee() {
         if (DodgeAndUse()) {
             if (currNode)
-                navDest = currNode.RandomNeighborRoughlyToward(vel.xy, 0.2);
+                navDest = currNode.RandomNeighborRoughlyToward(vel.xy, 0.5);
 
             else
                 navDest = null;
@@ -2703,32 +2703,48 @@ class ZTBotController : Actor {
                 return;
             }
         }
-
-        PickCommander();
+        
+        BotChat("IDLE", 2.25 / 100);
+        DodgeAndUse();
 
         if (currNode == null) {
             SetCurrentNode(ClosestVisibleNode(possessed));
         }
-
-        DodgeAndUse();
-
-        if (currNode && possessed.Distance2D(currNode) < 200 && navDest && navDest != currNode) {
-            MoveToward(navDest, 5); // wander to this random neighbouring node
+        
+        if (!currNode) {
+            return;
         }
-
-        else {
+        
+        if (navDest == currNode) {
             navDest = null;
-            RandomMove();
         }
 
         if (!navDest) {
-            if (currNode) {
-                navDest = currNode.RandomNeighborRoughlyToward(vel.xy);
+            DebugLog(LT_VERBOSE, "picking destination");
+            navDest = currNode.RandomNeighborRoughlyToward(vel.xy, 4);
 
-                if (navDest == currNode) {
-                    navDest = null;
-                }
+            if (navDest == currNode) {
+                navDest = null;
+                //DebugLog(LT_VERBOSE, "tried to pick own node");
             }
+            
+            if (navDest) {
+                //DebugLog(LT_VERBOSE, "picked destination");
+            }
+            
+            else {
+                //DebugLog(LT_VERBOSE, "failed to pick destination");
+            }
+        }
+        
+        if (navDest) {
+            //DebugLog(LT_VERBOSE, "moving to destination");
+            MoveToward(navDest, 5); // wander to this random neighbouring node
+        }
+        
+        else {
+            //DebugLog(LT_VERBOSE, "no destination");
+            RandomMove();
         }
     }
 
