@@ -857,6 +857,42 @@ class ZTPathNode : ZTPositionMarker
         
         return res;
     }
+    
+    ZTPathNode RandomNeighborRoughlyToward(Vector2 direction, double preference = 0.5)
+    {
+        ActorList nb = NeighborsOutward();
+        ZTPathNode res;
+    
+        if ( nb.Length() < 1 )
+            return self;
+            
+        Array<double> weights;
+        double total = 0.0;
+        
+        ZTPathnode neigh;
+        for (nb.iReset(), neigh = ZTPathNode(nb.iNext()); neigh; neigh = ZTPathNode(nb.iNext())) {
+            Vector2 offs = neigh.pos.xy - pos.xy;
+            double directionality = 1 + (1 + offs dot direction) * preference;
+            weights.push(directionality);
+            total += directionality;
+        }
+        
+        // weighted random
+        double choice = FRandom(0, total);
+        
+        for (int i = 0; i < weights.Size(); i++) {
+            if (choice < weights[i]) {
+                res = ZTPathNode(nb.Get(i));
+                break;
+            }
+            
+            choice -= weights[i];
+        }
+    
+        nb.Destroy(); // clean actorlists after use
+        
+        return res;
+    }
 
     void ShowPath(ZTPathNode otherNode) {
         uint segRes = 24; // constant

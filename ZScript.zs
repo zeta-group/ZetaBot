@@ -2337,7 +2337,7 @@ class ZTBotController : Actor {
     void Subroutine_Flee() {
         if (DodgeAndUse()) {
             if (currNode)
-                navDest = currNode.RandomNeighbor();
+                navDest = currNode.RandomNeighborRoughlyToward(vel.xy, 0.2);
 
             else
                 navDest = null;
@@ -2723,7 +2723,7 @@ class ZTBotController : Actor {
 
         if (!navDest) {
             if (currNode) {
-                navDest = currNode.RandomNeighbor();
+                navDest = currNode.RandomNeighborRoughlyToward(vel.xy);
 
                 if (navDest == currNode) {
                     navDest = null;
