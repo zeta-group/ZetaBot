@@ -2571,10 +2571,8 @@ class ZTBotController : Actor {
 
             return true;
         }
-
-        let ztcom = ZetaBotPawn(newCommander);
-
-        if (ztcom && ztcom.cont && ztcom.cont.commander && ztcom.cont.commander == possessed) {
+        
+        if (Commands(newCommander)) {
             return false;
         }
 
@@ -2583,14 +2581,26 @@ class ZTBotController : Actor {
         return true;
     }
 
-    bool Commands(Actor another) {
+    bool Commands(Actor another, int depth = 0) {
+        if (!another) {
+            return false;
+        }
+        
+        if (another == possessed) {
+            return true;
+        }
+        
         ZetaBotPawn zbp = ZetaBotPawn(another);
 
-        if (!zbp || !zbp.cont) {
+        if (!zbp || !zbp.cont || !zbp.cont.commander) {
             return false;
         }
 
-        return zbp.cont.commander == possessed;
+        if (zbp.cont.commander == possessed) return true;
+        
+        if (depth > 100) return false;
+        
+        return Commands(zbp.cont.commander, depth + 1);
     }
 
     void PickCommander() {
@@ -2685,15 +2695,19 @@ class ZTBotController : Actor {
             navDest = null;
         }
     }
-
-    void Subroutine_Wander() {
+    
+    void ForgetEnemies() {
         if (lastEnemyPos != null) {
             lastEnemyPos.Destroy();
             lastEnemyPos = null;
         }
 
         enemy = null;
-        BotChat("IDLE", 2.25 / 100);
+    }
+
+    void Subroutine_Wander() {
+        ForgetEnemies();        
+        PickCommander();
 
         if (bstate != BS_FOLLOWING && ShouldFollow(commander)) {
             ConsiderSetBotState(BS_FOLLOWING);
