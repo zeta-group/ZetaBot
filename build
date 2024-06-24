@@ -18,6 +18,17 @@ LZMA=0
 PLATFORM=$(uname -s | head -c 5)
 RUN=0
 
+REALPATH_CMD="realpath"
+# check if we are on macos
+if [ "$PLATFORM" == "Darwi" ]; then
+    REALPATH_CMD="grealpath"
+    # check if grealpath exists
+    if ! command -v grealpath &> /dev/null; then
+        echo "grealpath not found, please install coreutils using 'brew install coreutils' and try again."
+        exit 1
+    fi
+fi
+
 while [[ $# -gt 0 ]]; do
     key="$1"
 
@@ -103,10 +114,10 @@ BUILDDIR=""
 function ADDFILE {
     if [ $# -eq 1 ]; then
         if [ -n "$BUILDDIR" ]; then
-            f="$(realpath --relative-to="./$BUILDDIR" "./${BUILDDIR}/${1}")"
+            f="$($REALPATH_CMD --relative-to="./$BUILDDIR" "./${BUILDDIR}/${1}")"
         
         else
-            f="$(realpath --relative-to="." "./${1}")"
+            f="$($REALPATH_CMD --relative-to="." "./${1}")"
         
         fi
         
