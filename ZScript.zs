@@ -1197,7 +1197,7 @@ class ZTBotController : Actor {
             if (lastEnemyPos != nulL) {
                 lastEnemyPos.Destroy();
             }
-    
+
             DebugLog(LT_INFO, myName.." is now \ck"..BStateNames[s].."!");
         }
 
@@ -1296,10 +1296,40 @@ class ZTBotController : Actor {
         if (currNode) {
             currNode.BecomesCurrent(self, possessed);
         }
-        
+
         if (navDest && navDest == currNode) {
             navDest = null;
         }
+
+        TryPushToLastVisited(pn);
+    }
+
+    const LAST_VISITED_LENGTH = 5;
+
+    bool TryPushToLastVisited(ZTPathNode node) {
+        if (lastVisited[0] == node) {
+            return false;
+        }
+
+        // ignore if dead end
+        let exits = node.NeighborsOutward();
+        int len = exits.Length();
+        exits.Destroy();
+
+        if (len < 2) {
+            return false;
+        }
+
+        // shift forward by 1
+        for (int i = LAST_VISITED_LENGTH - 1; i > 0; i--) {
+            lastVisited[i] = lastVisited[i - 1];
+        }
+
+        // push in
+        A_Log("New lastVisited: "..node.id);
+        lastVisited[0] = node;
+
+        return true;
     }
 
     bool isEnemy(Actor from, Actor other) {
@@ -2730,13 +2760,37 @@ class ZTBotController : Actor {
         }
     }
 
+    ZTPathNode LastVisited[LAST_VISITED_LENGTH];
+
     void SetWanderNavdest() {
         if (currNode) {
-            navDest = currNode.RandomNeighbor();
+            let alist = currNode.NeighborsOutward();
+
+            if (aList.IsEmpty()) {
+                return;
+            }
+
+            // remove lastVisited entries from aList, repeating until done or only one node is left
+            for (int listIdx = alist.Length() - 1; listIdx >= 0 && aList.Length() > 1; listIdx--) {
+                for (int checkIdx = 0; checkIdx < 5; checkIdx++) {
+                   if (alist.Get(listIdx) == LastVisited[checkIdx]) {
+                       aList.Remove(listIdx);
+                   }
+                }
+            }
+
+            if (aList.IsEmpty()) {
+                return;
+            }
+
+            navDest = ZTPathNode(aList.Get(Random(0, aList.Length() - 1)));
+            aList.Destroy();
+
+            /*navDest = currNode.RandomNeighbor();
 
             if (navDest == currNode) {
                 navDest = null;
-            }
+            }*/
         }
     }
 
