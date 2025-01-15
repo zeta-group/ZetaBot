@@ -2402,7 +2402,7 @@ class ZTBotController : Actor {
     void Subroutine_Flee() {
         if (DodgeAndUse()) {
             if (currNode)
-                navDest = currNode.RandomNeighbor();
+                navDest = currNode.RandomNeighborRoughlyToward(vel.xy, 0.5);
 
             else
                 navDest = null;
@@ -2668,7 +2668,15 @@ class ZTBotController : Actor {
         return true;
     }
 
-    bool Commands(Actor another) {
+    bool Commands(Actor another, int depth = 0) {
+        if (!another) {
+            return false;
+        }
+        
+        if (another == possessed) {
+            return true;
+        }
+        
         ZetaBotPawn zbp = ZetaBotPawn(another);
 
         if (zbp == null || zbp.cont == null) {
@@ -2798,15 +2806,19 @@ class ZTBotController : Actor {
             navDest = null;
         }
     }
-
-    void Subroutine_Wander() {
+    
+    void ForgetEnemies() {
         if (lastEnemyPos != null) {
             lastEnemyPos.Destroy();
             lastEnemyPos = null;
         }
 
         enemy = null;
-        BotChat("IDLE", 2.25 / 100);
+    }
+
+    void Subroutine_Wander() {
+        ForgetEnemies();        
+        PickCommander();
 
         if (bstate != BS_FOLLOWING && ShouldFollow(commander)) {
             ConsiderSetBotState(BS_FOLLOWING);
@@ -2816,27 +2828,25 @@ class ZTBotController : Actor {
                 return;
             }
         }
-
-        PickCommander();
+        
+        BotChat("IDLE", 2.25 / 100);
+        DodgeAndUse();
 
         if (currNode == null) {
             SetCurrentNode(ClosestVisibleNode(possessed));
         }
-
-        DodgeAndUse();
-
-        if (currNode && possessed.Distance2D(currNode) < 200 && navDest && navDest != currNode) {
-            MoveToward(navDest, 5); // wander to this random neighbouring node
+        
+        if (!currNode) {
+            return;
         }
-
-        else {
+        
+        if (navDest == currNode) {
             navDest = null;
-            RandomMove();
         }
 
         if (!navDest) {
-            SetWanderNavdest();
-        }
+            DebugLog(LT_VERBOSE, "picking destination");
+            navDest = currNode.RandomNeighborRoughlyToward(vel.xy, 4);
     }
 
     ZTPathNode LastVisited[LAST_VISITED_LENGTH];
@@ -2855,8 +2865,21 @@ class ZTBotController : Actor {
                    if (alist.Get(listIdx) == LastVisited[checkIdx]) {
                        aList.Remove(listIdx);
                    }
-                }
             }
+            
+            if (navDest) {
+                //DebugLog(LT_VERBOSE, "picked destination");
+            }
+            
+            else {
+                //DebugLog(LT_VERBOSE, "failed to pick destination");
+            }
+        }
+        
+        if (navDest) {
+            //DebugLog(LT_VERBOSE, "moving to destination");
+            MoveToward(navDest, 5); // wander to this random neighbouring node
+        }
 
             if (aList.IsEmpty()) {
                 return;
