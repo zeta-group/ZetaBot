@@ -2716,16 +2716,16 @@ class ZTBotController : Actor {
         Actor newCommander = null;
 
         while (
-            (
-                newCommander == null ||
-                newCommander == possessed ||
-                Commands(newCommander)
-            )
-            && friends.length() > 0
-            && (newCommander == null || !SetCommander(newCommander))
-        ) {
-            let idx = Random(0, friends.Length() - 1);
-            newCommander = friends.Get(idx);
+             (
+                 newCommander == null ||
+                 newCommander == possessed ||
+                 Commands(newCommander) ||
+                 !SetCommander(newCommander)
+             )
+             && friends.length() > 0
+         ) {
+             let idx = Random(0, friends.Length() - 1);
+             newCommander = friends.Get(idx);
             friends.Remove(idx);
         };
 
@@ -2833,10 +2833,11 @@ class ZTBotController : Actor {
         DodgeAndUse();
 
         if (currNode == null) {
-            SetCurrentNode(ClosestVisibleNode(possessed));
+            RefreshNode();
         }
         
         if (!currNode) {
+            SmartMove();
             return;
         }
         
@@ -2846,53 +2847,31 @@ class ZTBotController : Actor {
 
         if (!navDest) {
             DebugLog(LT_VERBOSE, "picking destination");
-            navDest = currNode.RandomNeighborRoughlyToward(vel.xy, 4);
+            SetWanderNavdest();
+        }
+
+        SmartMove(navDest);
     }
 
     ZTPathNode LastVisited[LAST_VISITED_LENGTH];
 
-    void SetWanderNavdest() {
-        if (currNode) {
-            let alist = currNode.NeighborsOutward();
+    void SetWanderNavdest(int maxTries = 10) {
+        if (currNode && !navDest) {
+            while (navDest == null && maxTries--) {
+                let next = currNode.RandomNeighborRoughlyToward(vel.xy, 4);
 
-            if (aList.IsEmpty()) {
-                return;
-            }
-
-            // remove lastVisited entries from aList, repeating until done or only one node is left
-            for (int listIdx = alist.Length() - 1; listIdx >= 0 && aList.Length() > 1; listIdx--) {
+                // remove lastVisited entries from aList, repeating until done or only one node is left
                 for (int checkIdx = 0; checkIdx < 5; checkIdx++) {
-                   if (alist.Get(listIdx) == LastVisited[checkIdx]) {
-                       aList.Remove(listIdx);
+                   if (next == LastVisited[checkIdx]) {
+                        next = null;
+                        break;
                    }
-            }
+                }
             
-            if (navDest) {
-                //DebugLog(LT_VERBOSE, "picked destination");
+                if (next) {
+                    navDest = next;
+                }
             }
-            
-            else {
-                //DebugLog(LT_VERBOSE, "failed to pick destination");
-            }
-        }
-        
-        if (navDest) {
-            //DebugLog(LT_VERBOSE, "moving to destination");
-            MoveToward(navDest, 5); // wander to this random neighbouring node
-        }
-
-            if (aList.IsEmpty()) {
-                return;
-            }
-
-            navDest = ZTPathNode(aList.Get(Random(0, aList.Length() - 1)));
-            aList.Destroy();
-
-            /*navDest = currNode.RandomNeighbor();
-
-            if (navDest == currNode) {
-                navDest = null;
-            }*/
         }
     }
 
