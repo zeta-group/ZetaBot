@@ -1112,7 +1112,15 @@ class ZTBotController : Actor {
 
     void SmartMove(ZTPathNode toward = null) {
         if (toward == null) toward = navDest;
-        if (toward == null || !possessed.CheckSight(toward)) toward = currNode;
+        if (
+            (
+                toward == null ||
+                !possessed.CheckSight(toward)
+            ) &&
+            possessed.Distance3D(currNode) > 900
+        ) {
+            toward = currNode;
+        }
 
         if (currNode && currNode.nodeType == ZTPathNode.NT_USE)
             DodgeAndUse();
@@ -1175,11 +1183,11 @@ class ZTBotController : Actor {
             angleMomentum += FRandom(-0.01, 0.01);
         }
 
-            if (FRandom(0, 99.9) < 10)
-                RandomStrafe();
+        if (FRandom(0, 99.9) < 10)
+            RandomStrafe();
 
-            else
-                MoveForward();
+        else
+            MoveForward();
 
         if (bstate == BS_WANDERING && FRandom(0, 99.9) < 10) {
             RandomMove();
@@ -1334,10 +1342,15 @@ class ZTBotController : Actor {
     const LAST_VISITED_LENGTH = 5;
 
     bool TryPushToLastVisited(ZTPathNode node) {
+        if (node == null) {
+            return false;
+        }
+        
         if (lastVisited[0] == node) {
             return false;
         }
 
+        /*
         // ignore if dead end
         let exits = node.NeighborsOutward();
         int len = exits.Length();
@@ -1346,6 +1359,7 @@ class ZTBotController : Actor {
         if (len < 2) {
             return false;
         }
+        */
 
         // shift forward by 1
         for (int i = LAST_VISITED_LENGTH - 1; i > 0; i--) {
@@ -2707,7 +2721,7 @@ class ZTBotController : Actor {
     }
 
     void PickCommander() {
-        if (commander) {
+        if (commander != null) {
             return;
         }
 
@@ -2726,10 +2740,10 @@ class ZTBotController : Actor {
          ) {
              let idx = Random(0, friends.Length() - 1);
              newCommander = friends.Get(idx);
-            friends.Remove(idx);
+             friends.Remove(idx);
         };
 
-        if (commander == newCommander) {
+        if (commander == newCommander && commander != null) {
             BotChat("COMM", 0.8);
         }
 
@@ -2782,7 +2796,7 @@ class ZTBotController : Actor {
         SetCurrentNode(ClosestVisibleNode(possessed));
 
         if (
-            (currNode == null || possessed.Distance2D(currNode) > 500 || (
+            (currNode == null || possessed.Distance2D(currNode) > 300 || (
                 (!possessed.CheckSight(currNode) && CheckSightPos(currSeeNodePos))))
             && CVar.FindCVar('zb_autonodes').GetBool() && CVar.FindCVar("zb_autonodenormal").GetBool()
         ) {
@@ -2846,7 +2860,6 @@ class ZTBotController : Actor {
         }
 
         if (!navDest) {
-            DebugLog(LT_VERBOSE, "picking destination");
             SetWanderNavdest();
         }
 
@@ -2855,12 +2868,15 @@ class ZTBotController : Actor {
 
     ZTPathNode LastVisited[LAST_VISITED_LENGTH];
 
-    void SetWanderNavdest(int maxTries = 10) {
+    void SetWanderNavdest(int maxTries = 1) {
         if (currNode && !navDest) {
             while (navDest == null && maxTries--) {
                 let next = currNode.RandomNeighborRoughlyToward(vel.xy, 4);
 
-                // remove lastVisited entries from aList, repeating until done or only one node is left
+                if (next == currNode) {
+                    continue;
+                }
+
                 for (int checkIdx = 0; checkIdx < 5; checkIdx++) {
                    if (next == LastVisited[checkIdx]) {
                         next = null;
