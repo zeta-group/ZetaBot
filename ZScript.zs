@@ -109,7 +109,8 @@ class ZTBotOrder play {
         "hunt",
         "attack",
         "follow",
-        "flee"
+        "flee",
+        "disband"
     };
 
     static const String BStatePast[] = {
@@ -117,7 +118,8 @@ class ZTBotOrder play {
         "hunted",
         "attacked",
         "followed",
-        "fled"
+        "fled",
+        "disbanded"
     };
 
     static const String BStateContinuous[] = {
@@ -125,7 +127,8 @@ class ZTBotOrder play {
         "hunting",
         "attacking",
         "following",
-        "chickening"
+        "chickening",
+        "disbanding"
     };
 
     void Apply(ZTBotController bot) {
@@ -252,11 +255,7 @@ class ZTBotOrderCode: Actor {
     }
 
     ZTBotOrder ConcoctOrder(Actor subject) {
-        if (mySubject != ST_NOORDER) {
-            return ZTBotOrder.Make(Owner, subject, orderType);
-        }
-
-        return null;
+        return ZTBotOrder.Make(Owner, subject, orderType);
     }
 
     int GiveOrder(Actor subject) {
@@ -273,11 +272,16 @@ class ZTBotOrderCode: Actor {
                 continue;
             }
 
-            if ((
-                (cont.commander == null && mySubject != ST_NOORDER)
-                || cont.commander == Owner
-                || Owner is "PlayerPawn"
-            ) && zbp.Distance2D(owner) < owner.radius + zbp.radius + 300 && !zbp.cont.IsEnemy(zbp, owner) && zbp.CheckSight(owner)) {
+            if (
+                (
+                    (cont.commander == null && mySubject != ST_NOORDER)
+                    || cont.commander == Owner
+                    || Owner is "PlayerPawn"
+                ) &&
+                zbp.Distance2D(owner) < owner.radius + zbp.radius + 300 &&
+                !zbp.cont.IsEnemy(zbp, owner) &&
+                zbp.CheckSight(owner)
+            ) {
                 if (order != null) {
                     order.Apply(cont);
                 }
@@ -380,9 +384,10 @@ class ZTBotFollowMeOrder : ZTBotFollowOrder {
     }
 }
 
-class ZTBotVacateOrder : ZTBotOrderCode {
+class ZTBotDisbandOrder : ZTBotOrderCode {
     // Vacate bots around of any orders.
     Default {
+        ZTBotOrderCode.OrderType 5; // ZetaBotPawn.ORDER_DISBAND
         ZTBotOrderCode.SubjectType 2; // ZTBotOrderCode.ST_NOORDER
     }
 }
@@ -462,7 +467,8 @@ class ZTBotController : Actor {
         BS_HUNTING,
         BS_ATTACKING,
         BS_FOLLOWING,
-        BS_FLEEING
+        BS_FLEEING,
+        ORDER_DISBAND
     };
 
     mixin DebugLog;
@@ -1245,6 +1251,11 @@ class ZTBotController : Actor {
     ZTBotOrder orderGiven;
 
     void SetOrder(ZTBotOrder newOrder) {
+        if (newOrder != null && newOrder.orderType == ORDER_DISBAND) {
+            SetCommander(null);
+            newOrder = null;
+        }
+        
         if (newOrder != null && newOrder.orderer != null) {
             if (newOrder.orderer == possessed || Commands(newOrder.orderer)) {
                 return;
@@ -1254,6 +1265,10 @@ class ZTBotController : Actor {
 
             if (newOrder.orderer != commander && (zbpc == null || !zbpc.cont.Commands(newOrder.orderer))) {
                 SetCommander(newOrder.orderer);
+
+                if (PlayerPawn(newOrder.orderer) != null) {
+                    zbpc.cont.SetCommander(newOrder.orderer);
+                }
             }
         }
 

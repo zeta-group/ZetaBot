@@ -13,7 +13,7 @@ defaultbind kp. "summonfriend zetabot 0"
 defaultbind p "summon ZTBotAttackOrder 0"
 defaultbind o "summon ZTBotFollowMeOrder 0"
 defaultbind i "summon ZTBotFollowOrder 0"
-defaultbind u "summon ZTBotVacateOrder 0"
+defaultbind u "summon ZTBotDisbandOrder 0"
 defaultbind y "summon ZTBotFleeOrder 0"
 
 //----------
@@ -26,11 +26,11 @@ addmenukey "Kill All Bots" "kill ZetaBotPawn"
 addkeysection "ZetaBot Orders" "zetabots_order"
 
 addmenukey "Order: Attack Looked" "summon ztbotattackorder"
-addmenukey "Order: Follow Self" "summon ztbotfollowmeorder"
+addmenukey "Order: Follow Me" "summon ztbotfollowmeorder"
 addmenukey "Order: Follow Looked" "summon ztbotfolloworder"
 addmenukey "Order: Wander" "summon ztbotwanderorder"
 addmenukey "Order: Flee Looked" "summon ztbotfleeorder"
-addmenukey "Order: Vacate Own Orders" "summon ztbotvacateorder"
+addmenukey "Order: Disband from Me" "summon ztbotdisbandorder"
 
 
 addkeysection "ZetaBot Pathing" "zetabots_paths"
