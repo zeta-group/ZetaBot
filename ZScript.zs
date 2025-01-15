@@ -129,6 +129,10 @@ class ZTBotOrder play {
     };
 
     void Apply(ZTBotController bot) {
+        if (orderer != null && bot.Commands(orderer)) {
+            return;
+        }
+
         if (lookedAt == null && orderType != ZTBotController.BS_WANDERING) {
             bot.DebugLog(ZTBotController.LT_WARNING, "Can't apply non-wander order without a target!");
             return;
@@ -1241,13 +1245,21 @@ class ZTBotController : Actor {
     ZTBotOrder orderGiven;
 
     void SetOrder(ZTBotOrder newOrder) {
-        if (newOrder && newOrder.orderer != commander) {
-            SetCommander(newOrder.orderer);
+        if (newOrder != null && newOrder.orderer != null) {
+            if (newOrder.orderer == possessed || Commands(newOrder.orderer)) {
+                return;
+            }
+
+            ZetaBotPawn zbpc = ZetaBotPawn(commander);
+
+            if (newOrder.orderer != commander && (zbpc == null || !zbpc.cont.Commands(newOrder.orderer))) {
+                SetCommander(newOrder.orderer);
+            }
         }
 
         if (newOrder != currentOrder) {
             if (newOrder) {
-                DebugLog(LT_INFO, myName.." was ordered to \ck"..newOrder.v_imperative.."!");
+                DebugLog(LT_INFO, String.Format("%s was ordered \ck by %s to %s!", myName, ActorName(newOrder.orderer), newOrder.v_imperative));
             }
 
             else {
@@ -2121,7 +2133,11 @@ class ZTBotController : Actor {
             return ComplexPathTo(Where);
         }
 
-        if (navDest && possessed.CheckSight(navDest)) {
+        if (!navDest) {
+            return false;
+        }
+
+        if (possessed.CheckSight(navDest)) {
             SmartMove(navDest);
             return true;
         }
@@ -2547,11 +2563,11 @@ class ZTBotController : Actor {
         while (i < friends.Length()) {
             friend = ZetaBotPawn(friends.Get(i++));
 
-            if (!friend) {
+            if (friend == null) {
                 continue;
             }
 
-            if (friend == possessed) {
+            if (friend == possessed || friend.cont == self) {
                 continue;
             }
 
@@ -2581,7 +2597,7 @@ class ZTBotController : Actor {
                 friend.cont.lastEnemyPos = lastEnemyPos;
             }
 
-            friend.cont.SetCommander(self);
+            friend.cont.SetCommander(possessed);
 
             if (!didChat) {
                 BotChat("ORDR", 0.2);
@@ -2595,21 +2611,41 @@ class ZTBotController : Actor {
     }
 
     bool SetCommander(Actor newCommander) {
-        if (newCommander == commander) {
-            return true;
+        if (newCommander == possessed) {
+            newCommander = null;
         }
 
-        if (!newCommander) {
-            DebugLog(LT_INFO, myName.." is no longer led "..(!commander ? "" : "(was previously led by"..ActorName(commander)..")"));
-            commander = null;
+        if (newCommander == null) {
+            if (commander != null) {
+                DebugLog(LT_INFO, myName.." is no longer led "..(!commander ? "" : "(was previously led by"..ActorName(commander)..")"));
+                commander = null;
+            }
 
             return true;
         }
 
         let ztcom = ZetaBotPawn(newCommander);
 
-        if (ztcom && ztcom.cont && ztcom.cont.commander && ztcom.cont.commander == possessed) {
+        if (ztcom != null) {
+            if (Commands(ztcom)) {
+                return false;
+            }
+
+            else while (ztcom != null && ztcom.cont != null) {
+                let nextCommander = ztcom.cont.commander;
+                if (nextCommander == null) break;
+
+                newCommander = nextCommander;
+                ztcom = ZetaBotPawn(newCommander);
+            }
+        }
+
+        if (newCommander == possessed) {
             return false;
+        }
+
+        if (newCommander == commander) {
+            return true;
         }
 
         commander = newCommander;
@@ -2620,11 +2656,31 @@ class ZTBotController : Actor {
     bool Commands(Actor another) {
         ZetaBotPawn zbp = ZetaBotPawn(another);
 
-        if (!zbp || !zbp.cont) {
+        if (zbp == null || zbp.cont == null) {
             return false;
         }
 
-        return zbp.cont.commander == possessed;
+        if (zbp == possessed) {
+            return true;
+        }
+
+        ZetaBotPawn potentialCommander = ZetaBotPawn(zbp.cont.commander);
+
+        while (potentialCommander != null) {
+            if (potentialCommander == possessed) {
+                return true;
+            }
+
+            let nextCommander = ZetaBotPawn(potentialCommander.cont.commander);
+
+            if (potentialCommander == nextCommander) {
+                return false;
+            }
+
+            potentialCommander = nextCommander;
+        }
+
+        return false;
     }
 
     void PickCommander() {
@@ -2633,16 +2689,24 @@ class ZTBotController : Actor {
         }
 
         ActorList friends = VisibleFriends(possessed);
-        int tries = 20;
 
-        while ((!commander || Commands(commander)) && tries--) {
-            if (friends.length() > 0) {
-                let newCommander = friends.get(Random(0, friends.length() - 1));
-                SetCommander(newCommander);
-            }
-        }
+        Actor newCommander = null;
 
-        if (commander) {
+        while (
+            (
+                newCommander == null ||
+                newCommander == possessed ||
+                Commands(newCommander)
+            )
+            && friends.length() > 0
+            && (newCommander == null || !SetCommander(newCommander))
+        ) {
+            let idx = Random(0, friends.Length() - 1);
+            newCommander = friends.Get(idx);
+            friends.Remove(idx);
+        };
+
+        if (commander == newCommander) {
             BotChat("COMM", 0.8);
         }
 
