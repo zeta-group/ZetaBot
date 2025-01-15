@@ -1339,7 +1339,7 @@ class ZTBotController : Actor {
         TryPushToLastVisited(pn);
     }
 
-    const LAST_VISITED_LENGTH = 5;
+    const LAST_VISITED_LENGTH = 2;
 
     bool TryPushToLastVisited(ZTPathNode node) {
         if (node == null) {
@@ -1367,7 +1367,7 @@ class ZTBotController : Actor {
         }
 
         // push in
-        A_Log("New lastVisited: "..node.id);
+        //A_Log("New lastVisited: "..node.id);
         lastVisited[0] = node;
 
         return true;
@@ -2877,7 +2877,7 @@ class ZTBotController : Actor {
                     continue;
                 }
 
-                for (int checkIdx = 0; checkIdx < 5; checkIdx++) {
+                for (int checkIdx = 0; checkIdx < LAST_VISITED_LENGTH; checkIdx++) {
                    if (next == LastVisited[checkIdx]) {
                         next = null;
                         break;
