@@ -2859,7 +2859,7 @@ class ZTBotController : Actor {
             navDest = null;
         }
 
-        if (!navDest) {
+        if (!navDest && FRandom(0, 1) < 0.1) {
             SetWanderNavdest();
         }
 
