@@ -910,9 +910,7 @@ class ZTBotController : Actor {
             ZetaCape.MakeFor(other);
         }
 
-        if (CVar.FindCVar("deathmatch").GetInt() > 0) {
-            other.bFRIENDLY = false;
-        }
+        other.bFRIENDLY = CVar.FindCVar("deathmatch").GetInt() == 0;
 
         RespawnReset();
     }
@@ -2518,7 +2516,7 @@ class ZTBotController : Actor {
         let dir = AngleToVector(possessed.angle);
         double ddot = (off.x * dir.x) + (off.y * dir.y);
 
-        if (dDot <= 0) {
+        if (!possessed.CheckSight(enemy) || dDot <= 0) {
             possessed.EndShoot();
         }
 
@@ -2706,6 +2704,10 @@ class ZTBotController : Actor {
         while (potentialCommander != null) {
             if (potentialCommander == possessed) {
                 return true;
+            }
+
+            if (potentialCommander.cont == null || potentialCommander.cont.commander == null) {
+                return false;
             }
 
             let nextCommander = ZetaBotPawn(potentialCommander.cont.commander);
