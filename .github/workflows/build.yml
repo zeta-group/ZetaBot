@@ -30,7 +30,7 @@ jobs:
           echo "VERSION=$VERSION" >>$GITHUB_ENV
       
       - name: Upload as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ZetaBot_v${{ env.VERSION }}.pk3
           path: Built/ZetaBot_v${{ env.VERSION }}.pk3
